@@ -15,6 +15,20 @@
 
 ---
 
+## Guarda come funziona
+
+<p align="center">
+  <a href="https://kekkoermalizia.github.io/Conti-Chiari/video/ContiChiari-tutorial.mp4">
+    <img src="docs/anteprima-tutorial.gif" width="300" alt="Anteprima del tutorial di Conti Chiari: creazione del gruppo, aggiunta delle persone, registrazione delle spese e calcolo di chi deve a chi">
+  </a>
+  <br>
+  <a href="https://kekkoermalizia.github.io/Conti-Chiari/video/ContiChiari-tutorial.mp4"><b>▶ Guarda il video tutorial completo (72 secondi)</b></a>
+</p>
+
+L'anteprima scorre a velocità quadrupla. Tocca il link per il video completo, con tutti i passaggi spiegati.
+
+---
+
 ## A cosa serve
 
 Quando si spende in gruppo, i conti si complicano: uno paga l'appartamento, un altro la benzina, un altro ancora la cena, e non sempre tutti partecipano a tutto.
