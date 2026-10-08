@@ -1,0 +1,7 @@
+{
+  "appId": "it.contichiari.app",
+  "appName": "Conti Chiari",
+  "webDir": "www",
+  "android": { "backgroundColor": "#eef2f1" },
+  "ios": { "backgroundColor": "#eef2f1", "contentInset": "never" }
+}

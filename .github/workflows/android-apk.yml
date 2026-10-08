@@ -1,0 +1,42 @@
+# Costruisce l'APK Android a ogni modifica (o a mano da "Actions → Run workflow").
+# Il file da installare si trova in fondo alla pagina dell'esecuzione, sotto "Artifacts".
+name: App Android (APK)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Installa le dipendenze
+        run: npm install
+
+      - name: Crea il progetto Android e le icone
+        run: npm run android
+
+      - name: Compila l'APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Rinomina il file
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk ContiChiari.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ContiChiari-android
+          path: ContiChiari.apk
+          retention-days: 30

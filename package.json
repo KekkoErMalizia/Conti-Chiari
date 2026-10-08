@@ -1,0 +1,20 @@
+{
+  "name": "conti-chiari",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dividi le spese di gruppo e scopri chi deve quanto a chi.",
+  "scripts": {
+    "icons": "capacitor-assets generate --iconBackgroundColor '#1f5f6b' --iconBackgroundColorDark '#0f1a1e' --splashBackgroundColor '#eef2f1' --splashBackgroundColorDark '#0f1a1e'",
+    "android": "cap add android && npm run icons -- --android && cap sync android",
+    "ios": "cap add ios && npm run icons -- --ios && cap sync ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.0.0"
+  }
+}
