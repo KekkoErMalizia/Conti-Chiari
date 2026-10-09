@@ -58,6 +58,7 @@ Conti Chiari tiene traccia di chi ha pagato cosa e alla fine ti dice **chi deve 
 | **Doppia spunta blu** | ✓ inviato, ✓✓ grigie consegnato, ✓✓ blu letto (nei gruppi: letto da tutti). Le conferme di lettura si possono disattivare. |
 | **Messaggi effimeri** | In ogni chat scegli 5 minuti, 1 ora, 8 ore o 24 ore: poi i messaggi spariscono da tutti i telefoni. Le chat private sono effimere a 24 ore di default. |
 | **Notifiche** | Un avviso per ogni messaggio in arrivo, nei gruppi e in privato, anche con l'app in background. |
+| **Attività in background** | Nell'app Android, un interruttore in Impostazioni tiene l'app attiva anche a schermo spento, così le notifiche arrivano subito. Mostra una notifica fissa e si può spegnere quando vuoi. |
 | **Profilo con foto e messaggio** | Ognuno sceglie foto, nome e un messaggio pubblico, visibili ai membri dei suoi gruppi online. |
 | **Ricerca nei movimenti** | Cerca tra spese e rimborsi passati per testo, persona e periodo, e filtra le **entrate** e le **uscite** di ciascuno, con i totali. |
 | **Suoni e vibrazione** | Ogni azione ha il suo suono e la sua vibrazione: tocco, cambio scheda, salvataggio, eliminazione, rimborso, messaggio inviato e ricevuto, errore, scansione QR. Volume e intensità si regolano nelle impostazioni. |
