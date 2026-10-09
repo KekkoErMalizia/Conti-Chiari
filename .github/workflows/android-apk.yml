@@ -38,7 +38,7 @@ jobs:
           M=android/app/src/main/AndroidManifest.xml
           sed -i 's#<application#<application android:name=".CrashGuard"#' $M
           sed -i 's#<category android:name="android.intent.category.LAUNCHER" />##' $M
-          sed -i 's#</application>#    <activity android:name=".StartActivity" android:exported="true" android:theme="@android:style/Theme.Translucent.NoTitleBar">\n            <intent-filter>\n                <action android:name="android.intent.action.MAIN" />\n                <category android:name="android.intent.category.LAUNCHER" />\n            </intent-filter>\n        </activity>\n        <activity android:name=".CrashActivity" android:exported="false" android:theme="@android:style/Theme.DeviceDefault.Light" />\n    </application>#' $M
+          sed -i 's#</application>#    <activity android:name=".StartActivity" android:process=":crash" android:exported="true" android:theme="@android:style/Theme.Translucent.NoTitleBar">\n            <intent-filter>\n                <action android:name="android.intent.action.MAIN" />\n                <category android:name="android.intent.category.LAUNCHER" />\n            </intent-filter>\n        </activity>\n        <activity android:name=".CrashActivity" android:process=":crash" android:exported="false" android:theme="@android:style/Theme.DeviceDefault.Light" />\n    </application>#' $M
           cat $M
 
       - name: Permesso fotocamera (scansione QR)
