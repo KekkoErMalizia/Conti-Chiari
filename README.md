@@ -100,6 +100,10 @@ L'icona compare tra le tue app e Conti Chiari si apre a schermo intero, come un'
 
 Apri l'indirizzo con Chrome, Edge o Safari. Con Chrome ed Edge puoi installarla dall'icona nella barra degli indirizzi.
 
+### Telefoni vecchi
+
+Funziona anche sui telefoni di circa 10 anni fa: Android 6 o più recente con Chrome 67 o più recente, iPhone con iOS 14 o più recente (per esempio iPhone 6s, 7 e SE di prima generazione). Se il telefono è troppo vecchio, l'app mostra cosa aggiornare: su Android «Google Chrome» e «Android System WebView» dal Play Store, su iPhone iOS.
+
 ## Come si usa
 
 1. **Crea il gruppo**: tocca il nome del gruppo in alto, poi scrivi un nome e tocca **Crea**.
@@ -181,6 +185,7 @@ www/                  l'app: index.html, i18n.js (traduzioni), sync.js (sincroni
 assets/               icone e schermata di avvio per Android e iOS
 capacitor.config.json configurazione dell'app nativa (id: it.contichiari.app)
 package.json          dipendenze e comandi per creare i progetti Android/iOS
+scripts/compat.mjs    conversione per i telefoni vecchi (usata durante la pubblicazione)
 .github/workflows/    costruzione automatica di APK e sito
 GUIDA.md              guida passo passo all'installazione
 ```
@@ -189,6 +194,8 @@ GUIDA.md              guida passo passo all'installazione
 
 - **App web**: pubblica la cartella `www/` su GitHub Pages.
 - **App Android (APK)**: crea il progetto Android con Capacitor e costruisce l'APK.
+
+Prima di pubblicare, entrambi convertono la cartella `www/` con `scripts/compat.mjs` (`npm run compat`, usa esbuild e lightningcss) perché funzioni anche sui telefoni vecchi (Chrome 67+, Safari 14+). Il codice in `www/` resta moderno: la conversione avviene solo durante la pubblicazione e modifica i file sul posto, quindi non va lanciata sulla propria copia di lavoro. Il limite minimo è BigInt, che serve alle firme dei gruppi online e non si può convertire.
 
 **Provare l'app in locale.** Apri `www/index.html` nel browser, oppure servi la cartella con un server qualsiasi (`npx serve www`).
 

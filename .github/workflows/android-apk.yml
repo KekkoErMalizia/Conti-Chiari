@@ -25,6 +25,9 @@ jobs:
       - name: Installa le dipendenze
         run: npm install
 
+      - name: Converti per i telefoni vecchi (Chrome 67+, Safari 14+)
+        run: npm run compat
+
       - name: Crea il progetto Android e le icone
         run: npm run android
 

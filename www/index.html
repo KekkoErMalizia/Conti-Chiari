@@ -14,6 +14,25 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<script>
+/* Telefoni troppo vecchi: invece di una pagina bianca, un messaggio che spiega cosa aggiornare. Scritto in JavaScript vecchio apposta. */
+(function(){
+  var ok=typeof BigInt==='function'&&typeof Promise==='function'&&typeof TextEncoder==='function'&&window.crypto&&crypto.getRandomValues;
+  if(ok)return;
+  var it=(navigator.language||'').slice(0,2)==='it';
+  var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
+  var msg=it?(ios?'Questo iPhone ha una versione di Safari troppo vecchia per Conti Chiari. Aggiorna iOS (Impostazioni \u2192 Generali \u2192 Aggiornamento software) e riapri la pagina.'
+                 :'Questo telefono ha una versione di Chrome troppo vecchia per Conti Chiari. Aggiorna dal Play Store \u00abGoogle Chrome\u00bb e \u00abAndroid System WebView\u00bb, poi riapri l\u2019app.')
+            :(ios?'This iPhone has a Safari version too old for Conti Chiari. Update iOS (Settings \u2192 General \u2192 Software Update) and reopen the page.'
+                 :'This phone has a Chrome version too old for Conti Chiari. Update \u201cGoogle Chrome\u201d and \u201cAndroid System WebView\u201d from the Play Store, then reopen the app.');
+  window.CC_OLD=true;
+  document.addEventListener('DOMContentLoaded',function(){
+    document.body.innerHTML='<div style="font:17px/1.5 sans-serif;padding:32px 24px;max-width:480px;margin:0 auto;color:#14262e;background:#eef2f1"><h1 style="font-size:22px">Conti Chiari</h1><p></p></div>';
+    document.body.style.background='#eef2f1';
+    document.body.getElementsByTagName('p')[0].appendChild(document.createTextNode(msg));
+  });
+})();
+</script>
 <style>
 /* Layout: app a schermo intero — barra superiore col gruppo, contenuto scorrevole su sfondo personalizzabile, barra a cinque schede in basso */
 :root{
@@ -40,7 +59,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .app{position:relative;z-index:1;height:100%;display:grid;grid-template-rows:auto 1fr auto;grid-template-columns:minmax(0,1fr)}
 
 #bgLayer{position:fixed;inset:0;z-index:0;background-color:var(--bg);background-size:cover;background-position:center}
-body.custom-bg{--bar:color-mix(in srgb,var(--surface) 86%,transparent)}
+body.custom-bg{--bar:var(--surface)}
 body.custom-bg .top,body.custom-bg nav.tabs{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 body.custom-bg section{box-shadow:0 4px 18px rgba(0,0,0,.12)}
 
@@ -118,8 +137,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .exp li:first-child{border-top:0;padding-top:2px}
 .exp .ic{grid-row:1/span 2;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--chip);color:var(--muted)}
 .exp .ic svg{width:18px;height:18px}
-.exp .ic.in{background:color-mix(in srgb,var(--pos) 16%,transparent);color:var(--pos)}
-.exp .ic.out{background:color-mix(in srgb,var(--neg) 14%,transparent);color:var(--neg)}
+.exp .ic.in{color:var(--pos)}
+.exp .ic.out{color:var(--neg)}
 .exp .d{font-weight:600;overflow-wrap:anywhere}
 .exp .m{grid-column:2;font-size:13px;color:var(--muted)}
 .exp .a{grid-row:1/span 2;grid-column:3;font-family:var(--f-mono);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:end}
@@ -148,8 +167,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{position:relative;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:15px;cursor:pointer;user-select:none}
 .chip input{position:absolute;opacity:0;pointer-events:none}
-.chip:has(input:checked){background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.chip:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip.focus{outline:2px solid var(--accent);outline-offset:2px}
 .chiprow{display:flex;justify-content:space-between;align-items:baseline}
 .link{all:unset;cursor:pointer;color:var(--accent);font-weight:600;font-size:14px}
 .preview{font-size:14px;color:var(--muted);font-family:var(--f-mono)}
@@ -204,7 +223,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .dmhead span{display:block;font-size:13px;color:var(--muted)}
 .dmlist{list-style:none;margin:0;padding:0;display:grid;gap:4px}
 .dmlist button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;gap:12px;align-items:center;padding:10px;border-radius:14px}
-.dmlist button:hover,.dmlist button:focus-visible{background:var(--chip)}
+.dmlist button:hover{background:var(--chip)}
+.dmlist button:focus-visible{background:var(--chip)}
 .dmlist .who{min-width:0;flex:1}
 .dmlist .who b{display:block}
 .dmlist .who span{display:block;font-size:14px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -306,6 +326,17 @@ html.a-photo body{filter:brightness(.88)}
 html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 @media (prefers-reduced-motion:no-preference){.sheet .panel{animation:up .22s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}}
 @media (min-width:700px){.fab{inset-inline-end:calc(50% - 300px)}}
+/* Telefoni vecchi (2016 circa): colori semitrasparenti solo dove il browser li sa calcolare, misure fisse al posto di aspect-ratio */
+@supports (color:color-mix(in srgb,red 50%,blue)){
+  body.custom-bg{--bar:color-mix(in srgb,var(--surface) 86%,transparent)}
+  .exp .ic.in{background:color-mix(in srgb,var(--pos) 16%,transparent)}
+  .exp .ic.out{background:color-mix(in srgb,var(--neg) 14%,transparent)}
+}
+@supports not (aspect-ratio:1){
+  .thumb{height:56vw;max-height:260px}
+  .scan{height:80vw;max-height:420px}
+  .vidwrap{height:70vh}
+}
 </style>
 </head>
 <body>
@@ -644,10 +675,10 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
 
-<script src="i18n.js?v=13"></script>
+<script src="i18n.js?v=14"></script>
 <script src="lib/secp256k1.js"></script>
 <script src="lib/qrcode.js"></script>
-<script src="sync.js?v=13"></script>
+<script src="sync.js?v=14"></script>
 <script>
 'use strict';
 const KEY='conti-chiari-app-v1', SKEY='conti-chiari-settings', PKEY='conti-chiari-photo';
@@ -1282,7 +1313,7 @@ function renderExpForm(){
   const g=G();
   $('payer').innerHTML=g.people.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
   if(g.me&&person(g.me))$('payer').value=g.me;
-  $('split').innerHTML=g.people.map(p=>`<label class="chip"><input type="checkbox" value="${esc(p.id)}" checked><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.name)}</label>`).join('');
+  $('split').innerHTML=g.people.map(p=>`<label class="chip on"><input type="checkbox" value="${esc(p.id)}" checked><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.name)}</label>`).join('');
   const opts=g.people.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
   $('payFrom').innerHTML=opts;$('payTo').innerHTML=opts;
   const first=g.me&&person(g.me)?g.me:g.people[0].id;$('payFrom').value=first;$('payTo').value=(g.people.find(p=>p.id!==first)||g.people[0]).id;
@@ -1292,6 +1323,7 @@ function renderExpForm(){
   updatePreview();
 }
 function updatePreview(){
+  document.querySelectorAll('#split .chip').forEach(l=>l.classList.toggle('on',l.querySelector('input').checked));
   const n=document.querySelectorAll('#split input:checked').length,a=parseAmount($('amount').value||'0',curDigits(G().cur));
   $('preview').textContent=(n&&a>0)?`÷ ${n} = ${t('perHead',{amount:fmt(Math.floor(a/n))})}`:'';
   $('toggleAll').textContent=t(n===G().people.length?'none':'all');
@@ -1445,6 +1477,9 @@ document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>openAdd(b.datas
 document.querySelectorAll('#expKind button').forEach(b=>b.onclick=()=>setKind(b.dataset.kind));
 $('amount').addEventListener('input',updatePreview);
 $('split').addEventListener('change',updatePreview);
+// contorno della persona attiva da tastiera (al posto di :has, che i telefoni vecchi non conoscono)
+$('split').addEventListener('focusin',e=>{const l=e.target.closest('.chip');let kb=true;try{kb=e.target.matches(':focus-visible')}catch(x){}if(l&&kb)l.classList.add('focus')});
+$('split').addEventListener('focusout',e=>{const l=e.target.closest('.chip');if(l)l.classList.remove('focus')});
 $('toggleAll').onclick=()=>{const all=document.querySelectorAll('#split input'),on=[...all].some(i=>!i.checked);all.forEach(i=>i.checked=on);updatePreview()};
 $('expForm').addEventListener('submit',e=>{
   e.preventDefault();const err=$('expErr');err.textContent='';
@@ -1690,6 +1725,6 @@ if(!SET.tutorialDone&&!CCSync.parseInvite(location.hash)&&!/^#chat=/.test(locati
 /* ---------- offline ---------- */
 if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="feedback.js?v=13"></script>
+<script src="feedback.js?v=14"></script>
 </body>
 </html>
