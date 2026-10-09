@@ -507,6 +507,8 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
         <button class="btn block" type="button" id="openTour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17h.01"/></svg><span data-t="replayTutorial"></span></button>
         <a class="btn primary block" id="dlApk" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg><span data-t="dlApk"></span></a>
         <p class="note" id="dlApkHint" hidden data-t="dlApkRec"></p>
+        <button class="btn block" type="button" id="updCheck" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg><span data-t="updCheck"></span></button>
+        <p class="hint" id="appVer" hidden></p>
         <button class="btn block" type="button" id="iosInstall" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg><span data-t="iosInstall"></span></button>
       </section>
       <section class="stack">
@@ -693,6 +695,7 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="apkTitle">
     <div class="grab"></div>
     <h3><span id="apkTitle" data-t="dlTitle"></span><button class="link" type="button" data-close data-t="close"></button></h3>
+    <p class="hint" id="apkInfo" hidden style="margin-top:0"></p>
     <ol class="iossteps">
       <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></span><span data-t="dlStep1"></span></li>
       <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg></span><span data-t="dlStep2"></span></li>
@@ -726,10 +729,10 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
 
-<script src="i18n.js?v=20"></script>
+<script src="i18n.js?v=21"></script>
 <script src="lib/secp256k1.js"></script>
 <script src="lib/qrcode.js"></script>
-<script src="sync.js?v=20"></script>
+<script src="sync.js?v=21"></script>
 <script>
 'use strict';
 const KEY='conti-chiari-app-v1', SKEY='conti-chiari-settings', PKEY='conti-chiari-photo';
@@ -1680,6 +1683,36 @@ $('keepBattery').onclick=()=>{const P=keepPlugin();if(P)P.openBatterySettings().
 // al ritorno nell'app (per esempio dalla richiesta della batteria) aggiorna lo stato
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&keepPlugin()){keepInfo=null;renderKeepAlive()}});
 applyKeepAlive();
+/* --- avviso di aggiornamento (app Android): confronta il proprio numero di versione (build.json, scritto da GitHub
+   quando costruisce l'APK) con quello della Release «android-latest». Android non permette di aggiornare da soli
+   un'app installata da APK: l'avviso porta al download, poi si conferma l'installazione. --- */
+let appBuild=null;
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+async function checkUpdate(manual){
+  if(!keepPlugin())return;   // solo nell'app Android (il plugin «Background» esiste solo lì)
+  try{
+    if(!appBuild)appBuild=await (await fetch('build.json',{cache:'no-store'})).json();
+    if(!appBuild||!appBuild.build||!appBuild.repo)return;
+    $('appVer').textContent=t('appVersion',{n:appBuild.build});$('appVer').hidden=$('updCheck').hidden=false;
+    if(!manual&&Date.now()-(+lsGet('cc-upd-check')||0)<6*3600e3)return;
+    lsSet('cc-upd-check',Date.now());
+    const rel=await (await fetch(`https://api.github.com/repos/${appBuild.repo}/releases/tags/android-latest`,{cache:'no-store'})).json();
+    const m=String(rel&&rel.body||'').match(/build:\s*(\d+)/),latest=m?+m[1]:0;
+    if(latest>appBuild.build)showUpdate(latest);
+    else if(manual)toast(t('updNone'));
+  }catch(e){if(manual)toast(t('updFail'))}
+}
+function showUpdate(latest){
+  if(!$('tour').hidden)return setTimeout(()=>showUpdate(latest),1000);   // dopo il tutorial della prima apertura
+  const url=`https://github.com/${appBuild.repo}/releases/download/android-latest/ContiChiari.apk`;
+  $('apkTitle').textContent=t('updTitle');
+  $('apkInfo').textContent=t('updInfo',{n:latest,cur:appBuild.build});$('apkInfo').hidden=false;
+  $('apkGo').href=url;$('apkGo').textContent=t('updGo');
+  $('apkGo').onclick=()=>setTimeout(()=>closeSheet('apkSheet'),300);   // il link si apre nel browser, che scarica l'APK
+  openSheet('apkSheet');
+}
+$('updCheck').onclick=()=>checkUpdate(true);
+setTimeout(()=>checkUpdate(false),1500);   // dopo l'eventuale tutorial della prima apertura (parte a 350 ms)
 $('rcptOn').onchange=e=>{SET.receipts=e.target.checked;saveSet();renderChat()};
 $('chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&matchMedia('(hover:hover)').matches){e.preventDefault();$('chatForm').requestSubmit()}});
 $('chatIn').addEventListener('input',e=>{e.target.style.height='';e.target.style.height=Math.min(140,e.target.scrollHeight)+'px'});
@@ -1826,6 +1859,6 @@ if(!SET.tutorialDone&&!CCSync.parseInvite(location.hash)&&!/^#chat=/.test(locati
 /* ---------- offline ---------- */
 if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="feedback.js?v=20"></script>
+<script src="feedback.js?v=21"></script>
 </body>
 </html>

@@ -30,6 +30,12 @@ jobs:
       - name: Converti per i telefoni vecchi (Chrome 67+, Safari 14+)
         run: npm run compat
 
+      # numero di versione dentro l'APK: l'app lo confronta con la Release «android-latest» per avvisare degli aggiornamenti
+      - name: Numero di versione dell'app
+        run: |
+          printf '{"build":%s,"repo":"%s","sha":"%s"}\n' "${{ github.run_number }}" "${{ github.repository }}" "${GITHUB_SHA::7}" > www/build.json
+          cat www/build.json
+
       - name: Crea il progetto Android e le icone
         run: npm run android
 
@@ -105,11 +111,12 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: android-latest
-          name: App Android (ultima versione)
+          name: App Android (build ${{ github.run_number }})
           make_latest: true
           files: ContiChiari.apk
           body: |
             Ultima versione dell'app Android, aggiornata a ogni modifica.
+            build: ${{ github.run_number }}
             Scaricala dal telefono: https://github.com/${{ github.repository }}/releases/download/android-latest/ContiChiari.apk
             Con Chrome tocca «Scarica comunque», apri il file e consenti a Chrome di installare app sconosciute; se Play Protect avvisa, tocca «Altri dettagli → Installa comunque».
 
