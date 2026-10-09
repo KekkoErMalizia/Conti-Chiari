@@ -4,7 +4,7 @@ name: App Android (APK)
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'ccr-*']
   workflow_dispatch:
 
 jobs:
@@ -56,3 +56,62 @@ jobs:
           name: ContiChiari-android
           path: ContiChiari.apk
           retention-days: 30
+
+  # Prova l'APK su telefoni Android 6 e 7 simulati: lo avvia due volte e salva registro (logcat) e schermate.
+  # Serve a vedere il motivo degli arresti all'avvio senza un telefono collegato al computer.
+  prova-telefoni-vecchi:
+    needs: build
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        api-level: [23, 24]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ContiChiari-android
+
+      - name: Attiva la virtualizzazione (KVM)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Avvia l'app su Android API ${{ matrix.api-level }}
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: x86
+          target: google_apis
+          disable-animations: true
+          script: |
+            adb install -r ContiChiari.apk
+            adb logcat -c
+            adb shell monkey -p it.contichiari.app -c android.intent.category.LAUNCHER 1
+            sleep 25
+            adb exec-out screencap -p > schermata-1.png
+            adb shell monkey -p it.contichiari.app -c android.intent.category.LAUNCHER 1
+            sleep 15
+            adb exec-out screencap -p > schermata-2.png
+            adb logcat -d -v time > logcat.txt
+            adb shell pm list packages -f | grep -i -E "webview|chrome" > webview.txt || true
+            adb shell dumpsys package com.google.android.webview | grep -i versionName >> webview.txt || true
+            adb shell dumpsys package com.android.chrome | grep -i versionName >> webview.txt || true
+
+      - name: Riepilogo errori
+        if: always()
+        run: |
+          cat webview.txt || true
+          echo "===== errori ====="
+          grep -n -E "FATAL|AndroidRuntime|Exception|Error|chromium|cr_|contichiari|ActivityManager: (Start|Process|Force)|DEBUG|libc|tombstone" logcat.txt | head -300 || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prova-android-api-${{ matrix.api-level }}
+          path: |
+            logcat.txt
+            webview.txt
+            schermata-*.png
+          retention-days: 14
