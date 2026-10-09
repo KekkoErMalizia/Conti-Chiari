@@ -41,6 +41,13 @@ jobs:
           sed -i 's#</application>#    <activity android:name=".StartActivity" android:process=":crash" android:exported="true" android:theme="@android:style/Theme.Translucent.NoTitleBar">\n            <intent-filter>\n                <action android:name="android.intent.action.MAIN" />\n                <category android:name="android.intent.category.LAUNCHER" />\n            </intent-filter>\n        </activity>\n        <activity android:name=".CrashActivity" android:process=":crash" android:exported="false" android:theme="@android:style/Theme.DeviceDefault.Light" />\n    </application>#' $M
           cat $M
 
+      - name: Niente font emoji scaricato dai Servizi Google Play all'avvio
+        run: |
+          M=android/app/src/main/AndroidManifest.xml
+          sed -i 's#<manifest xmlns:android="http://schemas.android.com/apk/res/android"#<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"#' $M
+          sed -i 's#</application>#    <provider android:name="androidx.startup.InitializationProvider" android:authorities="${applicationId}.androidx-startup" android:exported="false" tools:node="merge">\n            <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer" tools:node="remove" />\n        </provider>\n    </application>#' $M
+          grep -n "tools:\|EmojiCompat" $M
+
       - name: Permesso fotocamera (scansione QR)
         run: sed -i 's#</manifest>#    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.VIBRATE" />\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />\n</manifest>#' android/app/src/main/AndroidManifest.xml && grep -n CAMERA android/app/src/main/AndroidManifest.xml
 
@@ -104,7 +111,7 @@ jobs:
         run: |
           cat webview.txt || true
           echo "===== errori ====="
-          grep -n -E "FATAL|AndroidRuntime|Exception|Error|chromium|cr_|contichiari|ActivityManager: (Start|Process|Force)|DEBUG|libc|tombstone" logcat.txt | head -300 || true
+          grep -n -E "FATAL|AndroidRuntime|Exception|Error|chromium|cr_|contichiari|Capacitor|ActivityManager: (Start|Process|Force)|DEBUG|libc|tombstone" logcat.txt | head -300 || true
 
       - uses: actions/upload-artifact@v4
         if: always()

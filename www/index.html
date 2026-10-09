@@ -17,6 +17,8 @@
 <script>
 /* Telefoni troppo vecchi: invece di una pagina bianca, un messaggio che spiega cosa aggiornare. Scritto in JavaScript vecchio apposta. */
 (function(){
+  // globalThis esiste solo da Chrome 71 / Safari 12.1: serve a lib/secp256k1.js (WebView di Android 7 con Chrome 67-70)
+  if(typeof globalThis==='undefined')window.globalThis=window;
   var ok=typeof BigInt==='function'&&typeof Promise==='function'&&typeof TextEncoder==='function'&&window.crypto&&crypto.getRandomValues;
   if(ok)return;
   var it=(navigator.language||'').slice(0,2)==='it';
@@ -675,10 +677,10 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
 
-<script src="i18n.js?v=14"></script>
+<script src="i18n.js?v=15"></script>
 <script src="lib/secp256k1.js"></script>
 <script src="lib/qrcode.js"></script>
-<script src="sync.js?v=14"></script>
+<script src="sync.js?v=15"></script>
 <script>
 'use strict';
 const KEY='conti-chiari-app-v1', SKEY='conti-chiari-settings', PKEY='conti-chiari-photo';
@@ -1725,6 +1727,6 @@ if(!SET.tutorialDone&&!CCSync.parseInvite(location.hash)&&!/^#chat=/.test(locati
 /* ---------- offline ---------- */
 if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="feedback.js?v=14"></script>
+<script src="feedback.js?v=15"></script>
 </body>
 </html>
