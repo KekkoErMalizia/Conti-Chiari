@@ -96,7 +96,7 @@ Ti consigliamo caldamente di installare l'APK con il tasto dell'app, invece di u
 4. Apri il file scaricato. La prima volta Android chiede di consentire a Chrome di **installare app sconosciute**: attiva l'opzione e torna indietro.
 5. Avviata l'installazione, **forzala**: se compare **Play Protect**, tocca **Altri dettagli → Installa comunque**.
 
-Gli aggiornamenti si installano sopra la versione precedente e i dati restano. Se compare «App non installata», la versione sul telefono è firmata con un'altra chiave: disinstallala e reinstalla. Prima invia a te stesso il codice dei gruppi, così non perdi i dati.
+**Aggiornamenti:** all'apertura, al massimo ogni 6 ore, l'app controlla se su GitHub c'è una versione più recente. Se c'è, mostra «Aggiornamento disponibile» con il tasto per scaricarla e gli stessi passi. Il numero di versione e il tasto «Controlla aggiornamenti» sono in **Impostazioni → Guida e video**. Android non permette di aggiornare da sole le app installate da APK: l'installazione va sempre confermata. Gli aggiornamenti si installano sopra la versione precedente e i dati restano. Se compare «App non installata», la versione sul telefono è firmata con un'altra chiave: disinstallala e reinstalla. Prima invia a te stesso il codice dei gruppi, così non perdi i dati.
 
 ### Android, dal browser (alternativa)
 
