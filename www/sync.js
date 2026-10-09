@@ -136,7 +136,10 @@ class Hub{
     if(!g) return;
     this.seen.add(ev.id);
     if(!(await checkEvent(ev))) return;
-    let op; try{ op = await open(g.key, ev.content) }catch(e){ return }   // chiave sbagliata o dati manomessi
+    // la chiave può dipendere da chi scrive (casella delle richieste di amicizia: chiave ECDH con il mittente)
+    let key; try{ key = typeof g.key === 'function' ? await g.key(ev.pubkey) : g.key }catch(e){ return }
+    if(!key) return;
+    let op; try{ op = await open(key, ev.content) }catch(e){ return }   // chiave sbagliata o dati manomessi
     if(!op || typeof op !== 'object' || typeof op.t !== 'string') return;
     g.since = Math.max(g.since || 0, ev.created_at);
     this.onOp(g.id, op, ev.pubkey, ev.created_at);
@@ -161,6 +164,25 @@ async function dmChannel(sk, peerPk){
   return {key, topic: await topicOf(key)};
 }
 
+/* ---------- rubrica: casella personale e codice contatto ---------- */
+// Ogni telefono ascolta la propria «casella» (argomento ricavato dalla sua chiave pubblica). Chi conosce la chiave
+// pubblica può scriverci, ma il contenuto è cifrato con la chiave ECDH tra i due dispositivi: lo legge solo il destinatario.
+function inboxTopic(pk){return topicOf('inbox:' + pk)}
+function contactLink(pk, name){
+  const payload = b64url(enc.encode(JSON.stringify({v:1, p: pk, n: String(name || '').slice(0, 24)})));
+  const here = /^https?:/.test(location.protocol) && !/^(localhost|127\.)/.test(location.hostname) ? location.origin + location.pathname : APP_URL;
+  return here + '#add=' + payload;
+}
+function parseContact(text){
+  const m = String(text || '').match(/add=([A-Za-z0-9_-]+)/);
+  if(!m) return null;
+  try{
+    const o = JSON.parse(dec.decode(unb64url(m[1])));
+    if(o && o.v === 1 && /^[0-9a-f]{64}$/.test(o.p)) return {pk: o.p, name: String(o.n || '').slice(0, 24)};
+  }catch(e){}
+  return null;
+}
+
 /* ---------- inviti ---------- */
 const APP_URL = 'https://kekkoermalizia.github.io/Conti-Chiari/';
 function inviteLink(group){
@@ -178,5 +200,5 @@ function parseInvite(text){
   return null;
 }
 
-window.CCSync = {Hub, deviceKeys, newGroupKey, topicOf, seal, open, makeEvent, checkEvent, inviteLink, parseInvite, dmChannel, rid, KIND, DEFAULT_RELAYS};
+window.CCSync = {Hub, deviceKeys, newGroupKey, topicOf, seal, open, makeEvent, checkEvent, inviteLink, parseInvite, dmChannel, inboxTopic, contactLink, parseContact, rid, KIND, DEFAULT_RELAYS};
 })();
