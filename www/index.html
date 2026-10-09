@@ -1390,7 +1390,21 @@ function setKind(k){
   document.querySelectorAll('#expKind button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.kind===k));
   $('expTitle').textContent=t(k==='pay'?'kindPay':'newExpense');$('expSave').textContent=t(k==='pay'?'savePay':'save');$('expErr').textContent='';
 }
+// gruppo online: ogni telefono collegato diventa una persona del gruppo (stesso id su tutti i telefoni)
+function ensureMemberPeople(g){
+  if(!g.sync||!g.members)return;
+  const byName=n=>g.people.find(p=>p.name.toLowerCase()===n.toLowerCase());
+  Object.entries(g.members).sort((x,y)=>x[1].ts-y[1].ts).forEach(([pk,m],i)=>{
+    if(m.personId&&personIn(g,m.personId)){if(pk===ME.pk&&!g.me)g.me=m.personId;return}
+    const name=(pk===ME.pk?SET.profile.name:m.name)||m.name||t('anon')+' '+(i+1);
+    let p=byName(name);
+    if(!p){const used=new Set(g.people.map(x=>x.color));p={id:'m'+pk.slice(0,16),name:name.slice(0,24),color:COLORS.find(c=>!used.has(c))||COLORS[g.people.length%COLORS.length]};
+      if(!personIn(g,p.id))commit({t:'person',quiet:1,p},g)}
+    if(pk===ME.pk&&!g.me){g.me=p.id;persist();commit(memberOp(g),g)}
+  });
+}
 function openAdd(k){
+  if(G().people.length<2)ensureMemberPeople(G());
   if(G().people.length<2){toast(t('needPeople'));setTab('gruppo');$('personName').focus();return}
   renderExpForm();setKind(k);openSheet('expSheet');setTimeout(()=>$(k==='pay'?'amount':'desc').focus(),250);
 }
