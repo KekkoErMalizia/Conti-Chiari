@@ -10,6 +10,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # per pubblicare l'APK nella Release «android-latest»
     steps:
       - uses: actions/checkout@v4
 
@@ -58,12 +60,41 @@ jobs:
       - name: Permesso fotocamera (scansione QR)
         run: sed -i 's#</manifest>#    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.VIBRATE" />\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />\n</manifest>#' android/app/src/main/AndroidManifest.xml && grep -n CAMERA android/app/src/main/AndroidManifest.xml
 
+      # Firma stabile: con la stessa chiave a ogni versione gli aggiornamenti si installano sopra la vecchia app
+      # (senza disinstallarla e senza perdere i dati). La chiave sta nel secret ANDROID_DEBUG_KEYSTORE (keystore in base64).
+      - name: Firma stabile
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_DEBUG_KEYSTORE }}
+        run: |
+          if [ -n "$KEYSTORE" ]; then
+            mkdir -p ~/.android && echo "$KEYSTORE" | base64 -d > ~/.android/debug.keystore
+            echo "Firma stabile: chiave dal secret ANDROID_DEBUG_KEYSTORE"
+          else
+            echo "::warning::Manca il secret ANDROID_DEBUG_KEYSTORE: l'APK è firmato con una chiave nuova, per aggiornare bisogna disinstallare l'app (vedi GUIDA.md)"
+          fi
+
       - name: Compila l'APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
 
       - name: Rinomina il file
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk ContiChiari.apk
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk ContiChiari.apk
+          echo "Impronta della firma (deve restare uguale tra le versioni):"
+          keytool -printcert -jarfile ContiChiari.apk | grep -E "SHA256|Owner"
+
+      - name: Pubblica l'APK per il download diretto (Release «android-latest»)
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-latest
+          name: App Android (ultima versione)
+          make_latest: true
+          files: ContiChiari.apk
+          body: |
+            Ultima versione dell'app Android, aggiornata a ogni modifica.
+            Scaricala dal telefono: https://github.com/${{ github.repository }}/releases/download/android-latest/ContiChiari.apk
+            Con Chrome tocca «Scarica comunque», apri il file e consenti a Chrome di installare app sconosciute; se Play Protect avvisa, tocca «Altri dettagli → Installa comunque».
 
       - uses: actions/upload-artifact@v4
         with:
