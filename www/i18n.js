@@ -699,3 +699,26 @@ ko:["그룹","개인","개인 채팅","다른 사람과 온라인 그룹에 참�
 ['ja',"チャットを削除","{name} とのチャットをすべて削除しますか？相手の端末からも消えます。","グループ「{name}」のチャットを全員分すべて削除しますか？","チャットを削除しました"],
 ['ko',"채팅 삭제","{name}님과의 채팅을 모두 삭제할까요? 상대방 휴대폰에서도 사라집니다.","그룹 “{name}”의 채팅을 모든 멤버에게서 삭제할까요?","채팅이 삭제되었습니다"]
 ].forEach(([l,delChat,delChatQdm,delChatQgroup,chatDeleted])=>{if(I18N[l])Object.assign(I18N[l],{delChat,delChatQdm,delChatQgroup,chatDeleted})});
+
+/* ---- Gruppi con almeno 2 persone ---- */
+[
+['it',"Prima persona (tu)","Seconda persona","Un gruppo ha sempre almeno 2 persone.","Scrivi i nomi di almeno 2 persone.","Un gruppo deve avere almeno 2 persone: aggiungine un'altra prima di togliere {name}."],
+['en',"First person (you)","Second person","A group always has at least 2 people.","Enter the names of at least 2 people.","A group needs at least 2 people: add someone else before removing {name}."],
+['es',"Primera persona (tú)","Segunda persona","Un grupo siempre tiene al menos 2 personas.","Escribe los nombres de al menos 2 personas.","Un grupo necesita al menos 2 personas: añade otra antes de quitar a {name}."],
+['fr',"Première personne (vous)","Deuxième personne","Un groupe compte toujours au moins 2 personnes.","Saisissez les noms d'au moins 2 personnes.","Un groupe doit compter au moins 2 personnes : ajoutez-en une autre avant de retirer {name}."],
+['de',"Erste Person (du)","Zweite Person","Eine Gruppe hat immer mindestens 2 Personen.","Gib die Namen von mindestens 2 Personen ein.","Eine Gruppe braucht mindestens 2 Personen: Füge jemanden hinzu, bevor du {name} entfernst."],
+['pt',"Primeira pessoa (você)","Segunda pessoa","Um grupo tem sempre pelo menos 2 pessoas.","Escreva os nomes de pelo menos 2 pessoas.","Um grupo precisa de pelo menos 2 pessoas: adicione outra antes de remover {name}."],
+['nl',"Eerste persoon (jij)","Tweede persoon","Een groep heeft altijd minstens 2 personen.","Vul de namen van minstens 2 personen in.","Een groep heeft minstens 2 personen nodig: voeg iemand toe voordat je {name} verwijdert."],
+['pl',"Pierwsza osoba (ty)","Druga osoba","Grupa ma zawsze co najmniej 2 osoby.","Wpisz imiona co najmniej 2 osób.","Grupa musi mieć co najmniej 2 osoby: dodaj kogoś, zanim usuniesz {name}."],
+['ro',"Prima persoană (tu)","A doua persoană","Un grup are mereu cel puțin 2 persoane.","Scrie numele a cel puțin 2 persoane.","Un grup are nevoie de cel puțin 2 persoane: adaugă pe cineva înainte să-l elimini pe {name}."],
+['sv',"Första personen (du)","Andra personen","En grupp har alltid minst 2 personer.","Skriv namnen på minst 2 personer.","En grupp behöver minst 2 personer: lägg till någon innan du tar bort {name}."],
+['tr',"Birinci kişi (sen)","İkinci kişi","Bir grupta her zaman en az 2 kişi olur.","En az 2 kişinin adını yaz.","Bir grupta en az 2 kişi olmalı: {name} adlı kişiyi çıkarmadan önce başka birini ekle."],
+['el',"Πρώτο άτομο (εσύ)","Δεύτερο άτομο","Μια ομάδα έχει πάντα τουλάχιστον 2 άτομα.","Γράψε τα ονόματα τουλάχιστον 2 ατόμων.","Μια ομάδα χρειάζεται τουλάχιστον 2 άτομα: πρόσθεσε κάποιον πριν αφαιρέσεις τον/την {name}."],
+['ru',"Первый участник (вы)","Второй участник","В группе всегда не меньше 2 участников.","Введите имена как минимум 2 участников.","В группе должно быть не меньше 2 участников: добавьте кого-нибудь, прежде чем удалять {name}."],
+['uk',"Перший учасник (ви)","Другий учасник","У групі завжди щонайменше 2 учасники.","Введіть імена щонайменше 2 учасників.","У групі має бути щонайменше 2 учасники: додайте когось, перш ніж видаляти {name}."],
+['ar',"الشخص الأول (أنت)","الشخص الثاني","تضم المجموعة دائمًا شخصين على الأقل.","اكتب أسماء شخصين على الأقل.","تحتاج المجموعة إلى شخصين على الأقل: أضف شخصًا آخر قبل إزالة {name}."],
+['hi',"पहला व्यक्ति (आप)","दूसरा व्यक्ति","समूह में हमेशा कम से कम 2 लोग होते हैं।","कम से कम 2 लोगों के नाम लिखें।","समूह में कम से कम 2 लोग चाहिए: {name} को हटाने से पहले किसी और को जोड़ें।"],
+['zh',"第一位（你）","第二位","群组至少要有 2 个人。","请输入至少 2 个人的名字。","群组至少需要 2 个人：移除 {name} 之前请先添加其他人。"],
+['ja',"1人目（あなた）","2人目","グループには常に2人以上が必要です。","2人以上の名前を入力してください。","グループには2人以上が必要です。{name} を外す前に別の人を追加してください。"],
+['ko',"첫 번째 사람 (나)","두 번째 사람","그룹에는 항상 2명 이상이 있어야 합니다.","2명 이상의 이름을 입력하세요.","그룹에는 2명 이상이 필요합니다. {name}님을 빼기 전에 다른 사람을 추가하세요."]
+].forEach(([l,ngP1Ph,ngP2Ph,minTwoHint,errTwo,errMinTwo])=>{if(I18N[l])Object.assign(I18N[l],{ngP1Ph,ngP2Ph,minTwoHint,errTwo,errMinTwo})});

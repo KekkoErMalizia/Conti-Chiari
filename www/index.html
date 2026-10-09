@@ -100,6 +100,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 
 /* movimenti */
 .filters{display:grid;gap:10px}
+.newgroup .row>*{flex:1 1 120px;min-width:0}
 .quick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .quick .btn{min-height:56px;font-size:15.5px;line-height:1.2;padding:10px 12px}
 .quick .btn svg{width:22px;height:22px}
@@ -573,8 +574,14 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
     <div class="stack">
       <button class="btn primary block" type="button" id="openScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M7 12h10"/></svg><span data-t="scanQr"></span></button>
       <ul class="glist" id="glist"></ul>
-      <form id="newGroup" class="row">
+      <form id="newGroup" class="stack newgroup">
         <input id="newGroupName" type="text" data-tp="newGroupPh" maxlength="40" autocomplete="off">
+        <div class="row">
+          <input id="ngP1" type="text" data-tp="ngP1Ph" maxlength="24" autocomplete="off">
+          <input id="ngP2" type="text" data-tp="ngP2Ph" maxlength="24" autocomplete="off">
+        </div>
+        <p class="hint" data-t="minTwoHint" style="margin:0"></p>
+        <p class="err" id="ngErr" style="margin:0"></p>
         <button class="btn primary" type="submit" data-t="create"></button>
       </form>
       <details>
@@ -1438,6 +1445,7 @@ $('personForm').addEventListener('submit',e=>{
 });
 $('people').addEventListener('click',e=>{
   const id=e.target.closest('[data-rm]')?.dataset.rm;if(!id)return;const g=G();
+  if(g.people.length<=2){$('personErr').textContent=t('errMinTwo',{name:person(id).name});return}
   if(g.expenses.some(x=>x.payer===id||x.split.includes(id))||g.payments.some(x=>x.from===id||x.to===id)){$('personErr').textContent=t('errInUse',{name:person(id).name});return}
   commit({t:'person-',id});$('personErr').textContent='';render();
 });
@@ -1468,11 +1476,16 @@ function askDelete(){
   };
 }
 
-$('openGroups').onclick=()=>{renderGroups();$('importErr').textContent='';openSheet('groupSheet')};
+$('openGroups').onclick=()=>{renderGroups();$('importErr').textContent='';$('ngErr').textContent='';if(!$('ngP1').value)$('ngP1').value=SET.profile.name||'';openSheet('groupSheet')};
 $('glist').addEventListener('click',e=>{const id=e.target.closest('[data-g]')?.dataset.g;if(!id)return;DB.current=id;F.person=null;persist();render();closeSheet('groupSheet');setTab('mov')});
 $('newGroup').addEventListener('submit',e=>{
-  e.preventDefault();const n=$('newGroupName').value.trim();if(!n){$('newGroupName').focus();return}
-  const g=blankGroup({name:n,cur:G().sample?guessCur():G().cur});DB.groups[g.id]=g;DB.current=g.id;$('newGroupName').value='';F.person=null;
+  e.preventDefault();const n=$('newGroupName').value.trim(),a=$('ngP1').value.trim(),b=$('ngP2').value.trim();$('ngErr').textContent='';
+  if(!n){$('newGroupName').focus();return}
+  if(!a||!b){$('ngErr').textContent=t('errTwo');$(a?'ngP2':'ngP1').focus();return}
+  if(a.toLowerCase()===b.toLowerCase()){$('ngErr').textContent=t('errDup',{name:b});$('ngP2').focus();return}
+  const g=blankGroup({name:n,cur:G().sample?guessCur():G().cur,people:[{id:uid(),name:a,color:COLORS[0]},{id:uid()+'b',name:b,color:COLORS[1]}]});
+  if(SET.profile.name&&SET.profile.name.toLowerCase()===a.toLowerCase())g.me=g.people[0].id;
+  DB.groups[g.id]=g;DB.current=g.id;$('newGroupName').value='';$('ngP2').value='';F.person=null;
   persist();render();closeSheet('groupSheet');setTab('gruppo');toast(t('groupCreated'));setTimeout(()=>$('personName').focus(),200);
 });
 function importGroup(g){
