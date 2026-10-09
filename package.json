@@ -5,6 +5,7 @@
   "description": "Dividi le spese di gruppo e scopri chi deve quanto a chi.",
   "scripts": {
     "icons": "capacitor-assets generate --iconBackgroundColor '#1f5f6b' --iconBackgroundColorDark '#0f1a1e' --splashBackgroundColor '#eef2f1' --splashBackgroundColorDark '#0f1a1e'",
+    "compat": "node scripts/compat.mjs www",
     "android": "cap add android && npm run icons -- --android && cap sync android",
     "ios": "cap add ios && npm run icons -- --ios && cap sync ios && plutil -insert NSCameraUsageDescription -string 'Serve per scansionare il QR di invito di un gruppo.' ios/App/App/Info.plist"
   },
@@ -16,6 +17,8 @@
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
-    "@capacitor/cli": "^7.0.0"
+    "@capacitor/cli": "^7.0.0",
+    "esbuild": "^0.24.2",
+    "lightningcss": "^1.28.2"
   }
 }
