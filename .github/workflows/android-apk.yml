@@ -60,7 +60,7 @@ jobs:
         run: |
           M=android/app/src/main/AndroidManifest.xml
           sed -i 's#</application>#    <service android:name=".KeepAliveService" android:exported="false" android:foregroundServiceType="remoteMessaging" />\n    </application>#' $M
-          sed -i 's#</manifest>#    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />\n    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />\n</manifest>#' $M
+          sed -i 's#</manifest>#    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />\n    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />\n    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n</manifest>#' $M
           grep -n "KeepAlive\|FOREGROUND\|BATTERY" $M
 
       - name: Permesso fotocamera (scansione QR)

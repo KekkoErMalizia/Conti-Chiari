@@ -781,8 +781,8 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
     <p class="note" data-t="updRequired"></p>
     <ol class="iossteps">
       <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></span><span data-t="dlStep1"></span></li>
-      <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg></span><span data-t="dlStep2"></span></li>
-      <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span><span data-t="dlStep3"></span></li>
+      <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg></span><span data-t="updStep2"></span></li>
+      <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span><span data-t="updStep3"></span></li>
       <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span><span data-t="dlStep4"></span></li>
     </ol>
     <a class="btn primary block" id="updGo" data-t="updGo"></a>
@@ -812,10 +812,10 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
 
-<script src="i18n.js?v=23"></script>
+<script src="i18n.js?v=24"></script>
 <script src="lib/secp256k1.js"></script>
 <script src="lib/qrcode.js"></script>
-<script src="sync.js?v=23"></script>
+<script src="sync.js?v=24"></script>
 <script>
 'use strict';
 const KEY='conti-chiari-app-v1', SKEY='conti-chiari-settings', PKEY='conti-chiari-photo';
@@ -1929,9 +1929,25 @@ function showUpdate(){
   if(!updLatest)return;
   if(!$('tour').hidden)return setTimeout(showUpdate,400);   // appena il tutorial della prima apertura non è più visibile
   $('updInfo').textContent=t('updInfo',{n:updLatest,cur:appBuild.build});
-  $('updGo').href=`https://github.com/${appBuild.repo}/releases/download/android-latest/ContiChiari.apk`;   // si apre nel browser, che scarica l'APK
+  $('updGo').href=`https://github.com/${appBuild.repo}/releases/download/android-latest/ContiChiari.apk`;   // senza il plugin «Updater» si apre nel browser
+  if(updater()&&!updBusy)$('updGo').textContent=t('updNow');
   $('updModal').hidden=false;
 }
+// «Aggiorna ora»: l'app scarica l'APK e apre subito l'installazione di Android (resta da toccare «Installa»)
+const updater=()=>window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Updater;
+let updBusy=false;
+try{const U=updater();if(U)U.addListener('updateProgress',d=>{if(updBusy)$('updGo').textContent=t('updDownloading',{p:d.pct>=0?d.pct:'…'})})}catch(e){}
+$('updGo').addEventListener('click',async e=>{
+  const U=updater();if(!U)return;   // versioni senza il plugin: il link apre il browser
+  e.preventDefault();if(updBusy)return;
+  try{
+    const can=await U.canInstall();
+    if(!can.allowed){toast(t('updAllow'));await U.openInstallSettings();return}
+    updBusy=true;$('updGo').textContent=t('updDownloading',{p:0});
+    await U.downloadAndInstall({url:$('updGo').href});
+  }catch(err){toast(t('updDlFail'));setTimeout(()=>{location.href=$('updGo').href},1500)}   // ripiego: download dal browser
+  finally{updBusy=false;$('updGo').textContent=t('updNow')}
+});
 $('updCheck').onclick=()=>checkUpdate(true);
 setTimeout(()=>checkUpdate(false),500);   // all'avvio, dopo l'eventuale apertura del tutorial (a 350 ms)
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate(false)});
@@ -1942,10 +1958,10 @@ $('chatIn').addEventListener('input',e=>{e.target.style.height='';e.target.style
 // impostazioni
 $('langSel').onchange=e=>{
   SET.lang=e.target.value;saveSet();setLang();if(SET.keepAlive)applyKeepAlive();   // testo della notifica fissa nella nuova lingua
-  if(!$('updModal').hidden)showUpdate();
   for(const k in fmtCache)delete fmtCache[k];
   const s=DB.groups.esempio;if(s&&s.sample&&s.lang!==LANG){DB.groups.esempio=sampleGroup();persist()}
   applyStatic();render();renderSettings();
+  if(!$('updModal').hidden)showUpdate();   // dopo applyStatic, che riscriverebbe il testo del pulsante
 };
 $('curSel').onchange=e=>{
   const g=G(),old=g.cur,nw=e.target.value,diff=curDigits(nw)-curDigits(old);
@@ -2084,6 +2100,6 @@ if(!SET.tutorialDone&&!CCSync.parseInvite(location.hash)&&!window.CT_HASH&&!/^#c
 /* ---------- offline ---------- */
 if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="feedback.js?v=23"></script>
+<script src="feedback.js?v=24"></script>
 </body>
 </html>
