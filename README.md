@@ -56,6 +56,7 @@ Conti Chiari tiene traccia di chi ha pagato cosa e alla fine ti dice **chi deve 
 | **Chat di gruppo cifrata** | Una chat dentro ogni gruppo online, cifrata end-to-end: solo chi è nel gruppo può leggerla. |
 | **Profilo con foto e messaggio** | Ognuno sceglie foto, nome e un messaggio pubblico, visibili ai membri dei suoi gruppi online. |
 | **Ricerca nei movimenti** | Cerca tra spese e rimborsi passati per testo, persona e periodo, e filtra le **entrate** e le **uscite** di ciascuno, con i totali. |
+| **Tutorial e video integrati** | Al primo avvio un tutorial interattivo evidenzia i comandi uno per uno, con il tasto **Salta** e l'opzione per non mostrarlo più. In Impostazioni → **Guida e video** puoi rivederlo e guardare il video dimostrativo. |
 | **Rimborsi registrati** | Quando qualcuno paga, tocchi «Segna pagato»: il rimborso entra nello storico e i saldi si aggiornano. |
 | **Condivisione con un codice** | Passi un intero gruppo a un amico mandandogli un codice da incollare nella sua app. |
 | **Funziona offline** | Una volta installata, l'app funziona anche senza connessione. |
