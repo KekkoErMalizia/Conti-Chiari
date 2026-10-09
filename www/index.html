@@ -542,6 +542,14 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="expTitle">
     <div class="grab"></div>
     <h3><span id="expTitle"></span><button class="link" type="button" data-close data-t="cancel"></button></h3>
+    <form id="quickPeople" class="stack" hidden>
+      <p class="hint" data-t="needPeople" style="margin:0"></p>
+      <div class="row">
+        <input id="qpName" type="text" data-tp="namePh" data-ta="people" maxlength="24" autocomplete="off">
+        <button class="btn primary" type="submit" data-t="add"></button>
+      </div>
+      <p class="err" id="qpErr"></p>
+    </form>
     <form id="expForm" class="stack" novalidate>
       <div class="seg" id="expKind" role="group"><button type="button" data-kind="exp" aria-pressed="true" data-t="kindExp"></button><button type="button" data-kind="pay" aria-pressed="false" data-t="kindPay"></button></div>
       <div class="only-exp"><label class="f" for="desc" data-t="description"></label><input id="desc" type="text" data-tp="descPh" maxlength="60" autocomplete="off"></div>
@@ -636,10 +644,10 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
 
-<script src="i18n.js"></script>
+<script src="i18n.js?v=13"></script>
 <script src="lib/secp256k1.js"></script>
 <script src="lib/qrcode.js"></script>
-<script src="sync.js"></script>
+<script src="sync.js?v=13"></script>
 <script>
 'use strict';
 const KEY='conti-chiari-app-v1', SKEY='conti-chiari-settings', PKEY='conti-chiari-photo';
@@ -1414,11 +1422,24 @@ function ensureMemberPeople(g){
     if(pk===ME.pk&&!g.me){g.me=p.id;persist();commit(memberOp(g),g)}
   });
 }
+// gruppo con meno di 2 persone: il foglio si apre lo stesso e chiede prima i nomi mancanti
 function openAdd(k){
   if(G().people.length<2)ensureMemberPeople(G());
-  if(G().people.length<2){toast(t('needPeople'));setTab('gruppo');$('personName').focus();return}
+  $('quickPeople').dataset.kind=k;
+  if(G().people.length<2){
+    $('expForm').hidden=true;$('quickPeople').hidden=false;$('qpName').value='';$('qpErr').textContent='';
+    $('expTitle').textContent=t(k==='pay'?'kindPay':'newExpense');openSheet('expSheet');setTimeout(()=>$('qpName').focus(),250);return;
+  }
+  $('quickPeople').hidden=true;$('expForm').hidden=false;
   renderExpForm();setKind(k);openSheet('expSheet');setTimeout(()=>$(k==='pay'?'amount':'desc').focus(),250);
 }
+$('quickPeople').addEventListener('submit',e=>{
+  e.preventDefault();const err=addPerson($('qpName').value);$('qpErr').textContent=err;if(err)return;
+  $('qpName').value='';render();
+  if(G().people.length<2)return $('qpName').focus();
+  $('quickPeople').hidden=true;$('expForm').hidden=false;const k=$('quickPeople').dataset.kind;
+  renderExpForm();setKind(k);$(k==='pay'?'amount':'desc').focus();
+});
 $('fab').onclick=()=>openAdd('exp');
 document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>openAdd(b.dataset.add));
 document.querySelectorAll('#expKind button').forEach(b=>b.onclick=()=>setKind(b.dataset.kind));
@@ -1460,12 +1481,17 @@ $('shareSummary').onclick=async()=>{
   if(!await shareText(lines.join('\n'),g.name))toast(t('shareUnavailable'));
 };
 
-$('personForm').addEventListener('submit',e=>{
-  e.preventDefault();const g=G(),n=$('personName').value.trim();$('personErr').textContent='';
-  if(!n)return $('personErr').textContent=t('errName');
-  if(g.people.some(p=>p.name.toLowerCase()===n.toLowerCase()))return $('personErr').textContent=t('errDup',{name:n});
+// aggiunge una persona al gruppo attuale; restituisce il messaggio d'errore ('' se tutto ok)
+function addPerson(name){
+  const g=G(),n=name.trim();
+  if(!n)return t('errName');
+  if(g.people.some(p=>p.name.toLowerCase()===n.toLowerCase()))return t('errDup',{name:n});
   const used=new Set(g.people.map(p=>p.color));
   commit({t:'person',p:{id:uid(),name:n,color:COLORS.find(c=>!used.has(c))||COLORS[g.people.length%COLORS.length]}});
+  return '';
+}
+$('personForm').addEventListener('submit',e=>{
+  e.preventDefault();const err=addPerson($('personName').value);$('personErr').textContent=err;if(err)return;
   $('personName').value='';render();$('personName').focus();
 });
 $('people').addEventListener('click',e=>{
@@ -1664,6 +1690,6 @@ if(!SET.tutorialDone&&!CCSync.parseInvite(location.hash)&&!/^#chat=/.test(locati
 /* ---------- offline ---------- */
 if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="feedback.js"></script>
+<script src="feedback.js?v=13"></script>
 </body>
 </html>
