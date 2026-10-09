@@ -92,12 +92,13 @@ jobs:
           cp android/app/build/outputs/apk/debug/app-debug.apk ContiChiari.apk
           if [ -n "$KS_FILE" ]; then
             # ri-firma con la chiave stabile (apksigner sostituisce la firma di prova della build debug)
-            APKSIGNER=$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner
+            APKSIGNER="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner"
+            echo "Ri-firma con $APKSIGNER"
             "$APKSIGNER" sign --ks "$KS_FILE" --ks-pass pass:android --ks-key-alias androiddebugkey --key-pass pass:android ContiChiari.apk
-            "$APKSIGNER" verify --print-certs ContiChiari.apk | grep -E "Signer #1 certificate (DN|SHA-256)"
+            "$APKSIGNER" verify --print-certs ContiChiari.apk | head -6
           fi
           echo "Impronta della firma (deve restare uguale tra le versioni):"
-          keytool -printcert -jarfile ContiChiari.apk | grep -E "SHA256|Owner"
+          keytool -printcert -jarfile ContiChiari.apk | grep -E "SHA256|Owner" || echo "(firma v1 assente: vedi l'impronta di apksigner qui sopra)"
 
       - name: Pubblica l'APK per il download diretto (Release «android-latest»)
         if: github.ref == 'refs/heads/main'
