@@ -67,8 +67,18 @@ jobs:
           KEYSTORE: ${{ secrets.ANDROID_DEBUG_KEYSTORE }}
         run: |
           if [ -n "$KEYSTORE" ]; then
-            mkdir -p ~/.android && echo "$KEYSTORE" | base64 -d > ~/.android/debug.keystore
-            echo "Firma stabile: chiave dal secret ANDROID_DEBUG_KEYSTORE"
+            # spazi e a capo entrano facilmente copiando dal telefono: si tolgono prima di decodificare
+            CLEAN=$(printf '%s' "$KEYSTORE" | tr -d ' \t\r\n')
+            echo "Lunghezza del secret senza spazi: ${#CLEAN} caratteri (la chiave creata con GUIDA.md ne ha circa 3500)"
+            KS="$RUNNER_TEMP/contichiari.keystore"
+            if printf '%s' "$CLEAN" | base64 -d > "$KS" 2>/dev/null \
+               && keytool -list -keystore "$KS" -storepass android -alias androiddebugkey > /dev/null 2>&1; then
+              echo "KS_FILE=$KS" >> "$GITHUB_ENV"
+              echo "Firma stabile: chiave dal secret ANDROID_DEBUG_KEYSTORE (l'APK viene ri-firmato dopo la costruzione)"
+            else
+              rm -f "$KS"
+              echo "::warning::Il secret ANDROID_DEBUG_KEYSTORE non contiene una chiave valida (testo incompleto o modificato): l'APK è firmato con una chiave nuova. Ricopialo per intero dal file ANDROID_DEBUG_KEYSTORE.txt"
+            fi
           else
             echo "::warning::Manca il secret ANDROID_DEBUG_KEYSTORE: l'APK è firmato con una chiave nuova, per aggiornare bisogna disinstallare l'app (vedi GUIDA.md)"
           fi
@@ -80,8 +90,15 @@ jobs:
       - name: Rinomina il file
         run: |
           cp android/app/build/outputs/apk/debug/app-debug.apk ContiChiari.apk
+          if [ -n "$KS_FILE" ]; then
+            # ri-firma con la chiave stabile (apksigner sostituisce la firma di prova della build debug)
+            APKSIGNER="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner"
+            echo "Ri-firma con $APKSIGNER"
+            "$APKSIGNER" sign --ks "$KS_FILE" --ks-pass pass:android --ks-key-alias androiddebugkey --key-pass pass:android ContiChiari.apk
+            "$APKSIGNER" verify --print-certs ContiChiari.apk | head -6
+          fi
           echo "Impronta della firma (deve restare uguale tra le versioni):"
-          keytool -printcert -jarfile ContiChiari.apk | grep -E "SHA256|Owner"
+          keytool -printcert -jarfile ContiChiari.apk | grep -E "SHA256|Owner" || echo "(firma v1 assente: vedi l'impronta di apksigner qui sopra)"
 
       - name: Pubblica l'APK per il download diretto (Release «android-latest»)
         if: github.ref == 'refs/heads/main'
