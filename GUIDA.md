@@ -37,6 +37,11 @@ Usa lo stesso repository della Strada 1. Ad ogni caricamento GitHub costruisce l
 2. In fondo alla pagina, sotto **Artifacts**, scarica **ContiChiari-android**. È uno zip che contiene `ContiChiari.apk`.
 3. Passa il file sul telefono, aprilo e consenti "Installa app sconosciute" quando Android lo chiede.
 
+**Se l'app non si installa o si interrompe all'avvio** («Conti Chiari si è interrotta», spesso insieme a «Google Play Store» o «Servizi Google Play»), il problema di solito è del Play Store sul telefono, non dell'app:
+1. **Impostazioni → Applicazioni → Google Play Store → Archivio → Svuota cache**. Se serve, fai lo stesso per **Servizi Google Play** (solo «Svuota cache», non «Cancella dati»).
+2. Riavvia il telefono, reinstalla l'APK e riaprilo.
+3. Se si interrompe ancora, aggiorna dal Play Store **Google Chrome** e **Android System WebView** (su Android 7 l'app usa Chrome per mostrare le pagine).
+
 Questo APK è firmato con una chiave di prova: va bene per te e per i tuoi amici.
 Per pubblicare su **Google Play** servono un account sviluppatore (25 $ una tantum) e un pacchetto firmato (AAB). Si crea da Android Studio con **Build → Generate Signed Bundle**.
 

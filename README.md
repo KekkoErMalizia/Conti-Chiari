@@ -139,6 +139,9 @@ Se il gruppo esiste già sul suo telefono, viene aggiornato con i dati nuovi.
 **È gratis?**
 Sì, completamente.
 
+**Su Android l'app non si installa o si interrompe appena la apro. Cosa faccio?**
+Di solito è colpa del Google Play Store sul telefono, soprattutto se si interrompe anche lui o i Servizi Google Play. Vai in **Impostazioni → Applicazioni → Google Play Store → Archivio → Svuota cache** (e, se serve, lo stesso per **Servizi Google Play**), riavvia il telefono e reinstalla l'app. Se non basta, aggiorna dal Play Store **Google Chrome** e **Android System WebView**. Se l'app si chiude per un errore suo, alla riapertura mostra un rapporto da condividere con «Condividi».
+
 **Se cambio telefono perdo i dati?**
 I dati non passano da soli al nuovo telefono. Prima di cambiarlo, invia a te stesso il codice di ogni gruppo e importalo sul nuovo.
 
