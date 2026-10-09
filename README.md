@@ -147,6 +147,9 @@ Tocca il nome del gruppo in alto → **Scansiona QR** e inquadra il codice. Su A
 **Le notifiche arrivano anche con l'app chiusa?**
 Arrivano mentre l'app è aperta o in background. Con l'app chiusa del tutto no: servirebbe un server di notifiche, e Conti Chiari non ne usa per non dipendere da nessuno. Alla riapertura trovi tutti i messaggi.
 
+**Posso cancellare una chat?**
+Sì, con il cestino in alto nella chat. Una **chat privata** può cancellarla in ogni momento ciascuna delle due persone, e sparisce per entrambe. La **chat di gruppo** può cancellarla solo chi ha creato il gruppo online, e sparisce per tutti i membri. Gli altri telefoni ignorano una cancellazione inviata da chiunque altro.
+
 **I server possono leggere le mie spese o la chat?**
 No. Ricevono solo dati cifrati con la chiave del gruppo, che sta solo nei telefoni dei membri e nel QR. I server sono pubblici e gratuiti, quindi in rari casi potrebbero cancellare dati vecchi. I telefoni del gruppo conservano comunque una copia completa.
 

@@ -676,3 +676,26 @@ ko:["그룹","개인","개인 채팅","다른 사람과 온라인 그룹에 참�
 ['ja',"支出を追加","支出","渡した・受け取ったお金","お金を渡した人","受け取った人","たとえばグループ内の2人の間の返金や貸し借り。","保存","別々の2人を選んでください。"],
 ['ko',"지출 추가","지출","주고받은 돈","돈을 준 사람","받은 사람","예: 그룹 내 두 사람 사이의 환불이나 빌려준 돈.","저장","서로 다른 두 사람을 고르세요."]
 ].forEach(([l,qExp,kindExp,kindPay,payFrom,payTo,payHint,savePay,errSame])=>{if(I18N[l])Object.assign(I18N[l],{qExp,kindExp,kindPay,payFrom,payTo,payHint,savePay,errSame})});
+
+/* ---- Cancellazione delle chat ---- */
+[
+['it',"Elimina chat","Eliminare tutta la chat con {name}? Sparirà anche dal suo telefono.","Eliminare tutta la chat del gruppo «{name}» per tutti i membri?","Chat eliminata"],
+['en',"Delete chat","Delete the whole chat with {name}? It will also disappear from their phone.","Delete the whole chat of “{name}” for every member?","Chat deleted"],
+['es',"Eliminar chat","¿Eliminar todo el chat con {name}? También desaparecerá de su teléfono.","¿Eliminar todo el chat del grupo «{name}» para todos los miembros?","Chat eliminado"],
+['fr',"Supprimer la discussion","Supprimer toute la discussion avec {name} ? Elle disparaîtra aussi de son téléphone.","Supprimer toute la discussion du groupe « {name} » pour tous les membres ?","Discussion supprimée"],
+['de',"Chat löschen","Den ganzen Chat mit {name} löschen? Er verschwindet auch von seinem Handy.","Den ganzen Chat der Gruppe „{name}“ für alle Mitglieder löschen?","Chat gelöscht"],
+['pt',"Apagar conversa","Apagar toda a conversa com {name}? Também desaparecerá do telemóvel dessa pessoa.","Apagar toda a conversa do grupo «{name}» para todos os membros?","Conversa apagada"],
+['nl',"Chat verwijderen","De hele chat met {name} verwijderen? Hij verdwijnt ook van diens telefoon.","De hele chat van de groep ‘{name}’ voor alle leden verwijderen?","Chat verwijderd"],
+['pl',"Usuń czat","Usunąć cały czat z {name}? Zniknie też z telefonu tej osoby.","Usunąć cały czat grupy „{name}” dla wszystkich członków?","Czat usunięty"],
+['ro',"Șterge chatul","Ștergi tot chatul cu {name}? Va dispărea și de pe telefonul său.","Ștergi tot chatul grupului „{name}” pentru toți membrii?","Chat șters"],
+['sv',"Radera chatten","Radera hela chatten med {name}? Den försvinner även från deras telefon.","Radera hela chatten i gruppen ”{name}” för alla medlemmar?","Chatten raderad"],
+['tr',"Sohbeti sil","{name} ile tüm sohbet silinsin mi? Onun telefonundan da kaybolacak.","“{name}” grubunun tüm sohbeti herkes için silinsin mi?","Sohbet silindi"],
+['el',"Διαγραφή συνομιλίας","Διαγραφή όλης της συνομιλίας με {name}; Θα χαθεί και από το δικό του κινητό.","Διαγραφή όλης της συνομιλίας της ομάδας «{name}» για όλα τα μέλη;","Η συνομιλία διαγράφηκε"],
+['ru',"Удалить чат","Удалить весь чат с {name}? Он исчезнет и с его телефона.","Удалить весь чат группы «{name}» у всех участников?","Чат удалён"],
+['uk',"Видалити чат","Видалити весь чат з {name}? Він зникне і з його телефона.","Видалити весь чат групи «{name}» у всіх учасників?","Чат видалено"],
+['ar',"حذف الدردشة","حذف الدردشة كاملة مع {name}؟ ستختفي أيضًا من هاتفه.","حذف دردشة المجموعة «{name}» كاملة لجميع الأعضاء؟","تم حذف الدردشة"],
+['hi',"चैट मिटाएँ","{name} के साथ पूरी चैट मिटाएँ? यह उनके फ़ोन से भी हट जाएगी।","समूह “{name}” की पूरी चैट सभी सदस्यों के लिए मिटाएँ?","चैट मिटा दी गई"],
+['zh',"删除聊天","删除与 {name} 的全部聊天？对方手机上也会消失。","为所有成员删除群组“{name}”的全部聊天？","聊天已删除"],
+['ja',"チャットを削除","{name} とのチャットをすべて削除しますか？相手の端末からも消えます。","グループ「{name}」のチャットを全員分すべて削除しますか？","チャットを削除しました"],
+['ko',"채팅 삭제","{name}님과의 채팅을 모두 삭제할까요? 상대방 휴대폰에서도 사라집니다.","그룹 “{name}”의 채팅을 모든 멤버에게서 삭제할까요?","채팅이 삭제되었습니다"]
+].forEach(([l,delChat,delChatQdm,delChatQgroup,chatDeleted])=>{if(I18N[l])Object.assign(I18N[l],{delChat,delChatQdm,delChatQgroup,chatDeleted})});

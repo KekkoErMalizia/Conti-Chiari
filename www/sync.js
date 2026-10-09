@@ -164,7 +164,7 @@ async function dmChannel(sk, peerPk){
 /* ---------- inviti ---------- */
 const APP_URL = 'https://kekkoermalizia.github.io/Conti-Chiari/';
 function inviteLink(group){
-  const payload = b64url(enc.encode(JSON.stringify({v:2, id: group.id, n: group.name, k: group.sync.key})));
+  const payload = b64url(enc.encode(JSON.stringify(Object.assign({v:2, id: group.id, n: group.name, k: group.sync.key}, group.sync.owner ? {o: group.sync.owner} : {}))));
   const here = /^https?:/.test(location.protocol) && !/^(localhost|127\.)/.test(location.hostname) ? location.origin + location.pathname : APP_URL;
   return here + '#join=' + payload;
 }
@@ -173,7 +173,7 @@ function parseInvite(text){
   if(!m) return null;
   try{
     const o = JSON.parse(dec.decode(unb64url(m[1])));
-    if(o && o.v === 2 && typeof o.id === 'string' && typeof o.k === 'string' && unb64url(o.k).length === 32) return {id: o.id.slice(0, 40), name: String(o.n || '').slice(0, 40), key: o.k};
+    if(o && o.v === 2 && typeof o.id === 'string' && typeof o.k === 'string' && unb64url(o.k).length === 32) return {id: o.id.slice(0, 40), name: String(o.n || '').slice(0, 40), key: o.k, owner: /^[0-9a-f]{64}$/.test(o.o || '') ? o.o : ''};
   }catch(e){}
   return null;
 }
