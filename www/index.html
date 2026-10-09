@@ -103,6 +103,11 @@ textarea{min-height:110px;font-family:var(--f-mono);font-size:13px;resize:vertic
 input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .btn{cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--surface);padding:11px 16px;font-weight:600;text-align:center;display:inline-flex;align-items:center;justify-content:center;gap:8px}
 a.btn{color:inherit;text-decoration:none}
+.iossteps{list-style:none;margin:4px 0 12px;padding:0;display:grid;gap:14px}
+.iossteps li{display:flex;align-items:center;gap:14px;font-size:16px}
+.iossteps .ic{flex:none;width:44px;height:44px;border-radius:12px;background:var(--chip);color:var(--accent);display:grid;place-items:center}
+.iossteps .ic svg{width:24px;height:24px}
+.iossteps .ic img{width:44px;height:44px;border-radius:12px}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .btn.danger{color:var(--neg)}
 .btn.small{padding:7px 12px;font-size:14px}
@@ -497,6 +502,7 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
         <button class="btn block" type="button" id="openTour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17h.01"/></svg><span data-t="replayTutorial"></span></button>
         <a class="btn block" id="dlApk" hidden download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg><span data-t="dlApk"></span></a>
         <p class="hint" id="dlApkHint" hidden data-t="dlApkHint"></p>
+        <button class="btn block" type="button" id="iosInstall" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg><span data-t="iosInstall"></span></button>
       </section>
       <section class="stack">
         <h2 style="margin:0" data-t="notifTitle"></h2>
@@ -663,6 +669,20 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 
 
 <!-- Foglio: video dimostrativo -->
+<!-- Foglio: installare l'app su iPhone (Safari → Condividi → Aggiungi alla schermata Home) -->
+<div class="sheet" id="iosSheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="iosTitle">
+    <div class="grab"></div>
+    <h3><span id="iosTitle" data-t="iosTitle"></span><button class="link" type="button" data-close data-t="close"></button></h3>
+    <ol class="iossteps">
+      <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg></span><span data-t="iosStep1"></span></li>
+      <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span><span data-t="iosStep2"></span></li>
+      <li><span class="ic"><img src="icons/icon-192.png" alt=""></span><span data-t="iosStep3"></span></li>
+    </ol>
+    <p class="note" id="iosNotSafari" hidden data-t="iosNotSafari"></p>
+  </div>
+</div>
+
 <div class="sheet" id="videoSheet" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="vTitle">
     <div class="grab"></div>
@@ -686,10 +706,10 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
 
-<script src="i18n.js?v=17"></script>
+<script src="i18n.js?v=18"></script>
 <script src="lib/secp256k1.js"></script>
 <script src="lib/qrcode.js"></script>
-<script src="sync.js?v=17"></script>
+<script src="sync.js?v=18"></script>
 <script>
 'use strict';
 const KEY='conti-chiari-app-v1', SKEY='conti-chiari-settings', PKEY='conti-chiari-photo';
@@ -1758,6 +1778,15 @@ $('tRing').onclick=()=>tourI===TOUR.length-1?tourClose():tourShow(tourI+1);   //
 document.addEventListener('keydown',e=>{if($('tour').hidden)return;if(e.key==='Escape')tourClose();if(e.key==='ArrowRight')$('tNext').click();if(e.key==='ArrowLeft'&&tourI>0)tourShow(tourI-1)});
 addEventListener('resize',()=>{if(!$('tour').hidden)tourShow(tourI)});
 $('openTour').onclick=tourOpen;
+// sito aperto da iPhone/iPad e non ancora installato: pulsante con i passi per aggiungerlo alla schermata Home
+(function(){
+  const ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
+  const installed=navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
+  if(window.Capacitor||!ios||installed)return;
+  const safari=!/CriOS|FxiOS|EdgiOS|OPiOS|GSA\//.test(navigator.userAgent);
+  $('iosInstall').hidden=false;$('iosNotSafari').hidden=safari;
+  $('iosInstall').onclick=()=>openSheet('iosSheet');
+})();
 // sito aperto da un telefono Android (non dall'app): link diretto all'APK della Release «android-latest» del repository
 (function(){
   if(window.Capacitor||!/Android/i.test(navigator.userAgent)||!/\.github\.io$/.test(location.hostname))return;
@@ -1771,6 +1800,6 @@ if(!SET.tutorialDone&&!CCSync.parseInvite(location.hash)&&!/^#chat=/.test(locati
 /* ---------- offline ---------- */
 if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="feedback.js?v=17"></script>
+<script src="feedback.js?v=18"></script>
 </body>
 </html>

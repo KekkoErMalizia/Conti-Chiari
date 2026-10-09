@@ -82,7 +82,9 @@ I calcoli sono al centesimo. Quando un importo non si divide in parti uguali, il
 2. Tocca il pulsante **Condividi** (il quadrato con la freccia verso l'alto).
 3. Scegli **Aggiungi alla schermata Home**.
 
-L'icona compare tra le tue app e Conti Chiari si apre a schermo intero, come un'app normale.
+L'icona compare tra le tue app e Conti Chiari si apre a schermo intero, come un'app normale. Gli stessi passi, con le icone, si trovano nell'app web aperta da iPhone, in **Impostazioni → Guida e video → Installa su iPhone**.
+
+Non esiste un file da scaricare per iPhone come l'APK per Android. Apple permette di installare app fuori dall'App Store solo se sono firmate con un account sviluppatore a pagamento (TestFlight), oppure con strumenti da computer che vanno rinnovati ogni 7 giorni. Aggiunta alla schermata Home, invece, l'app è gratuita e si aggiorna da sola.
 
 ### Android, metodo consigliato
 
