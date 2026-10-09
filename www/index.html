@@ -100,6 +100,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 
 /* movimenti */
 .filters{display:grid;gap:10px}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.quick .btn{min-height:56px;font-size:15.5px;line-height:1.2;padding:10px 12px}
+.quick .btn svg{width:22px;height:22px}
+#expForm[data-kind=pay] .only-exp,#expForm:not([data-kind=pay]) .only-pay{display:none}
 .filters .row>*{flex:1 1 120px}
 .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--chip);border-radius:12px;padding:4px;gap:4px}
 .seg button{all:unset;cursor:pointer;text-align:center;padding:8px 4px;border-radius:9px;font-weight:600;font-size:14px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -316,6 +320,10 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
     <!-- MOVIMENTI -->
     <div class="view" id="v-mov">
       <div class="note" id="sampleNote" data-t="sampleNote" hidden></div>
+      <section class="quick">
+        <button class="btn primary" type="button" data-add="exp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span data-t="qExp"></span></button>
+        <button class="btn" type="button" data-add="pay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg><span data-t="kindPay"></span></button>
+      </section>
       <section class="filters">
         <input id="q" type="search" data-tp="searchPh" data-ta="search" autocomplete="off">
         <div class="row">
@@ -530,21 +538,27 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 <div class="sheet" id="expSheet" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="expTitle">
     <div class="grab"></div>
-    <h3><span id="expTitle" data-t="newExpense"></span><button class="link" type="button" data-close data-t="cancel"></button></h3>
+    <h3><span id="expTitle"></span><button class="link" type="button" data-close data-t="cancel"></button></h3>
     <form id="expForm" class="stack" novalidate>
-      <div><label class="f" for="desc" data-t="description"></label><input id="desc" type="text" data-tp="descPh" maxlength="60" autocomplete="off"></div>
+      <div class="seg" id="expKind" role="group"><button type="button" data-kind="exp" aria-pressed="true" data-t="kindExp"></button><button type="button" data-kind="pay" aria-pressed="false" data-t="kindPay"></button></div>
+      <div class="only-exp"><label class="f" for="desc" data-t="description"></label><input id="desc" type="text" data-tp="descPh" maxlength="60" autocomplete="off"></div>
       <div class="row">
         <div><label class="f" for="amount" data-t="amount"></label><div class="amountwrap"><input id="amount" type="text" inputmode="decimal" autocomplete="off"><span class="cur" id="amountCur"></span></div></div>
         <div><label class="f" for="date" data-t="date"></label><input id="date" type="date"></div>
       </div>
-      <div><label class="f" for="payer" data-t="paidBy"></label><select id="payer"></select></div>
-      <div>
+      <div class="only-pay row">
+        <div><label class="f" for="payFrom" data-t="payFrom"></label><select id="payFrom"></select></div>
+        <div><label class="f" for="payTo" data-t="payTo"></label><select id="payTo"></select></div>
+      </div>
+      <p class="hint only-pay" data-t="payHint"></p>
+      <div class="only-exp"><label class="f" for="payer" data-t="paidBy"></label><select id="payer"></select></div>
+      <div class="only-exp">
         <div class="chiprow"><span style="font-size:13px;font-weight:600;color:var(--muted)" data-t="splitBetween"></span><button type="button" class="link" id="toggleAll"></button></div>
         <div class="chips" id="split" style="margin-top:4px"></div>
       </div>
-      <div class="preview" id="preview"></div>
+      <div class="preview only-exp" id="preview"></div>
       <p class="err" id="expErr"></p>
-      <button class="btn primary block" type="submit" data-t="save"></button>
+      <button class="btn primary block" type="submit" id="expSave"></button>
     </form>
   </div>
 </div>
@@ -901,7 +915,7 @@ let tab='mov';
 function setTab(x){
   tab=x;document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===x));
   ['mov','saldi','chat','gruppo','impostazioni'].forEach(v=>$('v-'+v).hidden=v!==x);
-  $('fab').hidden=x!=='mov';
+  $('fab').hidden=x!=='mov'&&x!=='saldi';
   if(x==='chat'){renderChat();requestAnimationFrame(()=>$('main').scrollTop=$('main').scrollHeight);if(SET.notify!==false&&notifPermission()==='default')askNotif()}else $('main').scrollTop=0;
   if(x==='impostazioni')renderSettings();
   renderUnread();
@@ -1207,6 +1221,9 @@ function renderExpForm(){
   $('payer').innerHTML=g.people.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
   if(g.me&&person(g.me))$('payer').value=g.me;
   $('split').innerHTML=g.people.map(p=>`<label class="chip"><input type="checkbox" value="${esc(p.id)}" checked><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.name)}</label>`).join('');
+  const opts=g.people.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
+  $('payFrom').innerHTML=opts;$('payTo').innerHTML=opts;
+  const first=g.me&&person(g.me)?g.me:g.people[0].id;$('payFrom').value=first;$('payTo').value=(g.people.find(p=>p.id!==first)||g.people[0]).id;
   $('desc').value='';$('amount').value='';$('date').value=today();$('expErr').textContent='';
   $('amountCur').textContent=curSymbol(g.cur);
   $('amount').placeholder=(0).toLocaleString(LOCALE,{minimumFractionDigits:curDigits(g.cur)});
@@ -1325,16 +1342,31 @@ $('fPerson').onchange=e=>{F.person=e.target.value;if(!F.person)F.dir='all';rende
 $('fPeriod').onchange=e=>{F.period=e.target.value;renderMov()};
 document.querySelectorAll('#fDir button').forEach(b=>b.onclick=()=>{F.dir=b.dataset.dir;renderMov()});
 
-$('fab').onclick=()=>{
+function setKind(k){
+  $('expForm').dataset.kind=k;
+  document.querySelectorAll('#expKind button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.kind===k));
+  $('expTitle').textContent=t(k==='pay'?'kindPay':'newExpense');$('expSave').textContent=t(k==='pay'?'savePay':'save');$('expErr').textContent='';
+}
+function openAdd(k){
   if(G().people.length<2){toast(t('needPeople'));setTab('gruppo');$('personName').focus();return}
-  renderExpForm();openSheet('expSheet');setTimeout(()=>$('desc').focus(),250);
-};
+  renderExpForm();setKind(k);openSheet('expSheet');setTimeout(()=>$(k==='pay'?'amount':'desc').focus(),250);
+}
+$('fab').onclick=()=>openAdd('exp');
+document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>openAdd(b.dataset.add));
+document.querySelectorAll('#expKind button').forEach(b=>b.onclick=()=>setKind(b.dataset.kind));
 $('amount').addEventListener('input',updatePreview);
 $('split').addEventListener('change',updatePreview);
 $('toggleAll').onclick=()=>{const all=document.querySelectorAll('#split input'),on=[...all].some(i=>!i.checked);all.forEach(i=>i.checked=on);updatePreview()};
 $('expForm').addEventListener('submit',e=>{
   e.preventDefault();const err=$('expErr');err.textContent='';
   const d=curDigits(G().cur),desc=$('desc').value.trim(),amount=parseAmount($('amount').value,d);
+  if($('expForm').dataset.kind==='pay'){
+    const from=$('payFrom').value,to=$('payTo').value;
+    if(!(amount>0))return err.textContent=t('errAmount',{ex:(12.5).toLocaleString(LOCALE,{minimumFractionDigits:d,maximumFractionDigits:d})});
+    if(from===to)return err.textContent=t('errSame');
+    const p={id:uid(),from,to,amount,date:$('date').value||today(),at:Date.now()};
+    commit({t:'pay',p});render();closeSheet('expSheet');undoToast(t('paymentSaved'),()=>{commit({t:'pay-',quiet:1,id:p.id});render()});return;
+  }
   const split=[...document.querySelectorAll('#split input:checked')].map(i=>i.value);
   if(!desc)return err.textContent=t('errDesc');
   if(!(amount>0))return err.textContent=t('errAmount',{ex:(12.5).toLocaleString(LOCALE,{minimumFractionDigits:d,maximumFractionDigits:d})});

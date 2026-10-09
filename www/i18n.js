@@ -653,3 +653,26 @@ ko:["그룹","개인","개인 채팅","다른 사람과 온라인 그룹에 참�
 };
 ['chatGroup','chatPrivate','privateTitle','privateEmpty','privateHint','startPrivate','back','eph','ephOff','eph5m','eph1h','eph8h','eph24h','ephOn','ephSet','ephOffSet','notifTitle','notifMsgs','notifHint','notifDenied','notifLimit','notifUnsupported','receipts','receiptsHint','privateFrom','st_pending','st_sent','st_delivered','st_read']
   .forEach((k, i) => Object.keys(CHAT).forEach(l => { I18N[l][k] = CHAT[l][i]; }));
+
+/* ---- Aggiunta rapida: spesa o soldi dati/ricevuti ---- */
+[
+['it',"Aggiungi spesa","Spesa","Soldi dati o ricevuti","Chi ha dato i soldi","Chi li ha ricevuti","Per esempio un rimborso o un prestito tra due persone del gruppo.","Registra","Scegli due persone diverse."],
+['en',"Add expense","Expense","Money given or received","Who gave the money","Who received it","For example a refund or a loan between two people in the group.","Save","Pick two different people."],
+['es',"Añadir gasto","Gasto","Dinero dado o recibido","Quién dio el dinero","Quién lo recibió","Por ejemplo un reembolso o un préstamo entre dos personas del grupo.","Guardar","Elige dos personas distintas."],
+['fr',"Ajouter une dépense","Dépense","Argent donné ou reçu","Qui a donné l'argent","Qui l'a reçu","Par exemple un remboursement ou un prêt entre deux personnes du groupe.","Enregistrer","Choisissez deux personnes différentes."],
+['de',"Ausgabe hinzufügen","Ausgabe","Geld gegeben oder erhalten","Wer hat das Geld gegeben","Wer hat es erhalten","Zum Beispiel eine Rückzahlung oder ein Darlehen zwischen zwei Personen der Gruppe.","Speichern","Wähle zwei verschiedene Personen."],
+['pt',"Adicionar despesa","Despesa","Dinheiro dado ou recebido","Quem deu o dinheiro","Quem o recebeu","Por exemplo um reembolso ou um empréstimo entre duas pessoas do grupo.","Guardar","Escolha duas pessoas diferentes."],
+['nl',"Uitgave toevoegen","Uitgave","Geld gegeven of ontvangen","Wie gaf het geld","Wie heeft het ontvangen","Bijvoorbeeld een terugbetaling of lening tussen twee mensen in de groep.","Opslaan","Kies twee verschillende personen."],
+['pl',"Dodaj wydatek","Wydatek","Pieniądze dane lub otrzymane","Kto dał pieniądze","Kto je otrzymał","Na przykład zwrot lub pożyczka między dwiema osobami w grupie.","Zapisz","Wybierz dwie różne osoby."],
+['ro',"Adaugă cheltuială","Cheltuială","Bani dați sau primiți","Cine a dat banii","Cine i-a primit","De exemplu o rambursare sau un împrumut între două persoane din grup.","Salvează","Alege două persoane diferite."],
+['sv',"Lägg till utgift","Utgift","Pengar givna eller mottagna","Vem gav pengarna","Vem tog emot dem","Till exempel en återbetalning eller ett lån mellan två personer i gruppen.","Spara","Välj två olika personer."],
+['tr',"Harcama ekle","Harcama","Verilen veya alınan para","Parayı kim verdi","Kim aldı","Örneğin gruptaki iki kişi arasında bir geri ödeme ya da borç.","Kaydet","İki farklı kişi seç."],
+['el',"Προσθήκη εξόδου","Έξοδο","Χρήματα που δόθηκαν ή ελήφθησαν","Ποιος έδωσε τα χρήματα","Ποιος τα πήρε","Για παράδειγμα επιστροφή ή δάνειο μεταξύ δύο ατόμων της ομάδας.","Αποθήκευση","Διάλεξε δύο διαφορετικά άτομα."],
+['ru',"Добавить расход","Расход","Деньги отданы или получены","Кто отдал деньги","Кто их получил","Например, возврат долга или заём между двумя участниками группы.","Сохранить","Выберите двух разных людей."],
+['uk',"Додати витрату","Витрата","Гроші віддано або отримано","Хто віддав гроші","Хто їх отримав","Наприклад, повернення боргу чи позика між двома учасниками групи.","Зберегти","Виберіть двох різних людей."],
+['ar',"أضف مصروفًا","مصروف","مال مدفوع أو مستلم","من دفع المال","من استلمه","مثلًا استرداد أو قرض بين شخصين في المجموعة.","حفظ","اختر شخصين مختلفين."],
+['hi',"खर्च जोड़ें","खर्च","दिए या मिले पैसे","पैसे किसने दिए","पैसे किसे मिले","जैसे समूह के दो लोगों के बीच लौटाए गए पैसे या उधार।","सहेजें","दो अलग लोग चुनें।"],
+['zh',"添加支出","支出","付出或收到的钱","谁给的钱","谁收到了","例如组内两人之间的还款或借款。","保存","请选择两个不同的人。"],
+['ja',"支出を追加","支出","渡した・受け取ったお金","お金を渡した人","受け取った人","たとえばグループ内の2人の間の返金や貸し借り。","保存","別々の2人を選んでください。"],
+['ko',"지출 추가","지출","주고받은 돈","돈을 준 사람","받은 사람","예: 그룹 내 두 사람 사이의 환불이나 빌려준 돈.","저장","서로 다른 두 사람을 고르세요."]
+].forEach(([l,qExp,kindExp,kindPay,payFrom,payTo,payHint,savePay,errSame])=>{if(I18N[l])Object.assign(I18N[l],{qExp,kindExp,kindPay,payFrom,payTo,payHint,savePay,errSame})});
