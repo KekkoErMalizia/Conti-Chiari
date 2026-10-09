@@ -2,55 +2,70 @@ package it.contichiari.app;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
  * Rilevatore di arresti dell'app Android.
- * Se l'app si chiude per un errore, alla riapertura CrashActivity mostra il motivo e le versioni
- * di Android, Chrome e WebView, da condividere per capire cosa non va (senza computer né cavi).
+ * Nel processo principale (quello di Capacitor e della WebView) segna l'avvio in un file e lo cancella dopo
+ * qualche secondo: se il file resta, l'app è morta mentre partiva, anche per errori nativi della WebView.
+ * Gli errori Java vengono scritti per intero. StartActivity e CrashActivity girano nel processo separato
+ * ":crash", così il rapporto si apre anche quando il processo principale non riesce a partire.
  * Copiato nel progetto Android da .github/workflows/android-apk.yml.
  */
 public class CrashGuard extends Application {
 
-    static final String PREFS = "conti-chiari-crash";
-    static final String KEY_REPORT = "report";
-    static final String KEY_FOREGROUND = "foreground";
+    static final String STARTING = "avvio-in-corso.txt";
+    static final String REPORT = "rapporto-arresto.txt";
+    static final long STARTUP_MS = 10000;
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-        final SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        if (processName().contains(":")) return;   // solo nel processo principale
+        final File dir = base.getFilesDir();
+        write(new File(dir, STARTING), "" + System.currentTimeMillis());
+        new Handler(Looper.getMainLooper()).postDelayed(() -> new File(dir, STARTING).delete(), STARTUP_MS);
 
-        // la volta scorsa l'app era aperta e si è chiusa senza un errore Java: di solito è la WebView
-        if (prefs.getBoolean(KEY_FOREGROUND, false) && prefs.getString(KEY_REPORT, null) == null) {
-            prefs.edit()
-                .putString(KEY_REPORT, "L'app si è chiusa senza un messaggio di errore Java (arresto della WebView o del sistema).\n\n" + deviceInfo(this))
-                .putBoolean(KEY_FOREGROUND, false)
-                .commit();
-        }
-
+        final Thread.UncaughtExceptionHandler previous = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler((thread, error) -> {
             try {
                 StringWriter trace = new StringWriter();
                 error.printStackTrace(new PrintWriter(trace));
-                prefs.edit()
-                    .putString(KEY_REPORT, deviceInfo(CrashGuard.this) + "\n\n" + trace)
-                    .putBoolean(KEY_FOREGROUND, false)
-                    .commit();
-                Intent intent = new Intent(CrashGuard.this, CrashActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
+                write(new File(dir, REPORT), "Errore Java:\n" + trace);
             } catch (Throwable ignored) {}
-            // niente finestra «L'app continua a interrompersi»: il rapporto si apre da solo
-            android.os.Process.killProcess(android.os.Process.myPid());
-            System.exit(10);
+            if (previous != null) previous.uncaughtException(thread, error);
         });
+    }
+
+    static boolean lastCrashExists(Context ctx) {
+        File dir = ctx.getFilesDir();
+        return new File(dir, REPORT).exists() || new File(dir, STARTING).exists();
+    }
+
+    /** Il rapporto dell'ultimo avvio fallito, oppure null se l'ultimo avvio è andato bene. */
+    static String lastCrash(Context ctx) {
+        File dir = ctx.getFilesDir();
+        File report = new File(dir, REPORT), starting = new File(dir, STARTING);
+        if (!report.exists() && !starting.exists()) return null;
+        String text = report.exists() ? read(report)
+            : "L'app si è chiusa nei primi secondi senza un errore Java (arresto nativo, di solito della WebView).";
+        return "Conti Chiari — rapporto di arresto\n\n" + text + "\n\n" + deviceInfo(ctx) + "\n\n--- Registro (logcat) ---\n" + logcat();
+    }
+
+    static void clear(Context ctx) {
+        new File(ctx.getFilesDir(), REPORT).delete();
+        new File(ctx.getFilesDir(), STARTING).delete();
     }
 
     /** Versioni di Android, dell'app, di Chrome e della WebView (con lo stato attivata/disattivata). */
@@ -74,6 +89,46 @@ public class CrashGuard extends Application {
             return info.versionName + (enabled ? "" : " (DISATTIVATA)");
         } catch (Throwable e) {
             return "non installata";
+        }
+    }
+
+    /** Le ultime righe del registro di sistema dell'app (un'app può leggere il proprio senza permessi). */
+    private static String logcat() {
+        try {
+            Process p = Runtime.getRuntime().exec(new String[] {"logcat", "-d", "-v", "time", "-t", "300"});
+            BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            StringBuilder s = new StringBuilder();
+            for (String line; (line = in.readLine()) != null; ) s.append(line).append('\n');
+            return s.length() > 0 ? s.toString() : "(vuoto)";
+        } catch (Throwable e) {
+            return "(non disponibile: " + e + ")";
+        }
+    }
+
+    private static String processName() {
+        try {
+            String s = read(new File("/proc/self/cmdline"));
+            int end = s.indexOf('\0');
+            return (end >= 0 ? s.substring(0, end) : s).trim();
+        } catch (Throwable e) {
+            return "";
+        }
+    }
+
+    private static void write(File f, String text) {
+        try (FileOutputStream out = new FileOutputStream(f)) {
+            out.write(text.getBytes("UTF-8"));
+            out.getFD().sync();
+        } catch (Throwable ignored) {}
+    }
+
+    private static String read(File f) {
+        try (FileInputStream in = new FileInputStream(f)) {
+            byte[] buf = new byte[(int) Math.max(f.length(), 4096)];
+            int n = in.read(buf);
+            return n > 0 ? new String(buf, 0, n, "UTF-8") : "";
+        } catch (Throwable e) {
+            return "";
         }
     }
 }

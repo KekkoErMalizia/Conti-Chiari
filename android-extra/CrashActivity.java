@@ -2,7 +2,6 @@ package it.contichiari.app;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -12,21 +11,19 @@ import android.widget.TextView;
 
 /**
  * Mostra il motivo dell'ultimo arresto dell'app, con i pulsanti per condividerlo e per riprovare.
- * Volutamente senza librerie (solo Android di base) e in un processo separato, così funziona anche
- * quando il resto dell'app non riesce ad avviarsi.
+ * Volutamente senza librerie (solo Android di base) e nel processo separato ":crash", così funziona
+ * anche quando il processo principale dell'app non riesce ad avviarsi.
  */
 public class CrashActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final SharedPreferences prefs = getSharedPreferences(CrashGuard.PREFS, MODE_PRIVATE);
-        String saved = prefs.getString(CrashGuard.KEY_REPORT, null);
-        final String report = "Conti Chiari — rapporto di arresto\n\n" + (saved != null ? saved : CrashGuard.deviceInfo(this));
+        String saved = CrashGuard.lastCrash(this);
+        final String report = saved != null ? saved : "Conti Chiari\n\n" + CrashGuard.deviceInfo(this);
 
-        boolean webview = report.contains("WebView") || report.contains("webview") || report.contains("DISATTIVATA");
-        String intro = "L'app si è chiusa per un errore. Tocca «Condividi» e invia questo testo allo sviluppatore: serve a capire cosa correggere.";
-        if (webview) intro += "\n\nSpesso la causa è la WebView: apri il Play Store e aggiorna (o attiva, se è disattivata) «Google Chrome» e «Android System WebView», poi tocca «Riprova».";
+        String intro = "L'app si è chiusa mentre partiva. Tocca «Condividi» e invia questo testo allo sviluppatore: serve a capire cosa correggere."
+            + "\n\nPuoi anche provare ad aprire il Play Store e aggiornare (o attivare, se è disattivata) «Google Chrome» e «Android System WebView», poi toccare «Riprova».";
 
         int pad = (int) (16 * getResources().getDisplayMetrics().density);
         LinearLayout box = new LinearLayout(this);
@@ -58,7 +55,7 @@ public class CrashActivity extends Activity {
         Button retry = new Button(this);
         retry.setText("Riprova");
         retry.setOnClickListener(v -> {
-            prefs.edit().remove(CrashGuard.KEY_REPORT).commit();
+            CrashGuard.clear(this);
             Intent open = new Intent(this, MainActivity.class);
             open.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(open);
