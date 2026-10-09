@@ -53,6 +53,9 @@ Conti Chiari tiene traccia di chi ha pagato cosa e alla fine ti dice **chi deve 
 | **Riepilogo in chat** | Un tocco e invii il riepilogo dei conti su WhatsApp, Telegram o dove preferisci. |
 | **Condivisione con un codice** | Passi un intero gruppo a un amico mandandogli un codice da incollare nella sua app. |
 | **Funziona offline** | Una volta installata, l'app funziona anche senza connessione. |
+| **19 lingue** | Italiano, inglese, spagnolo, francese, tedesco, portoghese, olandese, polacco, rumeno, svedese, turco, greco, russo, ucraino, arabo, hindi, cinese, giapponese e coreano. Si sceglie da sola in base al telefono, e si può cambiare a mano. |
+| **Tutte le valute del mondo** | Ogni gruppo ha la sua valuta: euro per la casa, yen per il viaggio in Giappone. I decimali sono corretti per ogni valuta (lo yen, per esempio, non ha centesimi). |
+| **Sfondo personalizzato** | Scegli un colore tra quelli proposti, uno qualsiasi con il selettore, oppure una tua foto. |
 | **Tema chiaro e scuro** | Segue automaticamente le impostazioni del telefono. |
 
 I calcoli sono al centesimo. Quando un importo non si divide in parti uguali, il centesimo in più viene assegnato in modo che i totali tornino sempre.
@@ -89,8 +92,9 @@ Apri l'indirizzo con Chrome, Edge o Safari. Con Chrome ed Edge puoi installarla 
 1. **Crea il gruppo**: tocca il nome del gruppo in alto, poi scrivi un nome e tocca **Crea**.
 2. **Aggiungi le persone**: dalla scheda **Gruppo** in basso.
 3. **Registra le spese**: nella scheda **Spese** tocca **+** e indica cosa, quanto, chi ha pagato e tra chi dividere.
-4. **Guarda i conti**: nella scheda **Saldi** trovi chi deve a chi. Quando qualcuno paga, spunta il rimborso.
-5. **Invia il riepilogo**: con **Invia riepilogo** lo mandi nella chat del gruppo.
+4. **Personalizza**: nella scheda **Impostazioni** scegli lingua, valuta del gruppo e sfondo.
+5. **Guarda i conti**: nella scheda **Saldi** trovi chi deve a chi. Quando qualcuno paga, spunta il rimborso.
+6. **Invia il riepilogo**: con **Invia riepilogo** lo mandi nella chat del gruppo.
 
 La prima volta trovi un gruppo di esempio, "Weekend a Bologna", per vedere subito come funziona. Puoi eliminarlo dalla scheda **Gruppo**.
 
@@ -123,7 +127,13 @@ I dati non passano da soli al nuovo telefono. Prima di cambiarlo, invia a te ste
 No. Non c'è un server che sincronizza i telefoni. Per aggiornare un gruppo bisogna reinviare il codice.
 
 **Posso usare valute diverse dall'euro?**
-Per ora l'app conta in euro.
+Sì: in **Impostazioni → Valuta del gruppo** trovi tutte le valute ufficiali. Ogni gruppo ha la sua. L'app non converte da una valuta all'altra: se cambi valuta, gli importi già inseriti restano gli stessi numeri.
+
+**Come cambio lingua?**
+In **Impostazioni → Lingua**. Con "Automatica" l'app usa la lingua del telefono.
+
+**Come metto una foto come sfondo?**
+In **Impostazioni → Sfondo → Foto**, poi scegli un'immagine dalla galleria. La foto resta solo sul tuo telefono.
 
 **Perché l'indirizzo è `kekkoermalizia.github.io/Conti-Chiari` e non un sottodominio?**
 GitHub Pages pubblica ogni progetto come cartella dell'indirizzo dell'account. Una volta installata l'app, l'indirizzo non si vede più.
@@ -135,7 +145,7 @@ GitHub Pages pubblica ogni progetto come cartella dell'indirizzo dell'account. U
 L'app è una singola pagina web (HTML, CSS e JavaScript, senza librerie esterne) installabile come PWA. È poi impacchettata come app nativa con [Capacitor](https://capacitorjs.com/).
 
 ```
-www/                  l'app: index.html, manifest, service worker (offline), icone
+www/                  l'app: index.html, i18n.js (traduzioni), manifest, service worker (offline), icone
 assets/               icone e schermata di avvio per Android e iOS
 capacitor.config.json configurazione dell'app nativa (id: it.contichiari.app)
 package.json          dipendenze e comandi per creare i progetti Android/iOS
