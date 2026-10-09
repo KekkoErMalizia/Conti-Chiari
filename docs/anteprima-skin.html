@@ -1,0 +1,253 @@
+<title>Conti Chiari · Cambio skin</title>
+<style>
+/* Layout: a sinistra due telefoni (Impostazioni › Aspetto e Movimenti con la skin applicata), a destra le note di progetto; su telefono tutto in colonna */
+:root{
+  --pg-bg:#e7ecea; --pg-ink:#14262e; --pg-muted:#5b6f76; --pg-line:#cfd9d7; --pg-card:#f7faf9; --pg-hl:#1f5f6b;
+  --f-display:ui-rounded,"SF Pro Rounded","Segoe UI Variable Display","Segoe UI",Roboto,system-ui,sans-serif;
+  --f-body:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",sans-serif;
+  --f-mono:ui-monospace,"SF Mono","Roboto Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--pg-bg:#0b1316;--pg-ink:#e4eeed;--pg-muted:#93a8ad;--pg-line:#22343a;--pg-card:#111c20;--pg-hl:#5fb3bf;color-scheme:dark}}
+:root[data-theme="dark"]{--pg-bg:#0b1316;--pg-ink:#e4eeed;--pg-muted:#93a8ad;--pg-line:#22343a;--pg-card:#111c20;--pg-hl:#5fb3bf;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--pg-bg);color:var(--pg-ink);font:15px/1.5 var(--f-body);padding-inline:16px;padding-block:28px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:28px}
+header.pg h1{font:700 clamp(24px,4vw,34px)/1.15 var(--f-display);margin:0;text-wrap:balance}
+header.pg p{margin:6px 0 0;color:var(--pg-muted);max-width:62ch}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--pg-hl)}
+.stage{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:1100px){.stage{grid-template-columns:auto auto}.notes{grid-column:1/-1}}
+@media (max-width:760px){.stage{grid-template-columns:minmax(0,1fr);justify-items:center}.notes{justify-self:stretch}}
+.cap{font-size:13px;font-weight:600;color:var(--pg-muted);text-align:center;margin-top:10px}
+
+/* ---------- telefono ---------- */
+.phone{width:330px;max-width:100%;height:680px;border-radius:44px;padding:10px;background:#0c1113;box-shadow:0 30px 60px -20px rgba(0,0,0,.45),inset 0 0 0 2px #2a3236}
+.screen{position:relative;height:100%;border-radius:35px;overflow:hidden;background:var(--bg);color:var(--ink);display:grid;grid-template-rows:auto 1fr auto;font-size:14px;transition:background-color .35s,color .35s}
+.screen *{transition:background-color .35s,border-color .35s,color .35s}
+.sb{display:flex;justify-content:space-between;padding:10px 22px 0;font:600 12px var(--f-body);color:var(--ink)}
+.top{padding:8px 16px 10px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.top .lbl{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.top .nm{font:700 18px/1.2 var(--f-display)}
+.top .tot{text-align:end}
+.top .tot small{display:block;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.top .tot b{font:600 15px var(--f-mono)}
+.body{overflow-y:auto;padding:12px;display:grid;gap:12px;align-content:start;scrollbar-width:none}
+.body::-webkit-scrollbar{display:none}
+.sec{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.sec h2{font:700 15px var(--f-display);margin:0 0 8px;display:flex;justify-content:space-between;align-items:baseline}
+.hint{font-size:11.5px;color:var(--muted);margin:0}
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface);border-top:1px solid var(--line);padding:6px 0 16px}
+.tabs span{display:grid;justify-items:center;gap:1px;font-size:9.5px;font-weight:600;color:var(--muted)}
+.tabs span.on{color:var(--accent)}
+.tabs svg{width:20px;height:20px}
+.btn{border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 10px;font:600 12.5px var(--f-body);display:flex;align-items:center;justify-content:center;gap:6px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:none;border:0;padding:0}
+.exp{list-style:none;margin:0;padding:0}
+.exp li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:0 9px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.exp li:first-child{border-top:0}
+.exp .ic{grid-row:1/span 2;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--chip);color:var(--muted)}
+.exp .ic svg{width:15px;height:15px}
+.exp .d{font-weight:600;font-size:13px}
+.exp .m{grid-column:2;font-size:11px;color:var(--muted)}
+.exp .a{grid-row:1/span 2;grid-column:3;font:600 13px var(--f-mono);text-align:end}
+.exp .a small{display:block;font:400 10.5px var(--f-body);color:var(--muted)}
+.day{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:2px 0}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+.settle{display:flex;align-items:center;gap:6px;padding:9px;border:1px dashed var(--line);border-radius:10px;font-size:12.5px}
+.settle b{font-weight:600}
+.settle .amt{margin-inline-start:auto;font:600 12.5px var(--f-mono);color:var(--gold)}
+.fab{position:absolute;right:14px;bottom:76px;width:46px;height:46px;border-radius:14px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;box-shadow:0 6px 16px rgba(0,0,0,.25)}
+.fab svg{width:22px;height:22px}
+
+/* ---------- selettore delle skin (dentro il telefono) ---------- */
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--chip);border-radius:10px;padding:3px;gap:3px}
+.seg button{all:unset;cursor:pointer;text-align:center;padding:7px 2px;border-radius:8px;font-weight:600;font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:5px}
+.seg button svg{width:14px;height:14px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.seg button:focus-visible{outline:2px solid var(--accent)}
+.skins{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.skin{all:unset;cursor:pointer;display:grid;gap:5px;justify-items:center;font-size:11.5px;font-weight:600;color:var(--muted);text-align:center}
+.skin .mini{position:relative;width:100%;aspect-ratio:3/4;max-width:100%;border-radius:12px;overflow:hidden;border:2px solid var(--line);background:var(--m-bg);display:grid;grid-template-rows:20% 1fr 14%}
+.skin .mini i{display:block}
+.skin .mini .mt{background:var(--m-surface);border-bottom:1px solid var(--m-line);display:grid;align-content:center;padding:0 6px;gap:2px}
+.skin .mini .mt::before{content:"";width:40%;height:3px;border-radius:2px;background:var(--m-accent)}
+.skin .mini .mt::after{content:"";width:70%;height:5px;border-radius:2px;background:var(--m-ink);opacity:.85}
+.skin .mini .mb{padding:6px;display:grid;gap:4px;align-content:start}
+.skin .mini .mb i{height:16px;border-radius:5px;background:var(--m-surface);border:1px solid var(--m-line)}
+.skin .mini .mb i:first-child{background:var(--m-accent);border-color:var(--m-accent);width:60%}
+.skin .mini .mn{background:var(--m-surface);border-top:1px solid var(--m-line);display:flex;justify-content:space-around;align-items:center}
+.skin .mini .mn b{width:6px;height:6px;border-radius:50%;background:var(--m-line)}
+.skin .mini .mn b:first-child{background:var(--m-accent)}
+.skin .tick{position:absolute;top:5px;right:5px;width:18px;height:18px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:none;place-items:center}
+.skin .tick svg{width:11px;height:11px}
+.skin[aria-pressed="true"]{color:var(--ink)}
+.skin[aria-pressed="true"] .mini{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.skin[aria-pressed="true"] .tick{display:grid}
+.skin:focus-visible .mini{outline:2px solid var(--accent);outline-offset:2px}
+.toast{position:absolute;left:12px;right:12px;bottom:78px;background:var(--ink);color:var(--bg);border-radius:11px;padding:9px 12px;font-size:12.5px;display:flex;justify-content:space-between;align-items:center;gap:10px;transform:translateY(12px);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+.toast.show{opacity:1;transform:none;pointer-events:auto}
+.toast button{all:unset;cursor:pointer;font-weight:700;text-decoration:underline}
+.newtag{font-size:9.5px;font-weight:800;letter-spacing:.08em;background:var(--gold);color:var(--surface);padding:1px 6px;border-radius:999px}
+.dimrow{opacity:.55}
+
+/* ---------- note ---------- */
+.notes{background:var(--pg-card);border:1px solid var(--pg-line);border-radius:18px;padding:20px;display:grid;gap:18px;min-width:0}
+.notes h2{font:700 18px var(--f-display);margin:0}
+.notes h3{font:700 14px var(--f-body);margin:0 0 6px;color:var(--pg-hl);letter-spacing:.02em}
+.notes ul{margin:0;padding-inline-start:18px;display:grid;gap:6px}
+.notes p{margin:0}
+.notes code{font:12.5px var(--f-mono);background:color-mix(in srgb,var(--pg-hl) 10%,transparent);padding:1px 5px;border-radius:5px}
+.pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.pal div{display:flex;align-items:center;gap:8px;font-size:13px}
+.pal span.c{display:flex;flex:none;border-radius:7px;overflow:hidden;border:1px solid var(--pg-line)}
+.pal span.c i{width:14px;height:22px}
+@media (prefers-reduced-motion:reduce){.screen,.screen *,.toast{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="pg">
+    <div class="eyebrow">Impostazioni › Aspetto · anteprima di progetto</div>
+    <h1>Cambio skin per Conti Chiari</h1>
+    <p>Prova pure: tocca una skin o cambia tra Automatico, Chiaro e Scuro nel primo telefono. Il secondo mostra subito la schermata Movimenti con la skin scelta.</p>
+  </header>
+
+  <div class="stage">
+    <div>
+      <div class="phone"><div class="screen" id="s1">
+        <div class="sb"><span>9:41</span><span>●●● 100%</span></div>
+        <div class="top"><div><div class="lbl">Conti Chiari</div><div class="nm">Impostazioni</div></div></div>
+        <div class="body">
+          <section class="sec dimrow"><h2>Profilo</h2><p class="hint">Nome, stato e foto</p></section>
+          <section class="sec" style="display:grid;gap:10px">
+            <h2><span>Aspetto</span><span class="newtag">NUOVO</span></h2>
+            <div class="seg" role="group" aria-label="Chiaro o scuro" id="modeSeg">
+              <button type="button" data-mode="auto" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>Automatico</button>
+              <button type="button" data-mode="light" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>Chiaro</button>
+              <button type="button" data-mode="dark" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>Scuro</button>
+            </div>
+            <div class="skins" id="skins" role="group" aria-label="Skin"></div>
+            <p class="hint" id="skinHint">La skin cambia i colori dell'app. Lo sfondo personalizzato resta com'è.</p>
+          </section>
+          <section class="sec dimrow"><h2>Sfondo</h2><p class="hint">Predefinito · Colore · Foto</p></section>
+          <section class="sec dimrow"><h2>Suoni, vibrazione e accessibilità</h2><p class="hint">Le modalità vista (es. Contrasto elevato) hanno la precedenza sulla skin.</p></section>
+        </div>
+        <nav class="tabs" aria-hidden="true">
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Movimenti</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>Saldi</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H9l-5 4z"/></svg>Chat</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Gruppo</span>
+          <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg>Impostazioni</span>
+        </nav>
+        <div class="toast" id="toast" role="status"><span id="toastMsg"></span><button type="button" id="undo">Annulla</button></div>
+      </div></div>
+      <div class="cap">1 · Si sceglie qui</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="screen" id="s2">
+        <div class="sb"><span>9:41</span><span>●●● 100%</span></div>
+        <div class="top"><div><div class="lbl">Conti Chiari</div><div class="nm">Weekend a Bologna</div></div><div class="tot"><small>Totale</small><b>€ 638,90</b></div></div>
+        <div class="body">
+          <section class="sec quick">
+            <span class="btn primary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Aggiungi spesa</span>
+            <span class="btn">Soldi dati o ricevuti</span>
+          </section>
+          <section class="sec">
+            <h2>Movimenti</h2>
+            <div class="day">sab 4 ottobre</div>
+            <ul class="exp">
+              <li><span class="ic" style="color:var(--neg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span><span class="d">Biglietti museo</span><span class="a neg">−€ 48,00<small>tua quota € 16,00</small></span><span class="m">Giulia ha pagato · per Giulia, Sara, Luca</span></li>
+              <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/></svg></span><span class="d">Aperitivo</span><span class="a">€ 31,50</span><span class="m">Luca ha pagato · per Marco, Sara, Luca</span></li>
+            </ul>
+            <div class="day" style="margin-top:6px">ven 3 ottobre</div>
+            <ul class="exp">
+              <li><span class="ic" style="color:var(--pos)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M17 7L7 17M15 17H7V9"/></svg></span><span class="d">Pagamento</span><span class="a pos">+€ 50,00</span><span class="m">Luca → Giulia</span></li>
+              <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/></svg></span><span class="d">Cena all'osteria</span><span class="a">€ 132,00</span><span class="m">Sara ha pagato · per tutti</span></li>
+            </ul>
+          </section>
+          <section class="sec"><h2>Chi deve a chi</h2><div class="settle"><b>Marco</b><span style="color:var(--muted)">dà a</span><b>Giulia</b><span class="amt">€ 112,35</span></div></section>
+        </div>
+        <span class="fab" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+        <nav class="tabs" aria-hidden="true">
+          <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Movimenti</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>Saldi</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H9l-5 4z"/></svg>Chat</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Gruppo</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg>Impostazioni</span>
+        </nav>
+      </div></div>
+      <div class="cap">2 · Si vede subito in tutta l'app</div>
+    </div>
+
+    <aside class="notes">
+      <h2>Perché è facile da usare</h2>
+      <div>
+        <h3>Per chi usa l'app</h3>
+        <ul>
+          <li>Ogni skin è una <b>miniatura dell'app vera</b> (barra in alto, pulsante, schede in basso): si capisce l'effetto senza leggere nomi di colori.</li>
+          <li><b>Un tocco e basta</b>: la skin si applica subito, come lo sfondo oggi. Nessun pulsante «Salva».</li>
+          <li>Se non piace, <b>«Annulla»</b> nel messaggio in basso torna alla skin di prima, come già succede quando si elimina una spesa.</li>
+          <li>Chiaro e scuro sono separati dalla skin: <b>Automatico</b> segue il telefono, ogni skin ha la sua versione notturna già pronta.</li>
+          <li>La spunta e il bordo marcano la skin attiva anche per chi distingue poco i colori; i lettori di schermo leggono «Salvia, selezionata».</li>
+          <li>Verde per chi riceve e rosso per chi deve <b>non cambiano</b> tra una skin e l'altra: i saldi restano leggibili come sempre.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Le sei skin proposte</h3>
+        <div class="pal" id="pal"></div>
+      </div>
+      <div>
+        <h3>Come si inserisce nel codice</h3>
+        <ul>
+          <li>Due nuove impostazioni: <code>SET.skin</code> (predefinita <code>laguna</code>, cioè i colori di oggi) e <code>SET.mode</code> (<code>auto</code> · <code>light</code> · <code>dark</code>).</li>
+          <li>Ogni skin è un blocco di variabili CSS su <code>html[data-skin=…]</code>, con la variante scura dentro <code>prefers-color-scheme</code> e in <code>html[data-mode=dark]</code>. Il resto dell'interfaccia usa già quelle variabili: nessun componente da riscrivere.</li>
+          <li>Le modalità vista (Contrasto elevato, Foto, daltonismo) restano più forti della skin, così l'accessibilità non si rompe.</li>
+          <li>Il colore della barra di sistema (<code>theme-color</code>) e il bagliore del tasto «Scarica l'app Android» seguono l'accento della skin.</li>
+          <li>Testi nuovi nelle 19 lingue: «Aspetto», «Automatico», «Chiaro», «Scuro» e i sei nomi delle skin.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+const SKINS={
+  laguna:{name:'Laguna',light:{bg:'#eef2f1',surface:'#ffffff',ink:'#14262e',muted:'#5b6f76',line:'#d5dfdd',chip:'#e3ebea',accent:'#1f5f6b','accent-ink':'#ffffff',gold:'#a8770a'},
+                       dark:{bg:'#0f1a1e',surface:'#16252b',ink:'#e4eeed',muted:'#93a8ad',line:'#26393f',chip:'#20343a',accent:'#5fb3bf','accent-ink':'#0b1619',gold:'#e3b54a'}},
+  salvia:{name:'Salvia',light:{bg:'#eff2ea',surface:'#fbfcf7',ink:'#1e2a1f',muted:'#5f6d5f',line:'#d6ddcd',chip:'#e3e9da',accent:'#3d6a45','accent-ink':'#ffffff',gold:'#94720f'},
+                       dark:{bg:'#111812',surface:'#19231a',ink:'#e3ebe0',muted:'#98a996',line:'#2a382b',chip:'#223023',accent:'#8cc394','accent-ink':'#0e1a10',gold:'#dcb84f'}},
+  mirtillo:{name:'Mirtillo',light:{bg:'#f0f0f7',surface:'#ffffff',ink:'#1b1c33',muted:'#5e6080',line:'#dadaea',chip:'#e5e5f2',accent:'#4a4ea6','accent-ink':'#ffffff',gold:'#a0740c'},
+                       dark:{bg:'#11111d',surface:'#1a1a2b',ink:'#e6e6f5',muted:'#9c9ec0',line:'#2c2c45',chip:'#24243a',accent:'#a3a6f2','accent-ink':'#14152b',gold:'#e1b64e'}},
+  agrume:{name:'Agrume',light:{bg:'#f7f0e8',surface:'#fffdf9',ink:'#2b1d14',muted:'#776253',line:'#e7dacb',chip:'#f0e4d6',accent:'#ad4f1b','accent-ink':'#ffffff',gold:'#8f6a0a'},
+                       dark:{bg:'#1a1410',surface:'#241c16',ink:'#f2e7dc',muted:'#b39d8b',line:'#3a2d23',chip:'#30251d',accent:'#f09a62','accent-ink':'#2a160a',gold:'#e3bb57'}},
+  corallo:{name:'Corallo',light:{bg:'#f8eff1',surface:'#ffffff',ink:'#2a1219',muted:'#7a5962',line:'#ebd6dc',chip:'#f3e1e6',accent:'#ad3757','accent-ink':'#ffffff',gold:'#94700c'},
+                       dark:{bg:'#190f13',surface:'#23161b',ink:'#f3e3e8',muted:'#b7939d',line:'#3b252c',chip:'#2f1d23',accent:'#f28fab','accent-ink':'#2b0d17',gold:'#e2b850'}},
+  ardesia:{name:'Ardesia',light:{bg:'#eceef0',surface:'#ffffff',ink:'#16191d',muted:'#5b636e',line:'#d5d9de',chip:'#e1e4e8',accent:'#2e3742','accent-ink':'#ffffff',gold:'#946f0b'},
+                       dark:{bg:'#0e1013',surface:'#171a1e',ink:'#e7eaee',muted:'#97a0ab',line:'#2a2f35',chip:'#20242a',accent:'#c9d2dd','accent-ink':'#111418',gold:'#ddb54d'}}
+};
+const SEM={light:{pos:'#1d7a4f',neg:'#b3402d'},dark:{pos:'#5cc795',neg:'#ef8a74'}};
+let skin='laguna',mode='auto',prev=null,toastT;
+const mq=matchMedia('(prefers-color-scheme: dark)');
+const pageDark=()=>{const t=document.documentElement.dataset.theme;return t?t==='dark':mq.matches};
+const isDark=()=>mode==='dark'||(mode==='auto'&&pageDark());
+function vars(el,pal){for(const k in pal)el.style.setProperty('--'+k,pal[k])}
+function apply(){
+  const v=isDark()?'dark':'light',p=Object.assign({},SKINS[skin][v],SEM[v]);
+  ['s1','s2'].forEach(id=>vars(document.getElementById(id),p));
+  document.querySelectorAll('#skins .skin').forEach(b=>{
+    const on=b.dataset.skin===skin;b.setAttribute('aria-pressed',on);
+    const s=SKINS[b.dataset.skin][v];['bg','surface','ink','line','accent'].forEach(k=>b.style.setProperty('--m-'+k,s[k]));
+  });
+  document.querySelectorAll('#modeSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===mode));
+}
+document.getElementById('skins').innerHTML=Object.entries(SKINS).map(([k,s])=>`<button type="button" class="skin" data-skin="${k}" aria-label="${s.name}"><span class="mini"><i class="mt"></i><span class="mb"><i></i><i></i><i></i></span><span class="mn"><b></b><b></b><b></b><b></b></span><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span></span>${s.name}${k==='laguna'?' <span style="font-weight:500">(attuale)</span>':''}</button>`).join('');
+document.getElementById('pal').innerHTML=Object.values(SKINS).map(s=>`<div><span class="c">${['bg','surface','accent','ink'].map(k=>`<i style="background:${s.light[k]}"></i>`).join('')}${['bg','accent'].map(k=>`<i style="background:${s.dark[k]}"></i>`).join('')}</span>${s.name}</div>`).join('');
+function showToast(msg){const t=document.getElementById('toast');document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),4000)}
+document.getElementById('skins').addEventListener('click',e=>{const b=e.target.closest('[data-skin]');if(!b||b.dataset.skin===skin)return;prev=skin;skin=b.dataset.skin;apply();showToast('Skin «'+SKINS[skin].name+'» applicata')});
+document.getElementById('undo').onclick=()=>{if(prev){skin=prev;prev=null;apply()}document.getElementById('toast').classList.remove('show')};
+document.querySelectorAll('#modeSeg button').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;apply()});
+try{mq.addEventListener('change',apply)}catch(e){}
+new MutationObserver(apply).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+apply();
+</script>
