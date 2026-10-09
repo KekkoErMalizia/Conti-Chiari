@@ -99,7 +99,7 @@ class Hub{
     ws.onopen = () => {
       s.open = true; s.retry = 1000; this.onStatus(this.connected());
       Object.keys(this.groups).forEach(t => this._req(ws, t));
-      Object.values(this.pending).forEach(ev => ws.send(JSON.stringify(['EVENT', ev])));
+      Object.values(this.pending).forEach(ev => { try{ ws.send(JSON.stringify(['EVENT', ev])) }catch(e){} });
     };
     ws.onclose = () => { s.open = false; this.onStatus(this.connected()); this._later(url) };
     ws.onerror = () => { try{ws.close()}catch(e){} };
@@ -151,7 +151,7 @@ class Hub{
     Object.values(this.socks).forEach(s => { if(s.open) try{ s.ws.send(JSON.stringify(['EVENT', ev])) }catch(e){} });
     return ev;
   }
-  resend(events){ events.forEach(ev => { this.pending[ev.id] = ev; this.seen.add(ev.id) }); Object.values(this.socks).forEach(s => { if(s.open) events.forEach(ev => s.ws.send(JSON.stringify(['EVENT', ev]))) }) }
+  resend(events){ events.forEach(ev => { this.pending[ev.id] = ev; this.seen.add(ev.id) }); Object.values(this.socks).forEach(s => { if(s.open) events.forEach(ev => { try{ s.ws.send(JSON.stringify(['EVENT', ev])) }catch(e){} }) }) }
 }
 
 /* ---------- chat private: chiave condivisa tra due dispositivi (ECDH secp256k1) ---------- */
