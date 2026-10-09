@@ -290,6 +290,18 @@ body.custom-bg .chatbar{background:none}
 .sw:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .custom{display:flex;align-items:center;gap:12px;font-weight:600;font-size:15px}
 .custom input[type=color]{width:52px;height:44px;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:3px;cursor:pointer}
+.palette{display:grid;grid-template-columns:repeat(12,1fr);gap:3px}
+.palette .pc{all:unset;cursor:pointer;aspect-ratio:1;border-radius:5px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.palette .pc[aria-pressed="true"]{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--accent);position:relative;z-index:1}
+.palette .pc:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hex{width:6.2em;flex:none;margin-inline-start:auto;font-family:var(--f-mono);text-transform:uppercase}
+.subh{margin:8px 0 0;font-size:15px}
+.textures{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+.tx{all:unset;cursor:pointer;display:grid;gap:4px;justify-items:center;font-size:12px;font-weight:600;color:var(--muted);text-align:center}
+.tx i{display:block;width:100%;aspect-ratio:1;border-radius:10px;border:2px solid var(--line)}
+.tx[aria-pressed="true"]{color:var(--ink)}
+.tx[aria-pressed="true"] i{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.tx:focus-visible i{outline:2px solid var(--accent);outline-offset:2px}
 .thumb{width:100%;aspect-ratio:16/10;max-width:100%;border-radius:12px;background:var(--chip) center/cover no-repeat;border:1px solid var(--line)}
 .prof{display:flex;gap:16px;align-items:center}
 
@@ -599,7 +611,26 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
         </div>
         <div id="bgColorPane" class="stack" hidden>
           <div class="swatches" id="swatches"></div>
-          <label class="custom"><input type="color" id="customColor"><span data-t="customColor"></span></label>
+          <p class="hint" data-t="palette"></p>
+          <div class="palette" id="palette"></div>
+          <div class="custom"><input type="color" id="customColor" aria-labelledby="customColorL"><span id="customColorL" data-t="customColor"></span><input type="text" id="hexColor" class="hex" maxlength="7" spellcheck="false" autocomplete="off" aria-labelledby="customColorL"></div>
+          <h3 class="subh" data-t="gradient"></h3>
+          <div class="seg" role="group" id="gradSeg">
+            <button type="button" data-g="none" data-t="gradNone"></button>
+            <button type="button" data-g="linear" data-t="gradLinear"></button>
+            <button type="button" data-g="radial" data-t="gradRadial"></button>
+          </div>
+          <div id="gradPane" class="stack" hidden>
+            <div class="swatches" id="gradPresets"></div>
+            <label class="custom"><input type="color" id="color2"><span data-t="color2"></span></label>
+            <div class="range" id="angleRow"><label for="gradAngle"><span data-t="gradAngle"></span><output id="gradAngleOut"></output></label><input type="range" id="gradAngle" min="0" max="360" step="15"></div>
+          </div>
+          <h3 class="subh" data-t="texture"></h3>
+          <div class="textures" id="textures"></div>
+          <div id="texPane" class="stack" hidden>
+            <div class="range"><label for="texStrength"><span data-t="texStrength"></span><output id="texStrengthOut"></output></label><input type="range" id="texStrength" min="5" max="100" step="5"></div>
+            <div class="range"><label for="texSize"><span data-t="texSize"></span><output id="texSizeOut"></output></label><input type="range" id="texSize" min="6" max="60" step="2"></div>
+          </div>
         </div>
         <div id="bgPhotoPane" class="stack" hidden>
           <div class="thumb" id="thumb"></div>
@@ -820,6 +851,16 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 'use strict';
 const KEY='conti-chiari-app-v1', SKEY='conti-chiari-settings', PKEY='conti-chiari-photo';
 const COLORS=['#1f5f6b','#c08a12','#8a4fa3','#2f8a5a','#c2543e','#3b6fc4','#9a6b2f','#4d8f9c'];
+// tavolozza: 12 tinte × 7 luminosità (dalle più chiare alle più scure) + una riga di grigi
+const PALETTE=(()=>{
+  const hsl=(h,sat,l)=>{sat/=100;l/=100;const k=n=>(n+h/30)%12,a=sat*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(k(n)-3,9-k(n),1));return '#'+[f(0),f(8),f(4)].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('')};
+  const out=[];
+  [94,86,76,64,50,36,22].forEach(l=>{for(let h=0;h<360;h+=30)out.push(hsl(h,l>80?70:l<30?55:75,l))});
+  for(let i=0;i<12;i++)out.push(hsl(0,0,100-i*100/11));
+  return out;
+})();
+const GRAD_PRESETS=[['#fbeec4','#f6a6a6'],['#d7e4f4','#e6dff4'],['#d6ece2','#7fb8c6'],['#ffd3a5','#fd6585'],['#a1c4fd','#c2e9fb'],['#fdfbfb','#c9d6df'],['#43cea2','#185a9d'],['#ff9a8b','#a18cd1'],['#1d2b44','#5b3a6b'],['#0f2027','#2c5364'],['#232526','#414345'],['#3a1c71','#ffaf7b']];
+const TEXTURES=['none','dots','grid','stripes','hatch','checks','zigzag','linen','noise'];
 const BG_SWATCHES=['#e8dfd0','#d6ece2','#d7e4f4','#e6dff4','#f6dcdc','#fbeec4','#3a4a50','#1d2b44','#101418'];
 const $=id=>document.getElementById(id);
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -833,9 +874,9 @@ const IC={
 };
 
 /* ---------- impostazioni e lingua ---------- */
-let SET={lang:'auto',bg:{type:'default',color:'#d6ece2'},profile:{name:'',status:'',avatar:''},sound:true,vib:true,keepAlive:false,vol:50,vibInt:50,vision:'auto',textSize:50,voiceRate:50,notify:true,receipts:true};
+let SET={lang:'auto',bg:{type:'default',color:'#d6ece2',grad:'none',color2:'#1d2b44',angle:135,tex:'none',texStrength:30,texSize:20},profile:{name:'',status:'',avatar:''},sound:true,vib:true,keepAlive:false,vol:50,vibInt:50,vision:'auto',textSize:50,voiceRate:50,notify:true,receipts:true};
 const fx=k=>{try{window.FX&&FX.play(k)}catch(e){}};
-try{const s=JSON.parse(localStorage.getItem(SKEY));if(s)SET=Object.assign(SET,s,{profile:Object.assign(SET.profile,s.profile||{})})}catch(e){}
+try{const s=JSON.parse(localStorage.getItem(SKEY));if(s)SET=Object.assign(SET,s,{profile:Object.assign(SET.profile,s.profile||{}),bg:Object.assign(SET.bg,s.bg||{})})}catch(e){}
 const saveSet=()=>{try{localStorage.setItem(SKEY,JSON.stringify(SET))}catch(e){toast(t('storageFull'))}};
 function detectLang(){for(const l of (navigator.languages||[navigator.language||'en'])){const c=String(l).toLowerCase().split(/[-_@.]/)[0];if(I18N[c])return c}return 'en'}
 let LANG='it',LOCALE='it';
@@ -1626,16 +1667,56 @@ function renderSettings(){
   document.querySelectorAll('#bgSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.bg===SET.bg.type));
   $('bgColorPane').hidden=SET.bg.type!=='color';$('bgPhotoPane').hidden=SET.bg.type!=='photo';
   $('swatches').innerHTML=BG_SWATCHES.map(c=>`<button type="button" class="sw" data-c="${c}" style="background:${c}" aria-label="${c}" aria-pressed="${SET.bg.color===c}"></button>`).join('');
-  $('customColor').value=SET.bg.color||'#d6ece2';
+  const bg=SET.bg,col=(bg.color||'#d6ece2').toLowerCase();
+  $('palette').innerHTML=PALETTE.map(c=>`<button type="button" class="pc" data-c="${c}" style="background:${c}" aria-label="${c}" aria-pressed="${col===c}"></button>`).join('');
+  $('customColor').value=col;if(document.activeElement!==$('hexColor'))$('hexColor').value=col;
+  document.querySelectorAll('#gradSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.g===(bg.grad||'none')));
+  $('gradPane').hidden=!bg.grad||bg.grad==='none';$('angleRow').hidden=bg.grad!=='linear';
+  $('gradPresets').innerHTML=GRAD_PRESETS.map(([a,b])=>`<button type="button" class="sw" data-a="${a}" data-b="${b}" style="background:linear-gradient(135deg,${a},${b})" aria-label="${a} → ${b}" aria-pressed="${col===a&&bg.color2===b}"></button>`).join('');
+  $('color2').value=bg.color2||'#1d2b44';$('gradAngle').value=bg.angle??135;$('gradAngleOut').textContent=(bg.angle??135)+'°';
+  $('textures').innerHTML=TEXTURES.map(k=>{const p={...bg,tex:k,texStrength:Math.max(bg.texStrength||30,30),texSize:Math.min(bg.texSize||20,20)};return `<button type="button" class="tx" data-tx="${k}" aria-pressed="${(bg.tex||'none')===k}"><i style="${esc(bgCss(p,true))}"></i>${esc(t('tex_'+k))}</button>`}).join('');
+  $('texPane').hidden=!bg.tex||bg.tex==='none';
+  $('texStrength').value=bg.texStrength??30;$('texStrengthOut').textContent=(bg.texStrength??30)+'%';
+  $('texSize').value=bg.texSize??20;$('texSizeOut').textContent=(bg.texSize??20)+' px';
   const ph=getPhoto();$('thumb').style.backgroundImage=ph?`url("${ph}")`:'';$('removePhoto').hidden=!ph;
   renderA11y();
 }
 let photoCache,myT=null;
 function getPhoto(){if(photoCache===undefined){try{photoCache=localStorage.getItem(PKEY)||null}catch(e){photoCache=null}}return photoCache}
+// sfondo a colore: colore pieno o sfumatura, con una texture opzionale sopra (tutto in CSS, niente immagini da salvare)
+function hexRgb(h){const m=/^#?([0-9a-f]{6})$/i.exec(h||'');const n=m?parseInt(m[1],16):0xd6ece2;return[n>>16,n>>8&255,n&255]}
+function texLayers(k,c,s){
+  // ogni texture: [immagine, dimensione del riquadro che si ripete]
+  const h=s/2;
+  switch(k){
+    case 'dots':return[[`radial-gradient(${c} ${Math.max(1,s/10)}px,transparent ${Math.max(1.5,s/10+.8)}px)`,`${s}px ${s}px`]];
+    case 'grid':return[[`linear-gradient(${c} 1px,transparent 1px)`,`${s}px ${s}px`],[`linear-gradient(90deg,${c} 1px,transparent 1px)`,`${s}px ${s}px`]];
+    case 'stripes':return[[`repeating-linear-gradient(45deg,${c} 0,${c} ${h/2}px,transparent ${h/2}px,transparent ${h}px)`,'auto']];
+    case 'hatch':return[[`repeating-linear-gradient(45deg,${c} 0,${c} 1px,transparent 1px,transparent ${h}px)`,'auto'],[`repeating-linear-gradient(-45deg,${c} 0,${c} 1px,transparent 1px,transparent ${h}px)`,'auto']];
+    case 'checks':return[[`linear-gradient(45deg,${c} 25%,transparent 25%,transparent 75%,${c} 75%)`,`${s}px ${s}px`],[`linear-gradient(45deg,${c} 25%,transparent 25%,transparent 75%,${c} 75%)`,`${s}px ${s}px`,`${h}px ${h}px`]];
+    case 'zigzag':return[[`linear-gradient(135deg,${c} 25%,transparent 25%)`,`${s}px ${s}px`,`-${h}px 0`],[`linear-gradient(225deg,${c} 25%,transparent 25%)`,`${s}px ${s}px`,`-${h}px 0`],[`linear-gradient(315deg,${c} 25%,transparent 25%)`,`${s}px ${s}px`],[`linear-gradient(45deg,${c} 25%,transparent 25%)`,`${s}px ${s}px`]];
+    case 'linen':return[[`repeating-linear-gradient(0deg,${c} 0,${c} 1px,transparent 1px,transparent ${Math.max(3,s/5)}px)`,'auto'],[`repeating-linear-gradient(90deg,${c} 0,${c} 1px,transparent 1px,transparent ${Math.max(4,s/4)}px)`,'auto']];
+    case 'noise':{const f=(2.4/Math.sqrt(s)).toFixed(2),svg=`<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='${f}' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 ${c.r} 0 0 0 0 ${c.r} 0 0 0 0 ${c.r} ${(c.a*3).toFixed(3)} 0 0 0 -${(c.a*.6).toFixed(3)}'/></filter><rect width='100%' height='100%' filter='url(#n)'/></svg>`;return[[`url("data:image/svg+xml,${encodeURIComponent(svg)}")`,'200px 200px']]}
+  }
+  return[];
+}
+function bgCss(bg,asText){
+  const base=bg.color||'#d6ece2',[r,g,b]=hexRgb(base),light=(r*299+g*587+b*114)/1000>140;
+  // la texture è scura sui colori chiari e chiara su quelli scuri
+  const a=(bg.texStrength??30)/100*(light?.22:.3),tc=`rgba(${light?'0,0,0':'255,255,255'},${a.toFixed(3)})`;
+  const c=bg.tex==='noise'?{r:light?0:1,a}:tc;
+  const layers=bg.tex&&bg.tex!=='none'?texLayers(bg.tex,c,bg.texSize||20):[];
+  const ang=bg.angle??135;
+  if(bg.grad==='linear')layers.push([`linear-gradient(${ang}deg,${base},${bg.color2||base})`,'100% 100%']);
+  if(bg.grad==='radial')layers.push([`radial-gradient(circle at 50% 35%,${base},${bg.color2||base})`,'100% 100%']);
+  const st={backgroundColor:base,backgroundImage:layers.map(l=>l[0]).join(',')||'none',backgroundSize:layers.map(l=>l[1]).join(',')||'auto',backgroundPosition:layers.map(l=>l[2]||'0 0').join(',')||'0 0',backgroundRepeat:layers.map(l=>l[1]==='100% 100%'?'no-repeat':'repeat').join(',')||'repeat'};
+  if(!asText)return st;
+  return Object.entries(st).map(([k,v])=>k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())+':'+v).join(';');
+}
 function applyBg(){
   const L=$('bgLayer'),ph=getPhoto();let custom=false;
-  L.style.backgroundImage='';L.style.backgroundColor='';
-  if(SET.bg.type==='color'&&SET.bg.color){L.style.backgroundColor=SET.bg.color;custom=true}
+  L.style.backgroundImage='';L.style.backgroundColor='';L.style.backgroundSize='';L.style.backgroundPosition='';L.style.backgroundRepeat='';
+  if(SET.bg.type==='color'&&SET.bg.color){Object.assign(L.style,bgCss(SET.bg));custom=true}
   if(SET.bg.type==='photo'&&ph){L.style.backgroundImage=`url("${ph}")`;custom=true}
   document.body.classList.toggle('custom-bg',custom);
 }
@@ -1980,8 +2061,22 @@ document.querySelectorAll('#bgSeg button').forEach(b=>b.onclick=()=>{
   SET.bg.type=b.dataset.bg;saveSet();applyBg();renderSettings();
   if(b.dataset.bg==='photo'&&!getPhoto())$('photoInput').click();
 });
-$('swatches').addEventListener('click',e=>{const c=e.target.closest('[data-c]')?.dataset.c;if(!c)return;SET.bg={type:'color',color:c};saveSet();applyBg();renderSettings()});
-$('customColor').addEventListener('input',e=>{SET.bg={type:'color',color:e.target.value};saveSet();applyBg();document.querySelectorAll('.sw').forEach(s=>s.setAttribute('aria-pressed','false'))});
+const setBg=(o,full)=>{Object.assign(SET.bg,{type:'color'},o);saveSet();applyBg();if(full!==false)renderSettings()};
+const pickColor=e=>{const c=e.target.closest('[data-c]')?.dataset.c;if(c)setBg({color:c})};
+$('swatches').addEventListener('click',pickColor);$('palette').addEventListener('click',pickColor);
+// durante il trascinamento nel selettore aggiorna solo lo sfondo; ridisegna le anteprime alla fine
+$('customColor').addEventListener('input',e=>{setBg({color:e.target.value},false);$('hexColor').value=e.target.value});
+$('customColor').addEventListener('change',()=>renderSettings());
+$('hexColor').addEventListener('input',e=>{let v=e.target.value.trim();if(!v.startsWith('#'))v='#'+v;if(/^#[0-9a-f]{3}$/i.test(v))v='#'+[...v.slice(1)].map(x=>x+x).join('');if(/^#[0-9a-f]{6}$/i.test(v))setBg({color:v.toLowerCase()})});
+$('hexColor').addEventListener('blur',()=>renderSettings());
+document.querySelectorAll('#gradSeg button').forEach(b=>b.onclick=()=>setBg({grad:b.dataset.g}));
+$('gradPresets').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b)setBg({color:b.dataset.a,color2:b.dataset.b})});
+$('color2').addEventListener('input',e=>setBg({color2:e.target.value},false));
+$('color2').addEventListener('change',()=>renderSettings());
+$('gradAngle').addEventListener('input',e=>{setBg({angle:+e.target.value},false);$('gradAngleOut').textContent=e.target.value+'°'});
+$('textures').addEventListener('click',e=>{const b=e.target.closest('[data-tx]');if(b)setBg({tex:b.dataset.tx})});
+$('texStrength').addEventListener('input',e=>{setBg({texStrength:+e.target.value},false);$('texStrengthOut').textContent=e.target.value+'%'});
+$('texSize').addEventListener('input',e=>{setBg({texSize:+e.target.value},false);$('texSizeOut').textContent=e.target.value+' px'});
 $('photoInput').addEventListener('change',e=>{loadPhoto(e.target.files[0]);e.target.value=''});
 $('removePhoto').onclick=()=>{try{localStorage.removeItem(PKEY)}catch(e){}photoCache=null;SET.bg.type='default';saveSet();applyBg();renderSettings()};
 
