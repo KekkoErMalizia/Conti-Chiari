@@ -181,6 +181,37 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .msg .tm{font-size:11px;color:var(--muted);text-align:end}
 .msg.cont .av{visibility:hidden}
 .msg.cont .au{display:none}
+.chathead{display:grid;gap:10px}
+.chathead .row{align-items:center}
+.ephsel{display:flex;align-items:center;gap:6px;background:var(--chip);border-radius:999px;padding:4px 6px 4px 12px;flex:0 0 auto!important}
+.ephsel svg{width:16px;height:16px;flex:none;color:var(--accent)}
+.ephsel select{border:0;background:transparent;padding:4px 2px;font-size:14px;font-weight:600;width:auto}
+.ephnote{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;color:var(--muted);text-align:center}
+.ephnote svg{width:13px;height:13px}
+.sysmsg{text-align:center;font-size:12.5px;color:var(--muted);background:var(--chip);border-radius:10px;padding:5px 10px;justify-self:center;max-width:90%}
+.dmhead{display:flex;align-items:center;gap:10px}
+.dmhead .back{all:unset;cursor:pointer;width:40px;height:40px;display:grid;place-items:center;border-radius:12px;color:var(--accent)}
+.dmhead .back svg{width:24px;height:24px}
+[dir=rtl] .dmhead .back svg{transform:scaleX(-1)}
+.dmhead b{display:block}
+.dmhead span{display:block;font-size:13px;color:var(--muted)}
+.dmlist{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.dmlist button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;gap:12px;align-items:center;padding:10px;border-radius:14px}
+.dmlist button:hover,.dmlist button:focus-visible{background:var(--chip)}
+.dmlist .who{min-width:0;flex:1}
+.dmlist .who b{display:block}
+.dmlist .who span{display:block;font-size:14px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dmlist .meta{display:grid;justify-items:end;gap:4px;font-size:12px;color:var(--muted)}
+.badge{min-width:20px;height:20px;border-radius:10px;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:700;display:inline-grid;vertical-align:middle;box-sizing:border-box;place-items:center;padding:0 6px}
+.msg .tm{display:flex;justify-content:flex-end;align-items:center;gap:4px}
+.ticks{display:inline-flex;width:18px;height:12px;color:var(--muted)}
+.ticks.read{color:#2fa8e8}
+.ticks svg{width:18px;height:12px}
+.msg .eph{width:11px;height:11px;opacity:.7}
+.members li[data-dm]{cursor:pointer;border-radius:12px}
+.members li[data-dm]:hover{background:var(--chip)}
+.seg .badge{margin-inline-start:4px}
+.members .dmbtn{margin-inline-start:auto;flex:none}
 .chatbar{position:sticky;bottom:-28px;padding-block:8px 28px;margin-bottom:-28px;display:flex;gap:8px;background:linear-gradient(transparent,var(--bg) 30%)}
 body.custom-bg .chatbar{background:none}
 .chatbar textarea{min-height:46px;max-height:140px;font-family:var(--f-body);font-size:16px;border-radius:22px;padding:11px 16px;resize:none;background:var(--surface)}
@@ -320,8 +351,27 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 
     <!-- CHAT -->
     <div class="view" id="v-chat" hidden>
-      <div class="e2e" id="e2e"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span data-t="e2e"></span></div>
+      <div class="chathead" id="chatHead">
+        <div class="seg" role="group" id="chatSeg">
+          <button type="button" data-cv="group" data-t="chatGroup"></button>
+          <button type="button" data-cv="list"><span data-t="chatPrivate"></span> <span class="badge" id="dmBadge" hidden></span></button>
+        </div>
+        <div class="dmhead" id="dmHead" hidden>
+          <button class="back" type="button" id="dmBack" data-ta="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <span id="dmAv"></span><div style="min-width:0;flex:1"><b id="dmName"></b><span id="dmSub"></span></div>
+        </div>
+        <div class="row" id="ephRow" style="justify-content:space-between;gap:8px">
+          <div class="e2e" id="e2e" style="flex:1 1 auto;justify-content:flex-start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span id="e2eText" data-t="e2e"></span></div>
+          <label class="ephsel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><select id="ephSel" data-ta="eph"></select></label>
+        </div>
+        <div class="ephnote" id="ephNote" hidden></div>
+      </div>
       <div class="msgs" id="msgs"></div>
+      <section id="dmListBox" hidden>
+        <h2 data-t="privateTitle"></h2>
+        <ul class="dmlist" id="dmList"></ul>
+        <p class="hint" id="dmEmpty" data-t="privateEmpty" hidden></p>
+      </section>
       <form class="chatbar" id="chatForm">
         <textarea id="chatIn" rows="1" maxlength="1000" data-tp="chatPh" data-ta="chatPh"></textarea>
         <button class="btn primary" type="submit" data-ta="send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button>
@@ -400,6 +450,18 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
         <h2 style="margin:0" data-t="helpTitle"></h2>
         <button class="btn primary block" type="button" id="openVideo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span data-t="watchVideo"></span></button>
         <button class="btn block" type="button" id="openTour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17h.01"/></svg><span data-t="replayTutorial"></span></button>
+      </section>
+      <section class="stack">
+        <h2 style="margin:0" data-t="notifTitle"></h2>
+        <div class="subtle">
+          <div class="setrow"><label for="notifOn" data-t="notifMsgs"></label><input type="checkbox" class="switch" id="notifOn" role="switch"></div>
+          <p class="hint" data-t="notifHint"></p>
+          <p class="hint" id="notifState"></p>
+        </div>
+        <div class="subtle">
+          <div class="setrow"><label for="rcptOn" data-t="receipts"></label><input type="checkbox" class="switch" id="rcptOn" role="switch"></div>
+          <p class="hint" data-t="receiptsHint"></p>
+        </div>
       </section>
       <section class="stack">
         <h2 style="margin:0" data-t="a11yTitle"></h2>
@@ -572,7 +634,7 @@ const IC={
 };
 
 /* ---------- impostazioni e lingua ---------- */
-let SET={lang:'auto',bg:{type:'default',color:'#d6ece2'},profile:{name:'',status:'',avatar:''},sound:true,vib:true,vol:50,vibInt:50,vision:'auto',textSize:50,voiceRate:50};
+let SET={lang:'auto',bg:{type:'default',color:'#d6ece2'},profile:{name:'',status:'',avatar:''},sound:true,vib:true,vol:50,vibInt:50,vision:'auto',textSize:50,voiceRate:50,notify:true,receipts:true};
 const fx=k=>{try{window.FX&&FX.play(k)}catch(e){}};
 try{const s=JSON.parse(localStorage.getItem(SKEY));if(s)SET=Object.assign(SET,s,{profile:Object.assign(SET.profile,s.profile||{})})}catch(e){}
 const saveSet=()=>{try{localStorage.setItem(SKEY,JSON.stringify(SET))}catch(e){toast(t('storageFull'))}};
@@ -642,6 +704,7 @@ Object.values(DB.groups).forEach(g=>{
   if(g.done){Object.keys(g.done).forEach(k=>{const m=k.match(/^(.+)_(.+)_(\d+)$/);if(m)g.payments.push({id:uid()+Math.random().toString(36).slice(2,5),from:m[1],to:m[2],amount:+m[3],date:today(),at:Date.now()})});delete g.done}
 });
 if(!DB.groups[DB.current])DB.current=Object.keys(DB.groups)[0];
+if(!DB.dms||typeof DB.dms!=='object')DB.dms={};
 const G=()=>DB.groups[DB.current];
 let saveT;
 function persist(){clearTimeout(saveT);saveT=null;try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){toast(t('storageFull'))}}
@@ -675,13 +738,10 @@ function applyOp(g,op,pk){
       (op.expenses||[]).forEach(e=>up('e:'+(e&&e.id),'expenses',cleanExp(e)));
       (op.payments||[]).forEach(p=>up('y:'+(p&&p.id),'payments',cleanPay(p)));
       break;
-    case 'msg':
-      if(isId(op.id)&&typeof op.text==='string'&&op.text.trim()&&!g.chat.some(m=>m.id===op.id)){
-        g.chat.push({id:op.id,from:pk,text:op.text.slice(0,1000),ts});g.chat.sort((a,b)=>a.ts-b.ts);if(g.chat.length>2000)g.chat.splice(0,g.chat.length-2000);
-        return 'msg';
-      }break;
+    case 'msg': case 'rcpt': case 'eph': return applyChat(g,op,pk);
     case 'member': {
       const m=g.members[pk];
+      if(pk!==ME.pk)setTimeout(()=>watchDM(pk),0);
       if(!m||m.ts<=ts)g.members[pk]={name:String(op.name||'').slice(0,24),status:String(op.status||'').slice(0,80),avatar:AV_RE.test(op.avatar||'')&&op.avatar.length<80000?op.avatar:'',personId:isId(op.personId)?op.personId:'',ts};
       break;}
   }
@@ -694,24 +754,50 @@ let RELAYS;try{RELAYS=JSON.parse(localStorage.getItem('cc-relays'))}catch(e){}
 let netCount=0;
 const HUB=new CCSync.Hub({relays:Array.isArray(RELAYS)&&RELAYS.length?RELAYS:undefined,keys:ME,
   onOp:(gid,op,pk,createdAt)=>{
-    const g=DB.groups[gid];if(!g||!g.sync)return;
-    const kind=applyOp(g,op,pk);
-    g.sync.last=Math.max(g.sync.last||0,createdAt);
-    if(kind==='msg'&&pk!==ME.pk){fx('receive');if(!(gid===DB.current&&tab==='chat'))g.unread=(g.unread||0)+1}
-    persistSoon();if(gid===DB.current)renderSoon();
+    let ch,isDM=gid.startsWith('dm:');
+    if(isDM){ch=ensureDM(gid.slice(3));if(pk!==ME.pk&&pk!==ch.peer)return}
+    else{ch=DB.groups[gid];if(!ch||!ch.sync)return}
+    const kind=isDM?applyChat(ch,op,pk):applyOp(ch,op,pk);
+    ch.sync.last=Math.max(ch.sync.last||0,createdAt);
+    if(kind==='msg'&&pk!==ME.pk)incoming(ch,gid,op,pk);
+    persistSoon();if(isDM||gid===DB.current)renderSoon();
   },
   onStatus:n=>{netCount=n;renderNet()},
-  onSent:id=>{for(const g of Object.values(DB.groups))if(g.outbox&&g.outbox.some(e=>e.id===id)){g.outbox=g.outbox.filter(e=>e.id!==id);persistSoon()}}
+  onSent:id=>{
+    for(const ch of allChans()){
+      if(ch.outbox&&ch.outbox.some(e=>e.id===id)){ch.outbox=ch.outbox.filter(e=>e.id!==id);persistSoon()}
+      const m=ch.chat&&ch.chat.find(m=>m.ev===id);if(m&&!m.sent){m.sent=1;persistSoon();renderSoon()}
+    }
+  }
 });
+const allChans=()=>[...Object.values(DB.groups),...Object.values(DB.dms)];
+const watchedDM=new Set();
+async function watchDM(pk){
+  if(!pk||pk===ME.pk||watchedDM.has(pk)||!/^[0-9a-f]{64}$/.test(pk))return;
+  watchedDM.add(pk);
+  try{const c=await CCSync.dmChannel(ME.sk,pk);const d=DB.dms[pk];if(d&&!d.sync)d.sync={key:c.key,topic:c.topic,last:0};DM_KEYS[pk]=c;HUB.watch('dm:'+pk,c.key,c.topic,d&&d.sync?d.sync.last:0)}catch(e){watchedDM.delete(pk)}
+}
+const DM_KEYS={};
+function ensureDM(pk){
+  let d=DB.dms[pk];
+  if(!d){d=DB.dms[pk]={id:'dm:'+pk,peer:pk,chat:[],rcpt:{},lww:{},eph:86400,unread:0,outbox:[],sync:DM_KEYS[pk]?{key:DM_KEYS[pk].key,topic:DM_KEYS[pk].topic,last:0}:null}}
+  return d;
+}
 function startSync(){
   let any=false;
-  Object.values(DB.groups).forEach(g=>{if(g.sync){any=true;HUB.watch(g.id,g.sync.key,g.sync.topic,g.sync.last);if(g.outbox&&g.outbox.length)HUB.resend(g.outbox)}});
+  allChans().forEach(ch=>{if(ch.sync){any=true;if(ch.outbox&&ch.outbox.length)HUB.resend(ch.outbox)}});
+  Object.values(DB.groups).forEach(g=>{if(g.sync){HUB.watch(g.id,g.sync.key,g.sync.topic,g.sync.last);Object.keys(g.members).forEach(watchDM)}});
+  Object.keys(DB.dms).forEach(watchDM);
   if(any&&!HUB.started){HUB.started=true;HUB.start()}
 }
-function publish(g,op){
-  if(!g.sync)return;
+function publish(ch,op){
+  if(!ch.sync)return;
   if(!HUB.started)startSync();
-  HUB.publish(g.sync.key,g.sync.topic,op).then(ev=>{(g.outbox=g.outbox||[]).push(ev);if(g.outbox.length>500)g.outbox.splice(0,g.outbox.length-500);persistSoon()}).catch(()=>{});
+  HUB.publish(ch.sync.key,ch.sync.topic,op).then(ev=>{
+    (ch.outbox=ch.outbox||[]).push(ev);if(ch.outbox.length>500)ch.outbox.splice(0,ch.outbox.length-500);
+    if(op.t==='msg'){const m=ch.chat.find(x=>x.id===op.id);if(m)m.ev=ev.id}
+    persistSoon();
+  }).catch(()=>{});
 }
 function commit(op,g=G()){
   op.id=op.id||CCSync.rid();op.ts=op.ts||Date.now();
@@ -816,7 +902,7 @@ function setTab(x){
   tab=x;document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===x));
   ['mov','saldi','chat','gruppo','impostazioni'].forEach(v=>$('v-'+v).hidden=v!==x);
   $('fab').hidden=x!=='mov';
-  if(x==='chat'){G().unread=0;persistSoon();renderChat();requestAnimationFrame(()=>$('main').scrollTop=$('main').scrollHeight)}else $('main').scrollTop=0;
+  if(x==='chat'){renderChat();requestAnimationFrame(()=>$('main').scrollTop=$('main').scrollHeight);if(SET.notify!==false&&notifPermission()==='default')askNotif()}else $('main').scrollTop=0;
   if(x==='impostazioni')renderSettings();
   renderUnread();
 }
@@ -831,7 +917,7 @@ function renderNet(){
   $('netLine').textContent=on?(netCount?t('syncStatus',{n:netCount}):t('offlineStatus')):'';
   $('netLine').style.color=netCount?'':'var(--muted)';
 }
-function renderUnread(){$('unread').textContent=G().unread||''}
+function renderUnread(){const n=Object.values(DB.groups).reduce((s,g)=>s+(g.unread||0),0)+Object.values(DB.dms).reduce((s,d)=>s+(d.unread||0),0);$('unread').textContent=n||''}
 
 /* --- filtri movimenti --- */
 const F={q:'',person:null,dir:'all',period:'all'};
@@ -896,29 +982,174 @@ function renderMov(){
   $('expenses').innerHTML=html;
 }
 
-/* --- chat --- */
-function renderChat(){
-  const g=G(),on=!!g.sync;
-  $('chatOff').hidden=on;$('chatForm').hidden=!on;$('e2e').hidden=!on;
-  if(!on){$('msgs').innerHTML='';return}
-  if(!g.chat.length){$('msgs').innerHTML=`<p class="empty" style="text-align:center">${esc(t('noMessages'))}</p>`;return}
+/* --- chat: canali di gruppo e privati --- */
+const EPH=[[0,'ephOff'],[300,'eph5m'],[3600,'eph1h'],[28800,'eph8h'],[86400,'eph24h']];
+const ephLabel=s=>t((EPH.find(e=>e[0]===s)||EPH[0])[1]);
+let chatView='group',curDM=null;
+function nameOf(pk){
+  if(pk===ME.pk)return SET.profile.name||t('you');
+  let best=null;for(const g of Object.values(DB.groups)){const m=g.members[pk];if(m&&(!best||m.ts>best.ts))best=Object.assign({g},m)}
+  if(!best)return t('anon');const p=best.personId&&personIn(best.g,best.personId);return best.name||(p&&p.name)||t('anon');
+}
+function infoOf(pk){let best=null;for(const g of Object.values(DB.groups)){const m=g.members[pk];if(m&&(!best||m.ts>best.ts))best=m}return best||{}}
+function avatarOf(pk,cls){if(pk===ME.pk)return avatarHtml(SET.profile.name||'?',COLORS[0],SET.profile.avatar,cls);const i=infoOf(pk);return avatarHtml(nameOf(pk),'#5b6f76',i.avatar,cls)}
+function applyChat(ch,op,pk){
+  const ts=+op.ts||0;ch.rcpt=ch.rcpt||{};ch.lww=ch.lww||{};
+  if(op.t==='msg'){
+    if(!isId(op.id)||typeof op.text!=='string'||!op.text.trim()||ch.chat.some(m=>m.id===op.id))return;
+    const exp=+op.exp||0;if(exp&&exp<Date.now())return;
+    ch.chat.push({id:op.id,from:pk,text:op.text.slice(0,1000),ts,exp:exp||undefined,sent:pk===ME.pk?0:1});
+    ch.chat.sort((a,b)=>a.ts-b.ts);if(ch.chat.length>2000)ch.chat.splice(0,ch.chat.length-2000);
+    return 'msg';
+  }
+  if(op.t==='rcpt'){
+    ['d','r'].forEach(k=>(Array.isArray(op[k])?op[k]:[]).slice(0,500).forEach(id=>{
+      const m=ch.chat.find(x=>x.id===id);if(!m||m.from!==ME.pk||pk===ME.pk)return;
+      const r=ch.rcpt[id]=ch.rcpt[id]||{d:{},r:{}};r.d[pk]=r.d[pk]||ts;if(k==='r')r.r[pk]=r.r[pk]||ts;
+    }));return 'rcpt';
+  }
+  if(op.t==='eph'){
+    const v=Math.max(0,Math.min(86400,+op.s||0));if((ch.lww.eph||0)>ts)return;ch.lww.eph=ts;
+    if(ch.eph!==v){ch.eph=v;if(isId(op.id)&&!ch.chat.some(m=>m.id===op.id))ch.chat.push({id:op.id,from:pk,sys:'eph',s:v,ts});ch.chat.sort((a,b)=>a.ts-b.ts)}
+    return 'eph';
+  }
+}
+function curChan(){return chatView==='dm'&&curDM?ensureDM(curDM):G()}
+function sendChat(ch,text){
+  const op={t:'msg',id:CCSync.rid(),ts:Date.now(),text:text.slice(0,1000)};
+  if(ch.eph)op.exp=op.ts+ch.eph*1000;
+  applyChat(ch,op,ME.pk);ch.updated=Date.now();persist();fx('send');publish(ch,op);
+}
+// ricevute: consegna subito, lettura quando la chat è davvero aperta davanti all'utente
+const RQ={};
+function queueRcpt(ch,kind,id){const q=RQ[ch.id]=RQ[ch.id]||{ch,d:new Set(),r:new Set()};q[kind].add(id);clearTimeout(queueRcpt.t);queueRcpt.t=setTimeout(flushRcpt,1200)}
+function flushRcpt(){for(const k in RQ){const q=RQ[k];const op={t:'rcpt',id:CCSync.rid(),ts:Date.now(),d:[...q.d],r:[...q.r]};delete RQ[k];if(op.d.length||op.r.length)publish(q.ch,op)}}
+function markRead(ch){
+  if(document.visibilityState!=='visible'||tab!=='chat')return;
+  let any=false;ch.chat.forEach(m=>{if(m.from!==ME.pk&&!m.sys&&!m.rs){m.rs=1;any=true;if(SET.receipts!==false)queueRcpt(ch,'r',m.id)}});
+  if(ch.unread){ch.unread=0;any=true}
+  if(any){persistSoon();renderUnread()}
+}
+function incoming(ch,chanId,op,pk){
+  queueRcpt(ch,'d',op.id);
+  fx('receive');
+  const isDM=chanId.startsWith('dm:'),viewing=document.visibilityState==='visible'&&tab==='chat'&&(isDM?(chatView==='dm'&&curDM===ch.peer):(chatView==='group'&&chanId===DB.current));
+  if(viewing){markRead(ch);return}
+  ch.unread=(ch.unread||0)+1;renderUnread();
+  notifyMsg(isDM?t('privateFrom',{name:nameOf(pk)}):`${nameOf(pk)} · ${ch.name}`,op.text,{chan:chanId});
+}
+function tickState(ch,m){
+  if(m.from!==ME.pk||m.sys)return '';
+  if(m.sent===0)return 'pending';
+  const rec=ch.peer?[ch.peer]:Object.keys(ch.members||{}).filter(pk=>pk!==ME.pk);
+  const r=(ch.rcpt||{})[m.id];
+  if(!rec.length||!r)return 'sent';
+  if(SET.receipts!==false&&rec.every(pk=>r.r[pk]))return 'read';
+  if(rec.every(pk=>r.d[pk]||r.r[pk]))return 'delivered';
+  return 'sent';
+}
+const TICK={pending:'<svg viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M12 5v3l2 1.5"/></svg>',
+  sent:'<svg viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8.5l4 4 9-9"/></svg>',
+  delivered:'<svg viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 8.5l4 4 9-9M9.5 12.5l9-9"/><path d="M8 11l1.5 1.5"/></svg>',
+  read:'<svg viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 8.5l4 4 9-9M9.5 12.5l9-9"/><path d="M8 11l1.5 1.5"/></svg>'};
+const EPH_IC='<svg class="eph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2"/></svg>';
+let prevTs=0;
+function renderMsgs(ch,isDM){
+  sweepExpired();
+  if(!ch.chat.length){$('msgs').innerHTML=`<p class="empty" style="text-align:center">${esc(t('noMessages'))}</p>`;return}
   let html='',prev=null,day='';
-  g.chat.forEach(m=>{
+  ch.chat.forEach(m=>{
     const d=new Date(m.ts),dk=d.toISOString().slice(0,10);
     if(dk!==day){day=dk;prev=null;html+=`<div class="day" style="text-align:center">${esc(d.toLocaleDateString(LOCALE,{weekday:'short',day:'numeric',month:'long'}))}</div>`}
-    const mine=m.from===ME.pk,mem=g.members[m.from]||{},p=mem.personId&&personIn(g,mem.personId);
-    const name=mine?t('you'):(mem.name||(p&&p.name)||t('anon'));
-    const av=mine?avatarHtml(SET.profile.name||'?',COLORS[0],SET.profile.avatar):avatarHtml(name,p?p.color:'#5b6f76',mem.avatar);
-    const cont=prev===m.from&&m.ts-prevTs<300000;
-    html+=`<div class="msg${mine?' me':''}${cont?' cont':''}">${av}<div class="bub">${mine?'':`<div class="au">${esc(name)}</div>`}<div class="tx">${esc(m.text)}</div><div class="tm">${esc(d.toLocaleTimeString(LOCALE,{hour:'2-digit',minute:'2-digit'}))}</div></div></div>`;
+    if(m.sys==='eph'){html+=`<div class="sysmsg">${esc(m.s?t('ephSet',{name:nameOf(m.from),d:ephLabel(m.s)}):t('ephOffSet',{name:nameOf(m.from)}))}</div>`;prev=null;return}
+    const mine=m.from===ME.pk,name=mine?t('you'):nameOf(m.from);
+    const cont=prev===m.from&&m.ts-prevTs<300000,st=tickState(ch,m);
+    const tick=st?`<span class="ticks ${st==='read'?'read':''}" role="img" aria-label="${esc(t('st_'+st))}">${TICK[st]}</span>`:'';
+    html+=`<div class="msg${mine?' me':''}${cont?' cont':''}">${avatarOf(m.from)}<div class="bub">${mine||isDM?'':`<div class="au">${esc(name)}</div>`}<div class="tx">${esc(m.text)}</div><div class="tm">${m.exp?EPH_IC:''}${esc(d.toLocaleTimeString(LOCALE,{hour:'2-digit',minute:'2-digit'}))}${tick}</div></div></div>`;
     prev=m.from;prevTs=m.ts;
   });
   const main=$('main'),atBottom=main.scrollHeight-main.scrollTop-main.clientHeight<80;
   $('msgs').innerHTML=html;
   if(tab==='chat'&&atBottom)main.scrollTop=main.scrollHeight;
 }
-let prevTs=0;
+function dmPeers(){
+  const set=new Set(Object.keys(DB.dms));
+  Object.values(DB.groups).forEach(g=>{if(g.sync)Object.keys(g.members).forEach(pk=>{if(pk!==ME.pk)set.add(pk)})});
+  return [...set];
+}
+function renderChat(){
+  const g=G(),on=!!g.sync,anyOnline=Object.values(DB.groups).some(x=>x.sync);
+  document.querySelectorAll('#chatSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.cv===(chatView==='dm'?'list':chatView)));
+  const dmUnread=Object.values(DB.dms).reduce((s,d)=>s+(d.unread||0),0);$('dmBadge').hidden=!dmUnread;$('dmBadge').textContent=dmUnread;
+  const inDM=chatView==='dm'&&curDM,inList=chatView==='list',inGroup=chatView==='group';
+  $('chatSeg').hidden=!!inDM;$('dmHead').hidden=!inDM;
+  $('dmListBox').hidden=!inList;
+  const conv=(inGroup&&on)||inDM;
+  $('msgs').hidden=!conv;$('chatForm').hidden=!conv;$('ephRow').hidden=!conv;
+  $('chatOff').hidden=!(inGroup&&!on)&&!(inList&&!anyOnline);
+  if(inList){
+    const peers=dmPeers().map(pk=>({pk,d:DB.dms[pk]})).sort((a,b)=>((b.d&&b.d.chat.length?b.d.chat[b.d.chat.length-1].ts:0)-(a.d&&a.d.chat.length?a.d.chat[a.d.chat.length-1].ts:0)));
+    $('dmEmpty').hidden=!!peers.length||!anyOnline;
+    $('dmList').innerHTML=peers.map(({pk,d})=>{const last=d&&[...d.chat].reverse().find(m=>!m.sys);const i=infoOf(pk);
+      return `<li><button type="button" data-peer="${pk}">${avatarOf(pk,'lg')}<div class="who"><b>${esc(nameOf(pk))}</b><span>${esc(last?(last.from===ME.pk?t('you')+': ':'')+last.text:(i.status||t('startPrivate')))}</span></div><div class="meta">${last?esc(new Date(last.ts).toLocaleTimeString(LOCALE,{hour:'2-digit',minute:'2-digit'})):''}${d&&d.unread?`<span class="badge">${d.unread}</span>`:''}</div></button></li>`}).join('');
+    return;
+  }
+  if(!conv){$('msgs').innerHTML='';return}
+  const ch=curChan();
+  $('ephSel').innerHTML=EPH.filter(e=>inDM?e[0]>0:true).map(([v,k])=>`<option value="${v}">${esc(t(k))}</option>`).join('');$('ephSel').value=String(ch.eph||0);
+  $('ephNote').hidden=!ch.eph;$('ephNote').innerHTML=ch.eph?EPH_IC+esc(t('ephOn',{d:ephLabel(ch.eph)})):'';
+  if(inDM){$('dmAv').innerHTML=avatarOf(curDM);$('dmName').textContent=nameOf(curDM);$('dmSub').textContent=t('privateHint',{name:nameOf(curDM)})}
+  renderMsgs(ch,!!inDM);
+  markRead(ch);
+}
+function openDM(pk){
+  watchDM(pk);const d=ensureDM(pk);
+  if(!d.sync&&DM_KEYS[pk])d.sync={key:DM_KEYS[pk].key,topic:DM_KEYS[pk].topic,last:0};
+  chatView='dm';curDM=pk;if(tab!=='chat')setTab('chat');else renderChat();
+  requestAnimationFrame(()=>$('main').scrollTop=$('main').scrollHeight);
+  if(!d.sync)setTimeout(()=>{const k=DM_KEYS[pk];if(k&&!d.sync){d.sync={key:k.key,topic:k.topic,last:0};persist()}},300);
+}
+function sweepExpired(){
+  const now=Date.now();let changed=false;
+  allChans().forEach(ch=>{if(!ch.chat)return;const n=ch.chat.length;ch.chat=ch.chat.filter(m=>!m.exp||m.exp>now);if(ch.chat.length!==n){changed=true;Object.keys(ch.rcpt||{}).forEach(id=>{if(!ch.chat.some(m=>m.id===id))delete ch.rcpt[id]})}});
+  if(changed)persistSoon();return changed;
+}
+setInterval(()=>{if(sweepExpired()&&tab==='chat')renderChat()},15000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&tab==='chat')renderChat()});
 
+/* --- notifiche --- */
+function notifPermission(){if(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications)return 'native';return 'Notification' in window?Notification.permission:'unsupported'}
+async function askNotif(){
+  try{
+    const LN=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;
+    if(LN){await LN.requestPermissions();return}
+    if('Notification' in window&&Notification.permission==='default')await Notification.requestPermission();
+  }catch(e){}
+  renderNotifState();
+}
+async function notifyMsg(title,body,data){
+  if(SET.notify===false)return;
+  if(document.visibilityState==='visible'){toast(title+': '+String(body).slice(0,80));return}
+  try{
+    const LN=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;
+    if(LN){await LN.schedule({notifications:[{id:Math.floor(Math.random()*2e9),title,body:String(body).slice(0,200),extra:data}]});return}
+    if(!('Notification' in window)||Notification.permission!=='granted')return;
+    const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();
+    const opts={body:String(body).slice(0,200),icon:'icons/icon-192.png',badge:'icons/icon-192.png',tag:data.chan,renotify:true,data};
+    if(reg)reg.showNotification(title,opts);else new Notification(title,opts);
+  }catch(e){}
+}
+function openChan(chan){
+  if(!chan)return;
+  if(chan.startsWith('dm:'))openDM(chan.slice(3));
+  else if(DB.groups[chan]){DB.current=chan;chatView='group';render();setTab('chat')}
+}
+if(navigator.serviceWorker)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.openChat)openChan(e.data.openChat)});
+try{const LN=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;if(LN)LN.addListener('localNotificationActionPerformed',a=>openChan(a.notification.extra&&a.notification.extra.chan))}catch(e){}
+function renderNotifState(){
+  const st=notifPermission();
+  $('notifState').textContent=st==='denied'?t('notifDenied'):st==='unsupported'?t('notifUnsupported'):t('notifLimit');
+}
 /* --- QR --- */
 function drawQR(text){
   const qr=qrcode(0,'M');qr.addData(text);qr.make();
@@ -959,7 +1190,7 @@ function render(){
     const ms=Object.entries(g.members).sort((a,b)=>b[1].ts-a[1].ts);
     $('memCount').textContent=ms.length||'';
     $('members').innerHTML=ms.map(([pk,m])=>{const p=m.personId&&personIn(g,m.personId),mine=pk===ME.pk,nm=(mine?SET.profile.name:m.name)||(p&&p.name)||t('anon');
-      return `<li>${avatarHtml(nm,p?p.color:'#5b6f76',mine?SET.profile.avatar:m.avatar,'lg')}<div class="who"><b>${esc(nm)}${mine?' ('+esc(t('you'))+')':''}${p&&p.name!==nm?' · '+esc(p.name):''}</b><span>${esc(mine?SET.profile.status:m.status)}</span></div></li>`}).join('');
+      return `<li${mine?'':` data-dm="${pk}"`}>${avatarHtml(nm,p?p.color:'#5b6f76',mine?SET.profile.avatar:m.avatar,'lg')}<div class="who"><b>${esc(nm)}${mine?' ('+esc(t('you'))+')':''}${p&&p.name!==nm?' · '+esc(p.name):''}</b><span>${esc(mine?SET.profile.status:m.status)}</span></div>${mine?'':`<button class="btn small dmbtn" type="button" data-dm="${pk}">${esc(t('startPrivate'))}</button>`}</li>`}).join('');
   }
   renderNet();renderUnread();
   if(tab==='chat')renderChat();
@@ -1191,8 +1422,18 @@ $('doImport').onclick=()=>{
 
 $('chatForm').addEventListener('submit',e=>{
   e.preventDefault();const v=$('chatIn').value.trim();if(!v)return;
-  commit({t:'msg',text:v.slice(0,1000)});$('chatIn').value='';$('chatIn').style.height='';renderChat();$('main').scrollTop=$('main').scrollHeight;
+  sendChat(curChan(),v);$('chatIn').value='';$('chatIn').style.height='';renderChat();$('main').scrollTop=$('main').scrollHeight;
 });
+document.querySelectorAll('#chatSeg button').forEach(b=>b.onclick=()=>{chatView=b.dataset.cv;curDM=null;renderChat();if(chatView==='group')requestAnimationFrame(()=>$('main').scrollTop=$('main').scrollHeight)});
+$('dmBack').onclick=()=>{chatView='list';curDM=null;renderChat()};
+$('dmList').addEventListener('click',e=>{const pk=e.target.closest('[data-peer]')?.dataset.peer;if(pk)openDM(pk)});
+$('members').addEventListener('click',e=>{const pk=e.target.closest('[data-dm]')?.dataset.dm;if(pk)openDM(pk)});
+$('ephSel').onchange=e=>{
+  const ch=curChan(),v=+e.target.value;const op={t:'eph',id:CCSync.rid(),ts:Date.now(),s:v};
+  applyChat(ch,op,ME.pk);persist();publish(ch,op);fx('toggle');renderChat();
+};
+$('notifOn').onchange=e=>{SET.notify=e.target.checked;saveSet();if(SET.notify)askNotif();renderNotifState()};
+$('rcptOn').onchange=e=>{SET.receipts=e.target.checked;saveSet();renderChat()};
 $('chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&matchMedia('(hover:hover)').matches){e.preventDefault();$('chatForm').requestSubmit()}});
 $('chatIn').addEventListener('input',e=>{e.target.style.height='';e.target.style.height=Math.min(140,e.target.scrollHeight)+'px'});
 
@@ -1237,6 +1478,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)persist()})
 /* ---------- suoni, vibrazione e accessibilità ---------- */
 const VISION=[['auto','vmAuto'],['standard','vmStandard'],['low','vmLow'],['contrast','vmContrast'],['protan','vmProtan'],['deutan','vmDeutan'],['tritan','vmTritan'],['mono','vmMono'],['blind','vmBlind'],['photo','vmPhoto']];
 function renderA11y(){
+  $('notifOn').checked=SET.notify!==false;$('rcptOn').checked=SET.receipts!==false;renderNotifState();
   $('sndOn').checked=SET.sound!==false;$('vibOn').checked=SET.vib!==false;
   $('sndVol').value=SET.vol;$('vibInt').value=SET.vibInt;$('txtSize').value=SET.textSize;$('voiceRate').value=SET.voiceRate;
   $('sndVolOut').textContent=SET.vol+'%';$('vibIntOut').textContent=SET.vibInt+'%';$('txtSizeOut').textContent=SET.textSize+'%';$('voiceRateOut').textContent=SET.voiceRate+'%';
@@ -1309,7 +1551,8 @@ $('tRing').onclick=()=>tourI===TOUR.length-1?tourClose():tourShow(tourI+1);   //
 document.addEventListener('keydown',e=>{if($('tour').hidden)return;if(e.key==='Escape')tourClose();if(e.key==='ArrowRight')$('tNext').click();if(e.key==='ArrowLeft'&&tourI>0)tourShow(tourI-1)});
 addEventListener('resize',()=>{if(!$('tour').hidden)tourShow(tourI)});
 $('openTour').onclick=tourOpen;
-if(!SET.tutorialDone&&!CCSync.parseInvite(location.hash))setTimeout(tourOpen,350);
+(function(){const m=location.hash.match(/^#chat=(.+)$/);if(m){history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>openChan(decodeURIComponent(m[1])),50)}})();
+if(!SET.tutorialDone&&!CCSync.parseInvite(location.hash)&&!/^#chat=/.test(location.hash))setTimeout(tourOpen,350);
 
 /* ---------- offline ---------- */
 if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}

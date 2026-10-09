@@ -54,6 +54,10 @@ Conti Chiari tiene traccia di chi ha pagato cosa e alla fine ti dice **chi deve 
 | **Riepilogo in chat** | Un tocco e invii il riepilogo dei conti su WhatsApp, Telegram o dove preferisci. |
 | **Gruppo online con QR** | Mostri un QR, l'amico lo inquadra con la fotocamera ed entra nel gruppo. Da lì spese, persone e pagamenti si aggiornano da soli su tutti i telefoni. |
 | **Chat di gruppo cifrata** | Una chat dentro ogni gruppo online, cifrata end-to-end: solo chi è nel gruppo può leggerla. |
+| **Chat private** | Scrivi a un solo membro del gruppo. La chiave nasce da voi due (ECDH), nemmeno gli altri del gruppo possono leggere. |
+| **Doppia spunta blu** | ✓ inviato, ✓✓ grigie consegnato, ✓✓ blu letto (nei gruppi: letto da tutti). Le conferme di lettura si possono disattivare. |
+| **Messaggi effimeri** | In ogni chat scegli 5 minuti, 1 ora, 8 ore o 24 ore: poi i messaggi spariscono da tutti i telefoni. Le chat private sono effimere a 24 ore di default. |
+| **Notifiche** | Un avviso per ogni messaggio in arrivo, nei gruppi e in privato, anche con l'app in background. |
 | **Profilo con foto e messaggio** | Ognuno sceglie foto, nome e un messaggio pubblico, visibili ai membri dei suoi gruppi online. |
 | **Ricerca nei movimenti** | Cerca tra spese e rimborsi passati per testo, persona e periodo, e filtra le **entrate** e le **uscite** di ciascuno, con i totali. |
 | **Suoni e vibrazione** | Ogni azione ha il suo suono e la sua vibrazione: tocco, cambio scheda, salvataggio, eliminazione, rimborso, messaggio inviato e ricevuto, errore, scansione QR. Volume e intensità si regolano nelle impostazioni. |
@@ -139,6 +143,9 @@ Sì, se il gruppo è online: scheda **Gruppo → Attiva gruppo online**, poi l'a
 
 **Come entro in un gruppo con il QR?**
 Tocca il nome del gruppo in alto → **Scansiona QR** e inquadra il codice. Su Android puoi anche inquadrarlo con la fotocamera del telefono. Se la fotocamera non è disponibile, usa **Usa una foto del QR**.
+
+**Le notifiche arrivano anche con l'app chiusa?**
+Arrivano mentre l'app è aperta o in background. Con l'app chiusa del tutto no: servirebbe un server di notifiche, e Conti Chiari non ne usa per non dipendere da nessuno. Alla riapertura trovi tutti i messaggi.
 
 **I server possono leggere le mie spese o la chat?**
 No. Ricevono solo dati cifrati con la chiave del gruppo, che sta solo nei telefoni dei membri e nel QR. I server sono pubblici e gratuiti, quindi in rari casi potrebbero cancellare dati vecchi. I telefoni del gruppo conservano comunque una copia completa.

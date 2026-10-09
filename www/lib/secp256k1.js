@@ -1334,5 +1334,5 @@ const wNAF = (n) => {
 // !! Remove the export below to easily use in REPL / browser console
 
 
-window.nobleSecp={schnorr,utils,etc,hashes};
+window.nobleSecp={schnorr,utils,etc,hashes,getSharedSecret};
 })();

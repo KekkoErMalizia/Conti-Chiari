@@ -59,7 +59,7 @@ function play(type){
   }catch(e){}
   try{
     const k = (SET.vibInt ?? 50) / 50;
-    if(SET.vib !== false && k > 0 && navigator.vibrate && HAPTICS[type]) navigator.vibrate(HAPTICS[type].map((v, i) => i % 2 ? v : Math.max(1, Math.round(v * k))));
+    if(SET.vib !== false && k > 0 && navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive) && HAPTICS[type]) navigator.vibrate(HAPTICS[type].map((v, i) => i % 2 ? v : Math.max(1, Math.round(v * k))));
   }catch(e){}
 }
 

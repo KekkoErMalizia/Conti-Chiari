@@ -56,8 +56,10 @@ async function open(key, content){
 }
 
 /* ---------- eventi Nostr firmati ---------- */
-async function makeEvent(keys, topic, content, ts){
-  const ev = {pubkey: keys.pk, created_at: Math.floor(ts / 1000), kind: KIND, tags: [['t', topic]], content};
+async function makeEvent(keys, topic, content, ts, expires){
+  const tags = [['t', topic]];
+  if(expires) tags.push(['expiration', String(Math.ceil(expires / 1000))]);   // i relay che supportano NIP-40 lo cancellano alla scadenza
+  const ev = {pubkey: keys.pk, created_at: Math.floor(ts / 1000), kind: KIND, tags, content};
   const id = await sha256(JSON.stringify([0, ev.pubkey, ev.created_at, ev.kind, ev.tags, ev.content]));
   ev.id = hex(id);
   ev.sig = hex(await schnorr.signAsync(id, unhex(keys.sk)));
@@ -140,13 +142,23 @@ class Hub{
     this.onOp(g.id, op, ev.pubkey, ev.created_at);
   }
   async publish(key, topic, op){
-    const ev = await makeEvent(this.keys, topic, await seal(key, op), op.ts || Date.now());
+    const ev = await makeEvent(this.keys, topic, await seal(key, op), op.ts || Date.now(), op.exp);
     this.seen.add(ev.id);
     this.pending[ev.id] = ev;
     Object.values(this.socks).forEach(s => { if(s.open) try{ s.ws.send(JSON.stringify(['EVENT', ev])) }catch(e){} });
     return ev;
   }
   resend(events){ events.forEach(ev => { this.pending[ev.id] = ev; this.seen.add(ev.id) }); Object.values(this.socks).forEach(s => { if(s.open) events.forEach(ev => s.ws.send(JSON.stringify(['EVENT', ev]))) }) }
+}
+
+/* ---------- chat private: chiave condivisa tra due dispositivi (ECDH secp256k1) ---------- */
+async function dmChannel(sk, peerPk){
+  // la coordinata x del punto condiviso è uguale per entrambi; solo i due dispositivi possono calcolarla
+  const shared = window.nobleSecp.getSharedSecret(unhex(sk), unhex('02' + peerPk));
+  const x = shared.slice(1);
+  const material = new Uint8Array(6 + x.length); material.set(enc.encode('cc-dm:')); material.set(x, 6);
+  const key = b64url(await sha256(material));
+  return {key, topic: await topicOf(key)};
 }
 
 /* ---------- inviti ---------- */
@@ -166,5 +178,5 @@ function parseInvite(text){
   return null;
 }
 
-window.CCSync = {Hub, deviceKeys, newGroupKey, topicOf, seal, open, makeEvent, checkEvent, inviteLink, parseInvite, rid, KIND, DEFAULT_RELAYS};
+window.CCSync = {Hub, deviceKeys, newGroupKey, topicOf, seal, open, makeEvent, checkEvent, inviteLink, parseInvite, dmChannel, rid, KIND, DEFAULT_RELAYS};
 })();
