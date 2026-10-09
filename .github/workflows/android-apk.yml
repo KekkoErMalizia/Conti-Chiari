@@ -28,6 +28,9 @@ jobs:
       - name: Crea il progetto Android e le icone
         run: npm run android
 
+      - name: Permesso fotocamera (scansione QR)
+        run: sed -i 's#</manifest>#    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />\n</manifest>#' android/app/src/main/AndroidManifest.xml && grep -n CAMERA android/app/src/main/AndroidManifest.xml
+
       - name: Compila l'APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon

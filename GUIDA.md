@@ -62,6 +62,15 @@ Per la maggior parte degli usi la Strada 1 su iPhone dà lo stesso risultato, se
 
 ---
 
+## Gruppo online, QR e chat
+
+1. Nella scheda **Gruppo** tocca **Attiva gruppo online**.
+2. Compare un **QR**: fallo inquadrare all'amico. Lui apre Conti Chiari, tocca il nome del gruppo in alto, poi **Scansiona QR**. In alternativa puoi mandargli il link con **Invia link**.
+3. Ognuno indica **chi è** nel gruppo e, in **Impostazioni → Il tuo profilo**, sceglie foto, nome e messaggio pubblico.
+4. Da quel momento spese, rimborsi e messaggi nella scheda **Chat** arrivano a tutti da soli.
+
+Su iPhone il link aperto dalla fotocamera di sistema apre Safari, non l'app installata. Per questo conviene usare **Scansiona QR** dentro l'app.
+
 ## Come si usa
 
 - **Gruppo** (scheda in basso): aggiungi le persone e rinomina il gruppo.

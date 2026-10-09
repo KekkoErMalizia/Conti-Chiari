@@ -51,6 +51,11 @@ Conti Chiari tiene traccia di chi ha pagato cosa e alla fine ti dice **chi deve 
 | **Chi deve a chi** | L'elenco dei rimborsi da fare, ridotto al minimo. Puoi spuntare quelli già pagati. |
 | **Più gruppi** | Un gruppo per il viaggio, uno per la casa, uno per le cene: restano separati. |
 | **Riepilogo in chat** | Un tocco e invii il riepilogo dei conti su WhatsApp, Telegram o dove preferisci. |
+| **Gruppo online con QR** | Mostri un QR, l'amico lo inquadra con la fotocamera ed entra nel gruppo. Da lì spese, persone e pagamenti si aggiornano da soli su tutti i telefoni. |
+| **Chat di gruppo cifrata** | Una chat dentro ogni gruppo online, cifrata end-to-end: solo chi è nel gruppo può leggerla. |
+| **Profilo con foto e messaggio** | Ognuno sceglie foto, nome e un messaggio pubblico, visibili ai membri dei suoi gruppi online. |
+| **Ricerca nei movimenti** | Cerca tra spese e rimborsi passati per testo, persona e periodo, e filtra le **entrate** e le **uscite** di ciascuno, con i totali. |
+| **Rimborsi registrati** | Quando qualcuno paga, tocchi «Segna pagato»: il rimborso entra nello storico e i saldi si aggiornano. |
 | **Condivisione con un codice** | Passi un intero gruppo a un amico mandandogli un codice da incollare nella sua app. |
 | **Funziona offline** | Una volta installata, l'app funziona anche senza connessione. |
 | **19 lingue** | Italiano, inglese, spagnolo, francese, tedesco, portoghese, olandese, polacco, rumeno, svedese, turco, greco, russo, ucraino, arabo, hindi, cinese, giapponese e coreano. Si sceglie da sola in base al telefono, e si può cambiare a mano. |
@@ -109,9 +114,11 @@ Se il gruppo esiste già sul suo telefono, viene aggiornato con i dati nuovi.
 
 ## Privacy
 
-- **Nessun account** e **nessun server**: i dati restano solo sul tuo telefono, nella memoria del browser o dell'app.
+- **Nessun account.** I gruppi normali restano solo sul tuo telefono.
+- **Gruppi online cifrati end-to-end.** Quando attivi un gruppo online, il telefono genera una chiave segreta casuale. Ogni spesa, messaggio o modifica viene **cifrata sul telefono** (AES-256-GCM) prima di partire. Viaggia attraverso alcuni server pubblici gratuiti della rete [Nostr](https://nostr.com), che vedono solo dati illeggibili.
+- **La chiave è nel QR.** Chi ha il QR o il link di invito può leggere il gruppo: mostralo solo alle persone che vuoi far entrare.
+- Ogni messaggio è **firmato** dal telefono che lo ha scritto, quindi nessuno può fingersi un altro membro.
 - Nessuna pubblicità, nessun tracciamento, nessun cookie di terze parti.
-- I dati escono dal telefono solo quando **tu** invii un riepilogo o un codice.
 
 **Attenzione:** se cancelli i dati del browser o disinstalli l'app, i gruppi vengono cancellati. Per tenerne una copia, invia a te stesso il codice del gruppo.
 
@@ -124,7 +131,16 @@ Sì, completamente.
 I dati non passano da soli al nuovo telefono. Prima di cambiarlo, invia a te stesso il codice di ogni gruppo e importalo sul nuovo.
 
 **Le modifiche di un amico mi arrivano in automatico?**
-No. Non c'è un server che sincronizza i telefoni. Per aggiornare un gruppo bisogna reinviare il codice.
+Sì, se il gruppo è online: scheda **Gruppo → Attiva gruppo online**, poi l'amico scansiona il QR. Senza internet le modifiche restano in attesa e partono appena torni online.
+
+**Come entro in un gruppo con il QR?**
+Tocca il nome del gruppo in alto → **Scansiona QR** e inquadra il codice. Su Android puoi anche inquadrarlo con la fotocamera del telefono. Se la fotocamera non è disponibile, usa **Usa una foto del QR**.
+
+**I server possono leggere le mie spese o la chat?**
+No. Ricevono solo dati cifrati con la chiave del gruppo, che sta solo nei telefoni dei membri e nel QR. I server sono pubblici e gratuiti, quindi in rari casi potrebbero cancellare dati vecchi. I telefoni del gruppo conservano comunque una copia completa.
+
+**Come cerco un pagamento vecchio?**
+Nella scheda **Movimenti** scrivi nella ricerca, scegli la persona e il periodo, e tocca **Entrate** o **Uscite**.
 
 **Posso usare valute diverse dall'euro?**
 Sì: in **Impostazioni → Valuta del gruppo** trovi tutte le valute ufficiali. Ogni gruppo ha la sua. L'app non converte da una valuta all'altra: se cambi valuta, gli importi già inseriti restano gli stessi numeri.
@@ -145,7 +161,8 @@ GitHub Pages pubblica ogni progetto come cartella dell'indirizzo dell'account. U
 L'app è una singola pagina web (HTML, CSS e JavaScript, senza librerie esterne) installabile come PWA. È poi impacchettata come app nativa con [Capacitor](https://capacitorjs.com/).
 
 ```
-www/                  l'app: index.html, i18n.js (traduzioni), manifest, service worker (offline), icone
+www/                  l'app: index.html, i18n.js (traduzioni), sync.js (sincronizzazione cifrata),
+                      lib/ (QR e firme digitali), manifest, service worker (offline), icone
 assets/               icone e schermata di avvio per Android e iOS
 capacitor.config.json configurazione dell'app nativa (id: it.contichiari.app)
 package.json          dipendenze e comandi per creare i progetti Android/iOS
@@ -169,5 +186,7 @@ npx cap open ios
 ```
 
 Per distribuirla tramite App Store o TestFlight serve un account Apple Developer.
+
+**Come funziona la sincronizzazione.** Ogni modifica è un'operazione (`exp`, `pay`, `person`, `msg`, `member`, …) con un orario. Viene cifrata con AES-256-GCM usando la chiave del gruppo, firmata con una chiave Schnorr/secp256k1 propria di ogni dispositivo e pubblicata come evento Nostr (kind 4321, tag `t` = hash della chiave) su più relay pubblici. Ogni telefono applica le operazioni ricevute e, per ogni oggetto, vince la modifica più recente. Le librerie incluse sono [noble-secp256k1](https://github.com/paulmillr/noble-secp256k1) (MIT), [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) (MIT) e [jsQR](https://github.com/cozmo/jsQR) (Apache 2.0).
 
 **Come vengono calcolati i rimborsi.** Per ogni persona si calcola il saldo: quanto ha pagato meno la sua quota delle spese. Poi, a ogni passo, la persona con il debito più grande paga quella con il credito più grande, finché tutti sono in pari. Così i trasferimenti sono al massimo il numero di persone meno uno.

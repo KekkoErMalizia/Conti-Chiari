@@ -6,7 +6,7 @@
   "scripts": {
     "icons": "capacitor-assets generate --iconBackgroundColor '#1f5f6b' --iconBackgroundColorDark '#0f1a1e' --splashBackgroundColor '#eef2f1' --splashBackgroundColorDark '#0f1a1e'",
     "android": "cap add android && npm run icons -- --android && cap sync android",
-    "ios": "cap add ios && npm run icons -- --ios && cap sync ios"
+    "ios": "cap add ios && npm run icons -- --ios && cap sync ios && plutil -insert NSCameraUsageDescription -string 'Serve per scansionare il QR di invito di un gruppo.' ios/App/App/Info.plist"
   },
   "dependencies": {
     "@capacitor/android": "^7.0.0",
