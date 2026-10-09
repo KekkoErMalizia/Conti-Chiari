@@ -67,8 +67,17 @@ jobs:
           KEYSTORE: ${{ secrets.ANDROID_DEBUG_KEYSTORE }}
         run: |
           if [ -n "$KEYSTORE" ]; then
-            mkdir -p ~/.android && echo "$KEYSTORE" | base64 -d > ~/.android/debug.keystore
-            echo "Firma stabile: chiave dal secret ANDROID_DEBUG_KEYSTORE"
+            # spazi e a capo entrano facilmente copiando dal telefono: si tolgono prima di decodificare
+            CLEAN=$(printf '%s' "$KEYSTORE" | tr -d ' \t\r\n')
+            echo "Lunghezza del secret senza spazi: ${#CLEAN} caratteri (la chiave creata con GUIDA.md ne ha circa 3500)"
+            mkdir -p ~/.android
+            if printf '%s' "$CLEAN" | base64 -d > ~/.android/debug.keystore 2>/dev/null \
+               && keytool -list -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey > /dev/null 2>&1; then
+              echo "Firma stabile: chiave dal secret ANDROID_DEBUG_KEYSTORE"
+            else
+              rm -f ~/.android/debug.keystore
+              echo "::warning::Il secret ANDROID_DEBUG_KEYSTORE non contiene una chiave valida (testo incompleto o modificato): l'APK è firmato con una chiave nuova. Ricopialo per intero dal file ANDROID_DEBUG_KEYSTORE.txt"
+            fi
           else
             echo "::warning::Manca il secret ANDROID_DEBUG_KEYSTORE: l'APK è firmato con una chiave nuova, per aggiornare bisogna disinstallare l'app (vedi GUIDA.md)"
           fi
