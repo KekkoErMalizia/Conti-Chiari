@@ -86,22 +86,21 @@ L'icona compare tra le tue app e Conti Chiari si apre a schermo intero, come un'
 
 Non esiste un file da scaricare per iPhone come l'APK per Android. Apple permette di installare app fuori dall'App Store solo se sono firmate con un account sviluppatore a pagamento (TestFlight), oppure con strumenti da computer che vanno rinnovati ogni 7 giorni. Aggiunta alla schermata Home, invece, l'app è gratuita e si aggiorna da sola.
 
-### Android, metodo consigliato
+### Android, metodo consigliato: l'APK
 
-1. Apri **Chrome** e vai su **https://kekkoermalizia.github.io/Conti-Chiari/**
-2. Tocca il menu **⋮** in alto a destra.
-3. Scegli **Installa app** oppure **Aggiungi a schermata Home**.
+Ti consigliamo caldamente di installare l'APK con il tasto dell'app, invece di usare «Installa app» del browser. «Installa app» fa creare l'app ai server di Google e la installa tramite il Play Store, e spesso dà errore.
 
-Se **Installa app** dà errore, usa **Aggiungi a schermata Home**, che non passa dal Play Store. In alternativa installa l'APK qui sotto. «Installa app» fa creare l'app ai server di Google e la installa tramite il Play Store: se il Play Store ha problemi, non funziona.
-
-### Android, con file APK
-
-1. Dal telefono, scarica **[ContiChiari.apk](https://github.com/KekkoErMalizia/Conti-Chiari/releases/download/android-latest/ContiChiari.apk)**. È sempre l'ultima versione e non serve un account GitHub. Lo stesso link è nell'app web, in **Impostazioni → Guida e video**.
-2. Se Chrome avvisa che il file può essere dannoso, tocca **Scarica comunque**.
-3. Apri il file scaricato. La prima volta Android chiede di consentire a Chrome di **installare app sconosciute**: attiva l'opzione e torna indietro.
-4. Se **Play Protect** avvisa che l'app è sconosciuta, tocca **Altri dettagli → Installa comunque**.
+1. Apri **Chrome** e vai su **https://kekkoermalizia.github.io/Conti-Chiari/**, poi **Impostazioni → Guida e video → Scarica l'app Android (APK)**. Il tasto mostra anche questi passi. In alternativa usa il link diretto **[ContiChiari.apk](https://github.com/KekkoErMalizia/Conti-Chiari/releases/download/android-latest/ContiChiari.apk)**: è sempre l'ultima versione e non serve un account GitHub.
+2. **Prima di installare:** **Impostazioni → Applicazioni → Google Play Store → Memoria → Cancella dati** e **Svuota cache**.
+3. Scarica l'APK. Se Chrome avvisa che il file può essere dannoso, tocca **Scarica comunque**.
+4. Apri il file scaricato. La prima volta Android chiede di consentire a Chrome di **installare app sconosciute**: attiva l'opzione e torna indietro.
+5. Avviata l'installazione, **forzala**: se compare **Play Protect**, tocca **Altri dettagli → Installa comunque**.
 
 Gli aggiornamenti si installano sopra la versione precedente e i dati restano. Se compare «App non installata», la versione sul telefono è firmata con un'altra chiave: disinstallala e reinstalla. Prima invia a te stesso il codice dei gruppi, così non perdi i dati.
+
+### Android, dal browser (alternativa)
+
+In Chrome tocca **⋮ → Aggiungi a schermata Home**: crea un collegamento che si apre a schermo intero e non passa dal Play Store. «Installa app» è sconsigliato, per il motivo spiegato sopra.
 
 ### Computer
 
@@ -147,7 +146,7 @@ Se il gruppo esiste già sul suo telefono, viene aggiornato con i dati nuovi.
 Sì, completamente.
 
 **Su Android l'app non si installa o si interrompe appena la apro. Cosa faccio?**
-Di solito è colpa del Google Play Store sul telefono, soprattutto se si interrompe anche lui o i Servizi Google Play. Vai in **Impostazioni → Applicazioni → Google Play Store → Archivio → Svuota cache** (e, se serve, lo stesso per **Servizi Google Play**), riavvia il telefono e reinstalla l'app. Se non basta, aggiorna dal Play Store **Google Chrome** e **Android System WebView**. Se l'app si chiude per un errore suo, alla riapertura mostra un rapporto da condividere con «Condividi».
+Di solito è colpa del Google Play Store sul telefono, soprattutto se si interrompe anche lui o i Servizi Google Play. Vai in **Impostazioni → Applicazioni → Google Play Store → Memoria → Cancella dati** e **Svuota cache** (e, se serve, **Svuota cache** anche per **Servizi Google Play**), riavvia il telefono e reinstalla l'app. Se non basta, aggiorna dal Play Store **Google Chrome** e **Android System WebView**. Se l'app si chiude per un errore suo, alla riapertura mostra un rapporto da condividere con «Condividi».
 
 **Se cambio telefono perdo i dati?**
 I dati non passano da soli al nuovo telefono. Prima di cambiarlo, invia a te stesso il codice di ogni gruppo e importalo sul nuovo.

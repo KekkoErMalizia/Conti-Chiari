@@ -103,6 +103,11 @@ textarea{min-height:110px;font-family:var(--f-mono);font-size:13px;resize:vertic
 input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .btn{cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--surface);padding:11px 16px;font-weight:600;text-align:center;display:inline-flex;align-items:center;justify-content:center;gap:8px}
 a.btn{color:inherit;text-decoration:none}
+/* tasto «Scarica l'app Android»: contorno luminoso che pulsa con regolarità per attirare l'occhio */
+#dlApk{animation:apkGlow 2.2s ease-in-out infinite}
+@keyframes apkGlow{0%,100%{box-shadow:0 0 0 0 rgba(31,95,107,.55),0 0 0 0 rgba(31,95,107,.25)}50%{box-shadow:0 0 0 4px rgba(31,95,107,.45),0 0 22px 8px rgba(31,95,107,.45)}}
+@media (prefers-color-scheme:dark){@keyframes apkGlow{0%,100%{box-shadow:0 0 0 0 rgba(95,179,191,.5),0 0 0 0 rgba(95,179,191,.2)}50%{box-shadow:0 0 0 4px rgba(95,179,191,.45),0 0 22px 8px rgba(95,179,191,.45)}}}
+@media (prefers-reduced-motion:reduce){#dlApk{animation:none}}
 .iossteps{list-style:none;margin:4px 0 12px;padding:0;display:grid;gap:14px}
 .iossteps li{display:flex;align-items:center;gap:14px;font-size:16px}
 .iossteps .ic{flex:none;width:44px;height:44px;border-radius:12px;background:var(--chip);color:var(--accent);display:grid;place-items:center}
@@ -500,8 +505,8 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
         <h2 style="margin:0" data-t="helpTitle"></h2>
         <button class="btn primary block" type="button" id="openVideo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span data-t="watchVideo"></span></button>
         <button class="btn block" type="button" id="openTour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17h.01"/></svg><span data-t="replayTutorial"></span></button>
-        <a class="btn block" id="dlApk" hidden download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg><span data-t="dlApk"></span></a>
-        <p class="hint" id="dlApkHint" hidden data-t="dlApkHint"></p>
+        <a class="btn primary block" id="dlApk" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg><span data-t="dlApk"></span></a>
+        <p class="note" id="dlApkHint" hidden data-t="dlApkRec"></p>
         <button class="btn block" type="button" id="iosInstall" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg><span data-t="iosInstall"></span></button>
       </section>
       <section class="stack">
@@ -683,6 +688,21 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
   </div>
 </div>
 
+<!-- Foglio: installare l'APK su Android (passi da fare prima e durante l'installazione) -->
+<div class="sheet" id="apkSheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="apkTitle">
+    <div class="grab"></div>
+    <h3><span id="apkTitle" data-t="dlTitle"></span><button class="link" type="button" data-close data-t="close"></button></h3>
+    <ol class="iossteps">
+      <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></span><span data-t="dlStep1"></span></li>
+      <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg></span><span data-t="dlStep2"></span></li>
+      <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span><span data-t="dlStep3"></span></li>
+      <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span><span data-t="dlStep4"></span></li>
+    </ol>
+    <a class="btn primary block" id="apkGo" data-t="dlGo"></a>
+  </div>
+</div>
+
 <div class="sheet" id="videoSheet" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="vTitle">
     <div class="grab"></div>
@@ -706,10 +726,10 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
 
-<script src="i18n.js?v=18"></script>
+<script src="i18n.js?v=20"></script>
 <script src="lib/secp256k1.js"></script>
 <script src="lib/qrcode.js"></script>
-<script src="sync.js?v=18"></script>
+<script src="sync.js?v=20"></script>
 <script>
 'use strict';
 const KEY='conti-chiari-app-v1', SKEY='conti-chiari-settings', PKEY='conti-chiari-photo';
@@ -1791,8 +1811,14 @@ $('openTour').onclick=tourOpen;
 (function(){
   if(window.Capacitor||!/Android/i.test(navigator.userAgent)||!/\.github\.io$/.test(location.hostname))return;
   const owner=location.hostname.split('.')[0],repo=location.pathname.split('/')[1];if(!repo)return;
-  $('dlApk').href=`https://github.com/${owner}/${repo}/releases/download/android-latest/ContiChiari.apk`;
+  const url=`https://github.com/${owner}/${repo}/releases/download/android-latest/ContiChiari.apk`;
+  $('dlApk').href=$('apkGo').href=url;
   $('dlApk').hidden=$('dlApkHint').hidden=false;
+  // prima del download, i passi da seguire (cache del Play Store, «Installa comunque»)
+  $('dlApk').onclick=e=>{e.preventDefault();openSheet('apkSheet')};
+  $('apkGo').onclick=()=>setTimeout(()=>closeSheet('apkSheet'),300);
+  // l'APK è la strada consigliata: niente banner «Installa app» di Chrome (crea una WebAPK tramite il Play Store)
+  window.addEventListener('beforeinstallprompt',ev=>ev.preventDefault());
 })();
 (function(){const m=location.hash.match(/^#chat=(.+)$/);if(m){history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>openChan(decodeURIComponent(m[1])),50)}})();
 if(!SET.tutorialDone&&!CCSync.parseInvite(location.hash)&&!/^#chat=/.test(location.hash))setTimeout(tourOpen,350);
@@ -1800,6 +1826,6 @@ if(!SET.tutorialDone&&!CCSync.parseInvite(location.hash)&&!/^#chat=/.test(locati
 /* ---------- offline ---------- */
 if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="feedback.js?v=18"></script>
+<script src="feedback.js?v=20"></script>
 </body>
 </html>
