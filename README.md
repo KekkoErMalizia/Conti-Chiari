@@ -82,7 +82,9 @@ I calcoli sono al centesimo. Quando un importo non si divide in parti uguali, il
 2. Tocca il pulsante **Condividi** (il quadrato con la freccia verso l'alto).
 3. Scegli **Aggiungi alla schermata Home**.
 
-L'icona compare tra le tue app e Conti Chiari si apre a schermo intero, come un'app normale.
+L'icona compare tra le tue app e Conti Chiari si apre a schermo intero, come un'app normale. Gli stessi passi, con le icone, si trovano nell'app web aperta da iPhone, in **Impostazioni → Guida e video → Installa su iPhone**.
+
+Non esiste un file da scaricare per iPhone come l'APK per Android. Apple permette di installare app fuori dall'App Store solo se sono firmate con un account sviluppatore a pagamento (TestFlight), oppure con strumenti da computer che vanno rinnovati ogni 7 giorni. Aggiunta alla schermata Home, invece, l'app è gratuita e si aggiorna da sola.
 
 ### Android, metodo consigliato
 
@@ -90,12 +92,16 @@ L'icona compare tra le tue app e Conti Chiari si apre a schermo intero, come un'
 2. Tocca il menu **⋮** in alto a destra.
 3. Scegli **Installa app** oppure **Aggiungi a schermata Home**.
 
+Se **Installa app** dà errore, usa **Aggiungi a schermata Home**, che non passa dal Play Store. In alternativa installa l'APK qui sotto. «Installa app» fa creare l'app ai server di Google e la installa tramite il Play Store: se il Play Store ha problemi, non funziona.
+
 ### Android, con file APK
 
-1. Vai nella scheda [**Actions**](../../actions) di questo repository. Serve essere entrati con un account GitHub.
-2. Apri l'esecuzione più recente di **App Android (APK)**.
-3. In fondo alla pagina, sotto **Artifacts**, scarica **ContiChiari-android**.
-4. Apri lo zip, tocca `ContiChiari.apk` e consenti l'installazione da fonti sconosciute quando richiesto.
+1. Dal telefono, scarica **[ContiChiari.apk](https://github.com/KekkoErMalizia/Conti-Chiari/releases/download/android-latest/ContiChiari.apk)**. È sempre l'ultima versione e non serve un account GitHub. Lo stesso link è nell'app web, in **Impostazioni → Guida e video**.
+2. Se Chrome avvisa che il file può essere dannoso, tocca **Scarica comunque**.
+3. Apri il file scaricato. La prima volta Android chiede di consentire a Chrome di **installare app sconosciute**: attiva l'opzione e torna indietro.
+4. Se **Play Protect** avvisa che l'app è sconosciuta, tocca **Altri dettagli → Installa comunque**.
+
+Gli aggiornamenti si installano sopra la versione precedente e i dati restano. Se compare «App non installata», la versione sul telefono è firmata con un'altra chiave: disinstallala e reinstalla. Prima invia a te stesso il codice dei gruppi, così non perdi i dati.
 
 ### Computer
 

@@ -33,9 +33,15 @@ Puoi mandare lo stesso indirizzo agli amici: ognuno installa l'app sul proprio t
 
 Usa lo stesso repository della Strada 1. Ad ogni caricamento GitHub costruisce l'APK da solo.
 
-1. Vai su **Actions → App Android (APK)** e apri l'esecuzione più recente. La prima volta impiega circa 5 minuti.
-2. In fondo alla pagina, sotto **Artifacts**, scarica **ContiChiari-android**. È uno zip che contiene `ContiChiari.apk`.
-3. Passa il file sul telefono, aprilo e consenti "Installa app sconosciute" quando Android lo chiede.
+1. Vai su **Actions → App Android (APK)** e aspetta che l'esecuzione più recente diventi verde. La prima volta impiega circa 5 minuti.
+2. Dal telefono, apri `https://github.com/TUO-NOME-UTENTE/conti-chiari/releases/download/android-latest/ContiChiari.apk`. È sempre l'ultima versione e lo stesso link è nell'app web, in **Impostazioni → Guida e video**. In alternativa, nell'esecuzione su **Actions** scarica lo zip **ContiChiari-android** sotto **Artifacts**.
+3. Se Chrome avvisa che il file può essere dannoso, tocca **Scarica comunque**. Apri il file e consenti a Chrome di **installare app sconosciute** quando Android lo chiede.
+4. Se **Play Protect** avvisa, tocca **Altri dettagli → Installa comunque**.
+
+**Firma stabile (consigliata, una volta sola).** Android installa un aggiornamento sopra la versione vecchia solo se le due versioni sono firmate con la stessa chiave. Senza questo passaggio GitHub crea una chiave nuova a ogni versione. Allora l'aggiornamento dà «App non installata» e bisogna disinstallare l'app, perdendo i dati.
+1. Crea una chiave sul computer: `keytool -genkeypair -keystore contichiari.keystore -storetype PKCS12 -alias androiddebugkey -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Conti Chiari"`. Poi convertila in testo: `base64 -w0 contichiari.keystore` (su Mac `base64 -i contichiari.keystore`).
+2. Su GitHub: **Settings → Secrets and variables → Actions → New repository secret**. Come nome scrivi `ANDROID_DEBUG_KEYSTORE`, come valore incolla il testo, poi **Add secret**.
+3. Da quel momento ogni APK ha la stessa firma. Conserva il file `contichiari.keystore`: se lo perdi, il prossimo aggiornamento richiederà di disinstallare l'app.
 
 **Se l'app non si installa o si interrompe all'avvio** («Conti Chiari si è interrotta», spesso insieme a «Google Play Store» o «Servizi Google Play»), il problema di solito è del Play Store sul telefono, non dell'app:
 1. **Impostazioni → Applicazioni → Google Play Store → Archivio → Svuota cache**. Se serve, fai lo stesso per **Servizi Google Play** (solo «Svuota cache», non «Cancella dati»).
