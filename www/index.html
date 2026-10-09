@@ -130,10 +130,10 @@ a.btn{color:inherit;text-decoration:none}
 .cthead span#ctStatus{display:block;font-size:14px;color:var(--muted);overflow-wrap:anywhere}
 .qrbox b{font-size:17px}
 /* tasto «Scarica l'app Android»: contorno luminoso che pulsa con regolarità per attirare l'occhio */
-#dlApk{animation:apkGlow 2.2s ease-in-out infinite}
-@keyframes apkGlow{0%,100%{box-shadow:0 0 0 0 rgba(31,95,107,.55),0 0 0 0 rgba(31,95,107,.25)}50%{box-shadow:0 0 0 4px rgba(31,95,107,.45),0 0 22px 8px rgba(31,95,107,.45)}}
-@media (prefers-color-scheme:dark){@keyframes apkGlow{0%,100%{box-shadow:0 0 0 0 rgba(95,179,191,.5),0 0 0 0 rgba(95,179,191,.2)}50%{box-shadow:0 0 0 4px rgba(95,179,191,.45),0 0 22px 8px rgba(95,179,191,.45)}}}
-@media (prefers-reduced-motion:reduce){#dlApk{animation:none}}
+#dlApk{position:relative}
+#dlApk::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:0 0 0 4px var(--accent),0 0 22px 8px var(--accent);opacity:0;pointer-events:none;animation:apkGlow 2.2s ease-in-out infinite}
+@keyframes apkGlow{50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){#dlApk::after{animation:none}}
 .iossteps{list-style:none;margin:4px 0 12px;padding:0;display:grid;gap:14px}
 .iossteps li{display:flex;align-items:center;gap:14px;font-size:16px}
 .iossteps .ic{flex:none;width:44px;height:44px;border-radius:12px;background:var(--chip);color:var(--accent);display:grid;place-items:center}
@@ -304,6 +304,27 @@ body.custom-bg .chatbar{background:none}
 .tx:focus-visible i{outline:2px solid var(--accent);outline-offset:2px}
 .thumb{width:100%;aspect-ratio:16/10;max-width:100%;border-radius:12px;background:var(--chip) center/cover no-repeat;border:1px solid var(--line)}
 .prof{display:flex;gap:16px;align-items:center}
+
+/* aspetto: skin e chiaro/scuro */
+.seg button svg{width:16px;height:16px;flex:none;vertical-align:-3px;margin-inline-end:4px}
+.skins{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.skin{all:unset;cursor:pointer;display:grid;gap:6px;justify-items:center;font-size:13px;font-weight:600;color:var(--muted);text-align:center;min-width:0}
+.skin .mini{position:relative;width:100%;height:96px;border-radius:12px;overflow:hidden;border:2px solid var(--line);background:var(--m-bg);display:grid;grid-template-rows:22px 1fr 16px}
+.skin .mt{background:var(--m-surface);border-bottom:1px solid var(--m-line);display:grid;align-content:center;gap:2px;padding:0 7px}
+.skin .mt i{display:block;height:3px;width:40%;border-radius:2px;background:var(--m-accent)}
+.skin .mt i+i{height:5px;width:70%;background:var(--m-ink);opacity:.85}
+.skin .mb{padding:6px;display:grid;gap:4px;align-content:start}
+.skin .mb i{display:block;height:14px;border-radius:5px;background:var(--m-surface);border:1px solid var(--m-line)}
+.skin .mb i:first-child{background:var(--m-accent);border-color:var(--m-accent);width:60%}
+.skin .mn{background:var(--m-surface);border-top:1px solid var(--m-line);display:flex;justify-content:space-around;align-items:center}
+.skin .mn i{width:6px;height:6px;border-radius:50%;background:var(--m-line)}
+.skin .mn i:first-child{background:var(--m-accent)}
+.skin .tick{position:absolute;top:5px;inset-inline-end:5px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:none;place-items:center}
+.skin .tick svg{width:12px;height:12px}
+.skin[aria-pressed="true"]{color:var(--ink)}
+.skin[aria-pressed="true"] .mini{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.skin[aria-pressed="true"] .tick{display:grid}
+.skin:focus-visible .mini{outline:2px solid var(--accent);outline-offset:3px}
 
 /* QR */
 .qrbox{display:grid;justify-items:center;gap:12px}
@@ -610,6 +631,16 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
         <p class="hint" data-t="currencyHint"></p>
       </section>
       <section class="stack">
+        <h2 style="margin:0" data-t="look"></h2>
+        <div class="seg" role="group" id="modeSeg">
+          <button type="button" data-mode="auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg><span data-t="modeAuto"></span></button>
+          <button type="button" data-mode="light"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg><span data-t="modeLight"></span></button>
+          <button type="button" data-mode="dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><span data-t="modeDark"></span></button>
+        </div>
+        <div class="skins" id="skins" role="group" data-ta="look"></div>
+        <p class="hint" data-t="skinHint"></p>
+      </section>
+      <section class="stack">
         <h2 style="margin:0" data-t="background"></h2>
         <div class="seg" role="group" id="bgSeg">
           <button type="button" data-bg="default" data-t="bgDefault"></button>
@@ -856,10 +887,10 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
 
-<script src="i18n.js?v=25"></script>
+<script src="i18n.js?v=26"></script>
 <script src="lib/secp256k1.js"></script>
 <script src="lib/qrcode.js"></script>
-<script src="sync.js?v=25"></script>
+<script src="sync.js?v=26"></script>
 <script>
 'use strict';
 const KEY='conti-chiari-app-v1', SKEY='conti-chiari-settings', PKEY='conti-chiari-photo';
@@ -888,10 +919,37 @@ const IC={
 };
 
 /* ---------- impostazioni e lingua ---------- */
-let SET={lang:'auto',bg:{type:'default',color:'#d6ece2',grad:'none',color2:'#1d2b44',angle:135,tex:'none',texStrength:30,texSize:20},profile:{name:'',status:'',avatar:''},sound:true,vib:true,keepAlive:false,vol:50,vibInt:50,vision:'auto',textSize:50,voiceRate:50,notify:true,receipts:true};
+let SET={skin:'laguna',mode:'auto',lang:'auto',bg:{type:'default',color:'#d6ece2',grad:'none',color2:'#1d2b44',angle:135,tex:'none',texStrength:30,texSize:20},profile:{name:'',status:'',avatar:''},sound:true,vib:true,keepAlive:false,vol:50,vibInt:50,vision:'auto',textSize:50,voiceRate:50,notify:true,receipts:true};
 const fx=k=>{try{window.FX&&FX.play(k)}catch(e){}};
 try{const s=JSON.parse(localStorage.getItem(SKEY));if(s)SET=Object.assign(SET,s,{profile:Object.assign(SET.profile,s.profile||{}),bg:Object.assign(SET.bg,s.bg||{})})}catch(e){}
+/* ---------- aspetto: skin (palette di colori) e chiaro/scuro ----------
+   Le variabili della skin vanno in uno <style> aggiunto dopo quello principale, con selettore :root:
+   vincono sui colori predefiniti ma non sulle modalità vista (html.a-hc, html.a-photo…), che restano più forti. */
+const SEM={l:{pos:'#1d7a4f',neg:'#b3402d',scrim:'rgba(10,20,24,.45)'},d:{pos:'#5cc795',neg:'#ef8a74',scrim:'rgba(0,0,0,.6)'}};
+const SKINS={
+  laguna:{l:['#eef2f1','#ffffff','#14262e','#5b6f76','#d5dfdd','#e3ebea','#1f5f6b','#ffffff','#a8770a','#f6ecd2','#d9ecef'],d:['#0f1a1e','#16252b','#e4eeed','#93a8ad','#26393f','#20343a','#5fb3bf','#0b1619','#e3b54a','#2c2614','#1d3b42']},
+  salvia:{l:['#eff2ea','#fbfcf7','#1e2a1f','#5f6d5f','#d6ddcd','#e3e9da','#3d6a45','#ffffff','#94720f','#f3ecd3','#dbe9d6'],d:['#111812','#19231a','#e3ebe0','#98a996','#2a382b','#223023','#8cc394','#0e1a10','#dcb84f','#29261a','#23392a']},
+  mirtillo:{l:['#f0f0f7','#ffffff','#1b1c33','#5e6080','#dadaea','#e5e5f2','#4a4ea6','#ffffff','#a0740c','#f5edd6','#e0e1f5'],d:['#11111d','#1a1a2b','#e6e6f5','#9c9ec0','#2c2c45','#24243a','#a3a6f2','#14152b','#e1b64e','#2a2516','#2a2b4a']},
+  agrume:{l:['#f7f0e8','#fffdf9','#2b1d14','#776253','#e7dacb','#f0e4d6','#ad4f1b','#ffffff','#8f6a0a','#f6ead0','#f5e0cf'],d:['#1a1410','#241c16','#f2e7dc','#b39d8b','#3a2d23','#30251d','#f09a62','#2a160a','#e3bb57','#2d2414','#3d2a1d']},
+  corallo:{l:['#f8eff1','#ffffff','#2a1219','#7a5962','#ebd6dc','#f3e1e6','#ad3757','#ffffff','#94700c','#f5ebd3','#f6dde4'],d:['#190f13','#23161b','#f3e3e8','#b7939d','#3b252c','#2f1d23','#f28fab','#2b0d17','#e2b850','#2b2416','#3f2430']},
+  ardesia:{l:['#eceef0','#ffffff','#16191d','#5b636e','#d5d9de','#e1e4e8','#2e3742','#ffffff','#946f0b','#f4ecd4','#e3e7ec'],d:['#0e1013','#171a1e','#e7eaee','#97a0ab','#2a2f35','#20242a','#c9d2dd','#111418','#ddb54d','#29251a','#2a3038']}
+};
+const SKIN_KEYS=['bg','surface','ink','muted','line','chip','accent','accent-ink','gold','gold-soft','mine'];
+const skinPal=(k,v)=>{const a=(SKINS[k]||SKINS.laguna)[v],o={};SKIN_KEYS.forEach((n,i)=>o[n]=a[i]);return Object.assign(o,SEM[v])};
+const darkMQ=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):{matches:false};
+const isDarkMode=()=>SET.mode==='dark'||(SET.mode!=='light'&&darkMQ.matches);
+function applySkin(){
+  if(!SKINS[SET.skin])SET.skin='laguna';if(!['auto','light','dark'].includes(SET.mode))SET.mode='auto';
+  let st=document.getElementById('skinStyle');
+  if(!st){st=document.createElement('style');st.id='skinStyle';document.head.appendChild(st)}
+  const v=isDarkMode()?'d':'l',p=skinPal(SET.skin,v);
+  // Laguna in automatico: bastano i colori del foglio di stile principale
+  st.textContent=SET.skin==='laguna'&&SET.mode==='auto'?'':':root{'+Object.entries(p).map(([k,c])=>'--'+k+':'+c).join(';')+';color-scheme:'+(v==='d'?'dark':'light')+'}';
+  document.querySelectorAll('meta[name=theme-color]').forEach(m=>{const dk=SET.mode==='dark'||(SET.mode==='auto'&&/dark/.test(m.media||''));m.content=dk?skinPal(SET.skin,'d').bg:skinPal(SET.skin,'l').accent});
+}
+try{darkMQ.addEventListener('change',()=>{applySkin();if(typeof renderSkins==='function'&&!$('v-impostazioni').hidden)renderSkins()})}catch(e){try{darkMQ.addListener(applySkin)}catch(x){}}
 const saveSet=()=>{try{localStorage.setItem(SKEY,JSON.stringify(SET))}catch(e){toast(t('storageFull'))}};
+applySkin();
 function detectLang(){for(const l of (navigator.languages||[navigator.language||'en'])){const c=String(l).toLowerCase().split(/[-_@.]/)[0];if(I18N[c])return c}return 'en'}
 let LANG='it',LOCALE='it';
 function setLang(){
@@ -1678,6 +1736,7 @@ function renderSettings(){
   const rest=ALL_CUR.filter(c=>!COMMON_CUR.includes(c)).map(c=>[c,curName(c)]).sort((a,b)=>a[1].localeCompare(b[1],LOCALE));
   cs.innerHTML=`<optgroup label="${esc(t('commonCur'))}">${COMMON_CUR.filter(c=>ALL_CUR.includes(c)).map(opt).join('')}</optgroup><optgroup label="${esc(t('allCur'))}">${rest.map(([c])=>opt(c)).join('')}</optgroup>`;
   cs.value=cur;
+  renderSkins();
   document.querySelectorAll('#bgSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.bg===SET.bg.type));
   $('bgColorPane').hidden=SET.bg.type!=='color';$('bgPhotoPane').hidden=SET.bg.type!=='photo';
   $('swatches').innerHTML=BG_SWATCHES.map(c=>`<button type="button" class="sw" data-c="${c}" style="background:${c}" aria-label="${c}" aria-pressed="${SET.bg.color===c}"></button>`).join('');
@@ -1694,6 +1753,17 @@ function renderSettings(){
   $('texSize').value=bg.texSize??20;$('texSizeOut').textContent=(bg.texSize??20)+' px';
   const ph=getPhoto();$('thumb').style.backgroundImage=ph?`url("${ph}")`:'';$('removePhoto').hidden=!ph;
   renderA11y();
+}
+function renderSkins(){
+  const v=isDarkMode()?'d':'l';
+  document.querySelectorAll('#modeSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===SET.mode));
+  $('skins').innerHTML=Object.keys(SKINS).map(k=>{const p=skinPal(k,v);
+    return `<button type="button" class="skin" data-skin="${k}" aria-pressed="${SET.skin===k}" style="--m-bg:${p.bg};--m-surface:${p.surface};--m-ink:${p.ink};--m-line:${p.line};--m-accent:${p.accent}"><span class="mini" aria-hidden="true"><span class="mt"><i></i><i></i></span><span class="mb"><i></i><i></i><i></i></span><span class="mn"><i></i><i></i><i></i><i></i></span><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span></span>${esc(t('sk_'+k))}</button>`}).join('');
+}
+function setSkin(k){
+  if(!SKINS[k]||k===SET.skin)return;const prev=SET.skin;
+  SET.skin=k;saveSet();applySkin();renderSkins();fx('toggle');
+  undoToast(t('skinApplied',{name:t('sk_'+k)}),()=>{SET.skin=prev;saveSet();applySkin();if(!$('v-impostazioni').hidden)renderSkins()});
 }
 let photoCache,myT=null;
 function getPhoto(){if(photoCache===undefined){try{photoCache=localStorage.getItem(PKEY)||null}catch(e){photoCache=null}}return photoCache}
@@ -2075,6 +2145,8 @@ document.querySelectorAll('#bgSeg button').forEach(b=>b.onclick=()=>{
   SET.bg.type=b.dataset.bg;saveSet();applyBg();renderSettings();
   if(b.dataset.bg==='photo'&&!getPhoto())$('photoInput').click();
 });
+$('skins').addEventListener('click',e=>{const b=e.target.closest('[data-skin]');if(b)setSkin(b.dataset.skin)});
+document.querySelectorAll('#modeSeg button').forEach(b=>b.onclick=()=>{SET.mode=b.dataset.mode;saveSet();applySkin();renderSkins()});
 const setBg=(o,full)=>{Object.assign(SET.bg,{type:'color'},o);saveSet();applyBg();if(full!==false)renderSettings()};
 const pickColor=e=>{const c=e.target.closest('[data-c]')?.dataset.c;if(c)setBg({color:c})};
 $('swatches').addEventListener('click',pickColor);$('palette').addEventListener('click',pickColor);
@@ -2233,6 +2305,6 @@ if(!SET.tutorialDone&&!CCSync.parseInvite(START_HASH)&&!CCSync.parseContact(STAR
 /* ---------- offline ---------- */
 if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="feedback.js?v=25"></script>
+<script src="feedback.js?v=26"></script>
 </body>
 </html>

@@ -70,6 +70,7 @@ Conti Chiari tiene traccia di chi ha pagato cosa e alla fine ti dice **chi deve 
 | **Funziona offline** | Una volta installata, l'app funziona anche senza connessione. |
 | **19 lingue** | Italiano, inglese, spagnolo, francese, tedesco, portoghese, olandese, polacco, rumeno, svedese, turco, greco, russo, ucraino, arabo, hindi, cinese, giapponese e coreano. Si sceglie da sola in base al telefono, e si può cambiare a mano. |
 | **Tutte le valute del mondo** | Ogni gruppo ha la sua valuta: euro per la casa, yen per il viaggio in Giappone. I decimali sono corretti per ogni valuta (lo yen, per esempio, non ha centesimi). |
+| **Aspetto: skin e chiaro/scuro** | In **Impostazioni → Aspetto** scegli una delle sei skin (Laguna, Salvia, Mirtillo, Agrume, Corallo, Ardesia), ognuna mostrata come una miniatura dell'app: basta un tocco e i colori cambiano subito, con «Annulla» per tornare indietro. Scegli anche Automatico (segue il telefono), Chiaro o Scuro. I colori dei saldi (verde e rosso) restano uguali e le modalità vista per l'accessibilità hanno sempre la precedenza. |
 | **Sfondo personalizzato** | Scegli un colore tra quelli proposti, uno della tavolozza completa (12 tinte in 7 sfumature più i grigi), uno qualsiasi con il selettore o con il codice esadecimale, oppure una tua foto. Al colore puoi aggiungere una sfumatura lineare o radiale verso un secondo colore e una texture (puntini, griglia, righe, tratteggio, scacchi, zigzag, lino, grana) regolandone intensità e dimensione. |
 | **Tema chiaro e scuro** | Segue automaticamente le impostazioni del telefono. |
 
@@ -116,7 +117,7 @@ Funziona anche sui telefoni di circa 10 anni fa: Android 6 o più recente con Ch
 1. **Crea il gruppo**: tocca il nome del gruppo in alto, poi scrivi un nome e tocca **Crea**.
 2. **Aggiungi le persone**: dalla scheda **Gruppo** in basso.
 3. **Registra le spese**: nella scheda **Spese** tocca **+** e indica cosa, quanto, chi ha pagato e tra chi dividere.
-4. **Personalizza**: nella scheda **Impostazioni** scegli lingua, valuta del gruppo e sfondo.
+4. **Personalizza**: nella scheda **Impostazioni** scegli lingua, valuta del gruppo, aspetto (skin, chiaro o scuro) e sfondo.
 5. **Guarda i conti**: nella scheda **Saldi** trovi chi deve a chi. Quando qualcuno paga, spunta il rimborso.
 6. **Invia il riepilogo**: con **Invia riepilogo** lo mandi nella chat del gruppo.
 
