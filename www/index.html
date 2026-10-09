@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <title>Conti Chiari</title>
 <meta name="description" content="Split group expenses and see who owes whom. Dividi le spese di gruppo.">
 <meta name="theme-color" content="#1f5f6b" media="(prefers-color-scheme: light)">
@@ -249,7 +249,7 @@ body.custom-bg .chatbar{background:none}
 .glist .gm{font-size:13px;color:var(--muted);font-family:var(--f-mono);white-space:nowrap}
 .glist .gn{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;display:flex;align-items:center;gap:6px}
 
-.sheet{position:fixed;inset:0;z-index:20;display:grid;align-items:end;background:var(--scrim)}
+.sheet{position:fixed;inset:0;bottom:var(--kb,0px);z-index:20;display:grid;align-items:end;background:var(--scrim)}
 .sheet .panel{background:var(--surface);border-radius:20px 20px 0 0;max-height:calc(100% - var(--top) - 24px);overflow-y:auto;padding:8px 16px calc(var(--bot) + 20px);width:100%;max-width:640px;margin:0 auto}
 .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 10px}
 .sheet h3{font-family:var(--f-display);font-size:20px;margin:0 0 14px;display:flex;justify-content:space-between;align-items:center}
@@ -939,6 +939,17 @@ function closeSheet(id){if(!$(id).hidden)fx('close');$(id).hidden=true;if(id==='
 document.querySelectorAll('.sheet').forEach(s=>s.addEventListener('click',e=>{if(e.target===s||e.target.hasAttribute('data-close'))closeSheet(s.id)}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.sheet:not([hidden])').forEach(s=>closeSheet(s.id))});
 const fmtDay=d=>new Date(d+'T12:00').toLocaleDateString(LOCALE,{weekday:'short',day:'numeric',month:'long'});
+/* tastiera: i fogli in basso restano sopra la tastiera e il campo toccato resta visibile */
+(function(){
+  const vv=window.visualViewport;
+  function kb(){if(!vv)return;const h=Math.max(0,Math.round(innerHeight-vv.height-vv.offsetTop));document.documentElement.style.setProperty('--kb',(h>60?h:0)+'px')}
+  if(vv){vv.addEventListener('resize',kb);vv.addEventListener('scroll',kb)}
+  document.addEventListener('focusin',e=>{
+    const el=e.target;if(!el.matches||!el.matches('input,select,textarea')||!el.closest('.sheet'))return;
+    const show=()=>{try{el.scrollIntoView({block:'center',behavior:'smooth'})}catch(x){el.scrollIntoView()}};
+    setTimeout(()=>{kb();show()},300);setTimeout(()=>{kb();show()},700);
+  });
+})();
 let rq;function renderSoon(){if(!rq)rq=requestAnimationFrame(()=>{rq=null;render()})}
 function renderNet(){
   const on=!!G().sync;$('netDot').hidden=!on;$('netDot').classList.toggle('on',netCount>0);
