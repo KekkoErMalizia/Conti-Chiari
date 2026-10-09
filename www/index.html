@@ -895,8 +895,8 @@ function renderSettings(){
   const p=SET.profile;
   $('myAv').outerHTML=avatarHtml(p.name||'?',COLORS[0],p.avatar,'xl').replace('<span class="av','<span id="myAv" class="av');
   $('removeAvatar').hidden=!p.avatar;
-  if(document.activeElement!==$('myName'))$('myName').value=p.name||'';
-  if(document.activeElement!==$('myStatus'))$('myStatus').value=p.status||'';
+  if(!myT&&document.activeElement!==$('myName'))$('myName').value=p.name||'';
+  if(!myT&&document.activeElement!==$('myStatus'))$('myStatus').value=p.status||'';
   const ls=$('langSel');
   ls.innerHTML=`<option value="auto">${esc(t('auto'))}</option>`+LANGS.map(([c,n])=>`<option value="${c}">${esc(n)}</option>`).join('');
   ls.value=SET.lang;
@@ -911,7 +911,7 @@ function renderSettings(){
   $('customColor').value=SET.bg.color||'#d6ece2';
   const ph=getPhoto();$('thumb').style.backgroundImage=ph?`url("${ph}")`:'';$('removePhoto').hidden=!ph;
 }
-let photoCache;
+let photoCache,myT=null;
 function getPhoto(){if(photoCache===undefined){try{photoCache=localStorage.getItem(PKEY)||null}catch(e){photoCache=null}}return photoCache}
 function applyBg(){
   const L=$('bgLayer'),ph=getPhoto();let custom=false;
@@ -944,6 +944,7 @@ function loadAvatar(file){
     const S=160,c=document.createElement('canvas');c.width=c.height=S;
     const m=Math.min(img.naturalWidth,img.naturalHeight);
     c.getContext('2d').drawImage(img,(img.naturalWidth-m)/2,(img.naturalHeight-m)/2,m,m,0,0,S,S);
+    if(myT)flushProfile();
     SET.profile.avatar=c.toDataURL('image/jpeg',.8);saveSet();renderSettings();render();broadcastProfile();
   },()=>toast(t('photoErr')));
 }
@@ -1112,11 +1113,11 @@ $('curSel').onchange=e=>{
   }else commit({t:'meta',name:g.name,cur:nw});
   render();
 };
-let myT;
-const profEdit=()=>{clearTimeout(myT);myT=setTimeout(()=>{SET.profile.name=$('myName').value.trim().slice(0,24);SET.profile.status=$('myStatus').value.trim().slice(0,80);saveSet();render();broadcastProfile()},500)};
+function flushProfile(){clearTimeout(myT);myT=null;SET.profile.name=$('myName').value.trim().slice(0,24);SET.profile.status=$('myStatus').value.trim().slice(0,80);saveSet()}
+const profEdit=()=>{clearTimeout(myT);myT=setTimeout(()=>{flushProfile();render();broadcastProfile()},500)};
 $('myName').addEventListener('input',profEdit);$('myStatus').addEventListener('input',profEdit);
 $('avatarInput').addEventListener('change',e=>{loadAvatar(e.target.files[0]);e.target.value=''});
-$('removeAvatar').onclick=()=>{SET.profile.avatar='';saveSet();renderSettings();render();broadcastProfile()};
+$('removeAvatar').onclick=()=>{if(myT)flushProfile();SET.profile.avatar='';saveSet();renderSettings();render();broadcastProfile()};
 document.querySelectorAll('#bgSeg button').forEach(b=>b.onclick=()=>{
   SET.bg.type=b.dataset.bg;saveSet();applyBg();renderSettings();
   if(b.dataset.bg==='photo'&&!getPhoto())$('photoInput').click();

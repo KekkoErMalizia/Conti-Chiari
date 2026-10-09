@@ -18,14 +18,15 @@
 ## Guarda come funziona
 
 <p align="center">
-  <a href="https://kekkoermalizia.github.io/Conti-Chiari/video/ContiChiari-tutorial.mp4">
+  <a href="https://kekkoermalizia.github.io/Conti-Chiari/video/ContiChiari-promo.mp4">
     <img src="docs/anteprima-tutorial.gif" width="300" alt="Anteprima del tutorial di Conti Chiari: creazione del gruppo, aggiunta delle persone, registrazione delle spese e calcolo di chi deve a chi">
   </a>
   <br>
-  <a href="https://kekkoermalizia.github.io/Conti-Chiari/video/ContiChiari-tutorial.mp4"><b>▶ Guarda il video tutorial completo (72 secondi)</b></a>
+  <a href="https://kekkoermalizia.github.io/Conti-Chiari/video/ContiChiari-promo.mp4"><b>▶ Guarda il video di presentazione (54 secondi, con musica)</b></a><br>
+  <a href="https://kekkoermalizia.github.io/Conti-Chiari/video/ContiChiari-tutorial.mp4">Tutorial passo passo (72 secondi)</a>
 </p>
 
-L'anteprima scorre a velocità quadrupla. Tocca il link per il video completo, con tutti i passaggi spiegati.
+L'anteprima scorre a velocità quadrupla. Il video di presentazione mostra tutte le funzioni, compresi QR, chat, profili, lingue e ricerca. Il tutorial spiega i passaggi di base uno per uno.
 
 ---
 
