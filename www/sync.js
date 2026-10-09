@@ -24,6 +24,24 @@ const b64url = bytes => b64(bytes).replace(/\+/g,'-').replace(/\//g,'_').replace
 function unb64url(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return unb64(s)}
 const sha256 = async data => new Uint8Array(await subtle.digest('SHA-256', typeof data === 'string' ? enc.encode(data) : data));
 const rid = () => hex(crypto.getRandomValues(new Uint8Array(8)));
+function concat(...arrs){const out=new Uint8Array(arrs.reduce((n,a)=>n+a.length,0));let o=0;for(const a of arrs){out.set(a,o);o+=a.length}return out}
+// testo in UTF-8 tagliato a max byte senza spezzare un carattere
+function utf8Cut(str, max){let s=String(str||'');let b=enc.encode(s);while(b.length>max){s=s.slice(0,-1);b=enc.encode(s)}return b}
+// base58 (alfabeto Bitcoin): solo lettere e cifre, i link restano interi quando si copiano nelle chat
+const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+function b58(bytes){
+  const d = [];
+  for(const x of bytes){let c=x;for(let j=0;j<d.length;j++){c+=d[j]<<8;d[j]=c%58;c=(c/58)|0}while(c){d.push(c%58);c=(c/58)|0}}
+  let s=''; for(const x of bytes){if(x)break;s+='1'}
+  for(let j=d.length-1;j>=0;j--)s+=B58[d[j]];
+  return s;
+}
+function unb58(str){
+  const b = [];
+  for(const ch of str){let c=B58.indexOf(ch);if(c<0)return null;for(let j=0;j<b.length;j++){c+=b[j]*58;b[j]=c&255;c>>=8}while(c){b.push(c&255);c>>=8}}
+  for(const ch of str){if(ch!=='1')break;b.push(0)}
+  return Uint8Array.from(b.reverse());
+}
 
 /* ---------- identità del dispositivo ---------- */
 function deviceKeys(store){
@@ -169,12 +187,18 @@ async function dmChannel(sk, peerPk){
 // pubblica può scriverci, ma il contenuto è cifrato con la chiave ECDH tra i due dispositivi: lo legge solo il destinatario.
 function inboxTopic(pk){return topicOf('inbox:' + pk)}
 function contactLink(pk, name){
-  const payload = b64url(enc.encode(JSON.stringify({v:1, p: pk, n: String(name || '').slice(0, 24)})));
-  const here = /^https?:/.test(location.protocol) && !/^(localhost|127\.)/.test(location.hostname) ? location.origin + location.pathname : APP_URL;
-  return here + '#add=' + payload;
+  // formato compatto: chiave pubblica (32 byte) + nome, in base58 (niente «_» o «-» che le chat rovinano)
+  return appBase() + '#c=' + b58(concat(unhex(pk), utf8Cut(name, 24)));
 }
 function parseContact(text){
-  const m = String(text || '').match(/add=([A-Za-z0-9_-]+)/);
+  text = String(text || '');
+  let m = text.match(/(?:^|[#\s?&])c=([1-9A-HJ-NP-Za-km-z]{40,})/);
+  if(m){
+    const b = unb58(m[1]);
+    if(b && b.length >= 32) return {pk: hex(b.subarray(0, 32)), name: dec.decode(b.subarray(32)).slice(0, 24)};
+    return null;
+  }
+  m = text.match(/add=([A-Za-z0-9_-]+)/);   // vecchio formato
   if(!m) return null;
   try{
     const o = JSON.parse(dec.decode(unb64url(m[1])));
@@ -185,13 +209,31 @@ function parseContact(text){
 
 /* ---------- inviti ---------- */
 const APP_URL = 'https://kekkoermalizia.github.io/Conti-Chiari/';
+function appBase(){
+  return /^https?:/.test(location.protocol) && !/^(localhost|127\.)/.test(location.hostname) ? location.origin + location.pathname : APP_URL;
+}
+// formato compatto: [lunghezza id][id][chiave 32 byte][1 = c'è il proprietario][proprietario 32 byte][nome], in base58
 function inviteLink(group){
-  const payload = b64url(enc.encode(JSON.stringify(Object.assign({v:2, id: group.id, n: group.name, k: group.sync.key}, group.sync.owner ? {o: group.sync.owner} : {}))));
-  const here = /^https?:/.test(location.protocol) && !/^(localhost|127\.)/.test(location.hostname) ? location.origin + location.pathname : APP_URL;
-  return here + '#join=' + payload;
+  const id = enc.encode(group.id).subarray(0, 40), owner = group.sync.owner;
+  const parts = [Uint8Array.of(id.length), id, unb64url(group.sync.key), Uint8Array.of(owner ? 1 : 0)];
+  if(owner) parts.push(unhex(owner));
+  parts.push(utf8Cut(group.name, 24));
+  return appBase() + '#g=' + b58(concat(...parts));
 }
 function parseInvite(text){
-  const m = String(text || '').match(/join=([A-Za-z0-9_-]+)/);
+  text = String(text || '');
+  let m = text.match(/(?:^|[#\s?&])g=([1-9A-HJ-NP-Za-km-z]{40,})/);
+  if(m){
+    const b = unb58(m[1]);
+    if(!b || !b.length) return null;
+    let i = 0;
+    const idLen = b[i++]; if(!idLen || b.length < 1 + idLen + 33) return null;
+    const id = dec.decode(b.subarray(i, i += idLen)), key = b64url(b.subarray(i, i += 32));
+    let owner = '';
+    if(b[i++] === 1){ if(b.length < i + 32) return null; owner = hex(b.subarray(i, i += 32)) }
+    return {id: id.slice(0, 40), name: dec.decode(b.subarray(i)).slice(0, 40), key, owner};
+  }
+  m = text.match(/join=([A-Za-z0-9_-]+)/);   // vecchio formato
   if(!m) return null;
   try{
     const o = JSON.parse(dec.decode(unb64url(m[1])));
