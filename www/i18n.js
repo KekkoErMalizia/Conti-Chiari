@@ -908,3 +908,12 @@ ko:["그룹","개인","개인 채팅","다른 사람과 온라인 그룹에 참�
 ['ja',"色をタップするか、下で好きな色を選ぶか、16進コードを入力してください。","グラデーション","なし","線形","放射状","2つ目の色","方向","テクスチャ","強さ","サイズ","なし","ドット","グリッド","ストライプ","ハッチング","チェック","ジグザグ","リネン","粒子"],
 ['ko',"색조를 탭하거나 아래에서 원하는 색을 고르거나 16진수 코드를 입력하세요.","그라데이션","없음","선형","원형","두 번째 색","방향","질감","강도","크기","없음","도트","격자","줄무늬","빗금","체크","지그재그","리넨","그레인"],
 ].forEach(([l,palette,gradient,gradNone,gradLinear,gradRadial,color2,gradAngle,texture,texStrength,texSize,tex_none,tex_dots,tex_grid,tex_stripes,tex_hatch,tex_checks,tex_zigzag,tex_linen,tex_noise])=>{if(I18N[l])Object.assign(I18N[l],{palette,gradient,gradNone,gradLinear,gradRadial,color2,gradAngle,texture,texStrength,texSize,tex_none,tex_dots,tex_grid,tex_stripes,tex_hatch,tex_checks,tex_zigzag,tex_linen,tex_noise})});
+
+// tutorial: video promozionale all'inizio
+[
+['it',"Salta video","Attiva audio"],['en',"Skip video","Turn on sound"],['es',"Saltar vídeo","Activar sonido"],['fr',"Passer la vidéo","Activer le son"],
+['de',"Video überspringen","Ton einschalten"],['pt',"Saltar vídeo","Ativar som"],['nl',"Video overslaan","Geluid aan"],['pl',"Pomiń film","Włącz dźwięk"],
+['ro',"Sari peste video","Pornește sunetul"],['sv',"Hoppa över video","Slå på ljud"],['tr',"Videoyu geç","Sesi aç"],['el',"Παράλειψη βίντεο","Ενεργοποίηση ήχου"],
+['ru',"Пропустить видео","Включить звук"],['uk',"Пропустити відео","Увімкнути звук"],['ar',"تخطَّ الفيديو","شغّل الصوت"],['hi',"वीडियो छोड़ें","आवाज़ चालू करें"],
+['zh',"跳过视频","打开声音"],['ja',"動画をスキップ","音声をオンにする"],['ko',"동영상 건너뛰기","소리 켜기"],
+].forEach(([l,tVidSkip,tVidSound])=>{if(I18N[l])Object.assign(I18N[l],{tVidSkip,tVidSound})});
