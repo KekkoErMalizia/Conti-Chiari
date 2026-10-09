@@ -56,6 +56,8 @@ Conti Chiari tiene traccia di chi ha pagato cosa e alla fine ti dice **chi deve 
 | **Chat di gruppo cifrata** | Una chat dentro ogni gruppo online, cifrata end-to-end: solo chi è nel gruppo può leggerla. |
 | **Profilo con foto e messaggio** | Ognuno sceglie foto, nome e un messaggio pubblico, visibili ai membri dei suoi gruppi online. |
 | **Ricerca nei movimenti** | Cerca tra spese e rimborsi passati per testo, persona e periodo, e filtra le **entrate** e le **uscite** di ciascuno, con i totali. |
+| **Suoni e vibrazione** | Ogni azione ha il suo suono e la sua vibrazione: tocco, cambio scheda, salvataggio, eliminazione, rimborso, messaggio inviato e ricevuto, errore, scansione QR. Volume e intensità si regolano nelle impostazioni. |
+| **Accessibilità visiva** | Modalità per ipovisione, alto contrasto, daltonismo (rosso, verde, blu-giallo), visione senza colori, cecità con lettura vocale e sensibilità alla luce, più la dimensione del testo regolabile. In automatico segue le impostazioni di accessibilità del telefono. |
 | **Tutorial e video integrati** | Al primo avvio un tutorial interattivo evidenzia i comandi uno per uno, con il tasto **Salta** e l'opzione per non mostrarlo più. In Impostazioni → **Guida e video** puoi rivederlo e guardare il video dimostrativo. |
 | **Rimborsi registrati** | Quando qualcuno paga, tocchi «Segna pagato»: il rimborso entra nello storico e i saldi si aggiornano. |
 | **Condivisione con un codice** | Passi un intero gruppo a un amico mandandogli un codice da incollare nella sua app. |
@@ -164,6 +166,7 @@ L'app è una singola pagina web (HTML, CSS e JavaScript, senza librerie esterne)
 
 ```
 www/                  l'app: index.html, i18n.js (traduzioni), sync.js (sincronizzazione cifrata),
+                      feedback.js (suoni, vibrazione, voce e modalità vista),
                       lib/ (QR e firme digitali), manifest, service worker (offline), icone
 assets/               icone e schermata di avvio per Android e iOS
 capacitor.config.json configurazione dell'app nativa (id: it.contichiari.app)

@@ -29,7 +29,7 @@ jobs:
         run: npm run android
 
       - name: Permesso fotocamera (scansione QR)
-        run: sed -i 's#</manifest>#    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />\n</manifest>#' android/app/src/main/AndroidManifest.xml && grep -n CAMERA android/app/src/main/AndroidManifest.xml
+        run: sed -i 's#</manifest>#    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.VIBRATE" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />\n</manifest>#' android/app/src/main/AndroidManifest.xml && grep -n CAMERA android/app/src/main/AndroidManifest.xml
 
       - name: Compila l'APK
         working-directory: android
