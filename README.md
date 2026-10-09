@@ -57,6 +57,7 @@ Conti Chiari tiene traccia di chi ha pagato cosa e alla fine ti dice **chi deve 
 | **Chat private** | Scrivi a un solo membro del gruppo. La chiave nasce da voi due (ECDH), nemmeno gli altri del gruppo possono leggere. |
 | **Doppia spunta blu** | ✓ inviato, ✓✓ grigie consegnato, ✓✓ blu letto (nei gruppi: letto da tutti). Le conferme di lettura si possono disattivare. |
 | **Messaggi effimeri** | In ogni chat scegli 5 minuti, 1 ora, 8 ore o 24 ore: poi i messaggi spariscono da tutti i telefoni. Le chat private sono effimere a 24 ore di default. |
+| **Rubrica** | Nella chat, la scheda Rubrica raccoglie i membri dei tuoi gruppi online e i contatti aggiunti con il codice contatto (QR o link). Puoi cercarli per nome, chiedere, accettare o togliere l'amicizia e bloccare chi non vuoi sentire. Le richieste viaggiano cifrate e non esiste un elenco pubblico degli utenti. |
 | **Notifiche** | Un avviso per ogni messaggio in arrivo, nei gruppi e in privato, anche con l'app in background. |
 | **Attività in background** | Nell'app Android, un interruttore in Impostazioni tiene l'app attiva anche a schermo spento, così le notifiche arrivano subito. Mostra una notifica fissa e si può spegnere quando vuoi. |
 | **Profilo con foto e messaggio** | Ognuno sceglie foto, nome e un messaggio pubblico, visibili ai membri dei suoi gruppi online. |

@@ -103,6 +103,19 @@ textarea{min-height:110px;font-family:var(--f-mono);font-size:13px;resize:vertic
 input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .btn{cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--surface);padding:11px 16px;font-weight:600;text-align:center;display:inline-flex;align-items:center;justify-content:center;gap:8px}
 a.btn{color:inherit;text-decoration:none}
+.btn.sm{padding:7px 11px;font-size:13px;border-radius:9px}
+.cthd{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.04em}
+.cthd .count{font-family:var(--f-mono);font-size:12px;background:var(--chip);border-radius:999px;padding:0 8px}
+.ctlist li{display:flex;align-items:center;gap:6px;min-width:0}
+#ctBox{grid-template-columns:minmax(0,1fr);align-content:start}
+#ctBox .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#ctBox .row .btn{min-width:0;padding-inline:8px}
+.ctlist li>button[data-ct]{flex:1;min-width:0}
+.ctq{display:flex;gap:6px;flex:none}
+.cthead{display:flex;gap:12px;align-items:center;margin:0 0 14px}
+.cthead b{display:block}
+.cthead span#ctStatus{display:block;font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.qrbox b{font-size:17px}
 /* tasto «Scarica l'app Android»: contorno luminoso che pulsa con regolarità per attirare l'occhio */
 #dlApk{animation:apkGlow 2.2s ease-in-out infinite}
 @keyframes apkGlow{0%,100%{box-shadow:0 0 0 0 rgba(31,95,107,.55),0 0 0 0 rgba(31,95,107,.25)}50%{box-shadow:0 0 0 4px rgba(31,95,107,.45),0 0 22px 8px rgba(31,95,107,.45)}}
@@ -410,6 +423,7 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
         <div class="seg" role="group" id="chatSeg">
           <button type="button" data-cv="group" data-t="chatGroup"></button>
           <button type="button" data-cv="list"><span data-t="chatPrivate"></span> <span class="badge" id="dmBadge" hidden></span></button>
+          <button type="button" data-cv="contacts"><span data-t="ctTab"></span> <span class="badge" id="ctBadge" hidden></span></button>
         </div>
         <div class="dmhead" id="dmHead" hidden>
           <button class="back" type="button" id="dmBack" data-ta="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
@@ -426,6 +440,12 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
         <h2 data-t="privateTitle"></h2>
         <ul class="dmlist" id="dmList"></ul>
         <p class="hint" id="dmEmpty" data-t="privateEmpty" hidden></p>
+      </section>
+      <section class="stack" id="ctBox" hidden>
+        <input type="search" id="ctSearch" data-tp="ctSearchPh" data-ta="ctSearchPh" autocomplete="off">
+        <div class="row"><button class="btn" type="button" id="ctMyCode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 18h2v2h-2zM18 14h2M14 18v2"/></svg><span data-t="ctMyCode"></span></button><button class="btn" type="button" id="ctAdd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M18 8v6M15 11h6"/></svg><span data-t="ctAddCode"></span></button></div>
+        <div id="ctList"></div>
+        <p class="hint" data-t="ctHint" style="margin:0"></p>
       </section>
       <form class="chatbar" id="chatForm">
         <textarea id="chatIn" rows="1" maxlength="1000" data-tp="chatPh" data-ta="chatPh"></textarea>
@@ -706,6 +726,39 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
   </div>
 </div>
 
+<!-- Fogli della rubrica: scheda di un contatto, il mio codice, aggiungi con codice -->
+<div class="sheet" id="ctSheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="ctName">
+    <div class="grab"></div>
+    <h3><span id="ctName"></span><button class="link" type="button" data-close data-t="close"></button></h3>
+    <div class="cthead"><span id="ctAv"></span><div style="min-width:0"><b id="ctState"></b><span id="ctStatus"></span></div></div>
+    <div class="stack" id="ctActions"></div>
+  </div>
+</div>
+<div class="sheet" id="myCodeSheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="mcTitle">
+    <div class="grab"></div>
+    <h3><span id="mcTitle" data-t="ctMyCode"></span><button class="link" type="button" data-close data-t="close"></button></h3>
+    <div class="stack">
+      <div class="qrbox"><canvas id="ctQr" width="240" height="240"></canvas><b id="ctMe"></b></div>
+      <p class="hint" data-t="myCodeHint" style="text-align:center;margin:0"></p>
+      <div class="row"><button class="btn primary" type="button" id="ctShare" data-t="shareLink"></button><button class="btn" type="button" id="ctCopy" data-t="copyLink"></button></div>
+    </div>
+  </div>
+</div>
+<div class="sheet" id="addCtSheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="acTitle">
+    <div class="grab"></div>
+    <h3><span id="acTitle" data-t="ctAddCode"></span><button class="link" type="button" data-close data-t="cancel"></button></h3>
+    <div class="stack">
+      <button class="btn primary block" type="button" id="ctScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 18h2v2h-2zM18 14h2M14 18v2"/></svg><span data-t="scanQr"></span></button>
+      <input type="text" id="ctCodeIn" data-tp="addCodePh" autocomplete="off">
+      <p class="err" id="ctCodeErr" style="margin:0"></p>
+      <button class="btn block" type="button" id="ctCodeGo" data-t="add"></button>
+    </div>
+  </div>
+</div>
+
 <div class="sheet" id="videoSheet" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="vTitle">
     <div class="grab"></div>
@@ -729,10 +782,10 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
 
-<script src="i18n.js?v=21"></script>
+<script src="i18n.js?v=22"></script>
 <script src="lib/secp256k1.js"></script>
 <script src="lib/qrcode.js"></script>
-<script src="sync.js?v=21"></script>
+<script src="sync.js?v=22"></script>
 <script>
 'use strict';
 const KEY='conti-chiari-app-v1', SKEY='conti-chiari-settings', PKEY='conti-chiari-photo';
@@ -821,6 +874,7 @@ Object.values(DB.groups).forEach(g=>{
 });
 if(!DB.groups[DB.current])DB.current=Object.keys(DB.groups)[0];
 if(!DB.dms||typeof DB.dms!=='object')DB.dms={};
+if(!DB.contacts||typeof DB.contacts!=='object')DB.contacts={};   // rubrica: pk -> {rel:'none'|'out'|'in'|'friend', ts, blocked, name, status, avatar}
 const G=()=>DB.groups[DB.current];
 let saveT;
 function persist(){clearTimeout(saveT);saveT=null;try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){toast(t('storageFull'))}}
@@ -871,16 +925,18 @@ let RELAYS;try{RELAYS=JSON.parse(localStorage.getItem('cc-relays'))}catch(e){}
 let netCount=0;
 const HUB=new CCSync.Hub({relays:Array.isArray(RELAYS)&&RELAYS.length?RELAYS:undefined,keys:ME,
   onOp:(gid,op,pk,createdAt)=>{
+    if(gid==='inbox'){DB.inboxLast=Math.max(DB.inboxLast||0,createdAt);onFriendOp(op,pk);persistSoon();return}
     let ch,isDM=gid.startsWith('dm:');
-    if(isDM){ch=ensureDM(gid.slice(3));if(pk!==ME.pk&&pk!==ch.peer)return}
+    if(isDM){ch=ensureDM(gid.slice(3));if(pk!==ME.pk&&pk!==ch.peer)return;if(pk!==ME.pk&&isBlocked(pk)){ch.sync.last=Math.max(ch.sync.last||0,createdAt);return}}
     else{ch=DB.groups[gid];if(!ch||!ch.sync)return}
     const kind=isDM?applyChat(ch,op,pk):applyOp(ch,op,pk);
     ch.sync.last=Math.max(ch.sync.last||0,createdAt);
-    if(kind==='msg'&&pk!==ME.pk)incoming(ch,gid,op,pk);
+    if(kind==='msg'&&pk!==ME.pk&&!isBlocked(pk))incoming(ch,gid,op,pk);
     persistSoon();if(isDM||gid===DB.current)renderSoon();
   },
   onStatus:n=>{netCount=n;renderNet()},
   onSent:id=>{
+    if(DB.frOut&&DB.frOut.some(e=>e.id===id)){DB.frOut=DB.frOut.filter(e=>e.id!==id);persistSoon()}
     for(const ch of allChans()){
       if(ch.outbox&&ch.outbox.some(e=>e.id===id)){ch.outbox=ch.outbox.filter(e=>e.id!==id);persistSoon()}
       const m=ch.chat&&ch.chat.find(m=>m.ev===id);if(m&&!m.sent){m.sent=1;persistSoon();renderSoon()}
@@ -906,6 +962,10 @@ function startSync(){
   allChans().forEach(ch=>{if(ch.sync){any=true;if(ch.outbox&&ch.outbox.length)HUB.resend(ch.outbox)}});
   Object.values(DB.groups).forEach(g=>{if(g.sync){HUB.watch(g.id,g.sync.key,g.sync.topic,g.sync.last);Object.keys(g.members).forEach(watchDM)}});
   Object.keys(DB.dms).forEach(watchDM);
+  // rubrica: chat private con i contatti e casella personale per le richieste di amicizia
+  const hasContacts=Object.keys(DB.contacts).length>0;
+  Object.keys(DB.contacts).forEach(pk=>{if(!isBlocked(pk))watchDM(pk)});
+  if(any||hasContacts||DB.inboxOn){watchInbox();if(DB.frOut&&DB.frOut.length)HUB.resend(DB.frOut);any=true}
   if(any&&!HUB.started){HUB.started=true;HUB.start()}
 }
 function publish(ch,op){
@@ -957,7 +1017,7 @@ async function joinGroup(inv){
   render();setTab('gruppo');fx('scan');toast(t('joined',{name:g.name}));
 }
 let profT;
-function broadcastProfile(){clearTimeout(profT);profT=setTimeout(()=>Object.values(DB.groups).forEach(g=>{if(g.sync)commit(memberOp(g),g)}),1200)}
+function broadcastProfile(){clearTimeout(profT);profT=setTimeout(()=>{Object.values(DB.groups).forEach(g=>{if(g.sync)commit(memberOp(g),g)});Object.keys(DB.contacts).forEach(pk=>{const c=DB.contacts[pk];if(c.rel==='friend'&&!c.blocked)frSend(pk,'upd')})},1200)}
 
 /* ---------- calcoli ---------- */
 function shares(e){const n=e.split.length,b=Math.floor(e.amount/n),r=e.amount-b*n;return e.split.map((id,i)=>[id,b+(i<r?1:0)])}
@@ -1049,7 +1109,7 @@ function renderNet(){
   $('netLine').textContent=on?(netCount?t('syncStatus',{n:netCount}):t('offlineStatus')):'';
   $('netLine').style.color=netCount?'':'var(--muted)';
 }
-function renderUnread(){const n=Object.values(DB.groups).reduce((s,g)=>s+(g.unread||0),0)+Object.values(DB.dms).reduce((s,d)=>s+(d.unread||0),0);$('unread').textContent=n||''}
+function renderUnread(){const n=Object.values(DB.groups).reduce((s,g)=>s+(g.unread||0),0)+Object.values(DB.dms).reduce((s,d)=>s+(isBlocked(d.peer)?0:(d.unread||0)),0)+reqInCount();$('unread').textContent=n||''}
 
 /* --- filtri movimenti --- */
 const F={q:'',person:null,dir:'all',period:'all'};
@@ -1121,9 +1181,10 @@ let chatView='group',curDM=null;
 function nameOf(pk){
   if(pk===ME.pk)return SET.profile.name||t('you');
   let best=null;for(const g of Object.values(DB.groups)){const m=g.members[pk];if(m&&(!best||m.ts>best.ts))best=Object.assign({g},m)}
-  if(!best)return t('anon');const p=best.personId&&personIn(best.g,best.personId);return best.name||(p&&p.name)||t('anon');
+  const c=DB.contacts[pk];
+  if(!best)return (c&&c.name)||t('anon');const p=best.personId&&personIn(best.g,best.personId);return best.name||(p&&p.name)||(c&&c.name)||t('anon');
 }
-function infoOf(pk){let best=null;for(const g of Object.values(DB.groups)){const m=g.members[pk];if(m&&(!best||m.ts>best.ts))best=m}return best||{}}
+function infoOf(pk){let best=null;for(const g of Object.values(DB.groups)){const m=g.members[pk];if(m&&(!best||m.ts>best.ts))best=m}return best||DB.contacts[pk]||{}}
 function avatarOf(pk,cls){if(pk===ME.pk)return avatarHtml(SET.profile.name||'?',COLORS[0],SET.profile.avatar,cls);const i=infoOf(pk);return avatarHtml(nameOf(pk),'#5b6f76',i.avatar,cls)}
 function applyChat(ch,op,pk){
   const ts=+op.ts||0;ch.rcpt=ch.rcpt||{};ch.lww=ch.lww||{};
@@ -1221,6 +1282,7 @@ function renderMsgs(ch,isDM){
   ch.chat.forEach(m=>{
     const d=new Date(m.ts),dk=d.toISOString().slice(0,10);
     if(dk!==day){day=dk;prev=null;html+=`<div class="day" style="text-align:center">${esc(d.toLocaleDateString(LOCALE,{weekday:'short',day:'numeric',month:'long'}))}</div>`}
+    if(m.from!==ME.pk&&isBlocked(m.from))return;
     if(m.sys==='eph'){html+=`<div class="sysmsg">${esc(m.s?t('ephSet',{name:nameOf(m.from),d:ephLabel(m.s)}):t('ephOffSet',{name:nameOf(m.from)}))}</div>`;prev=null;return}
     const mine=m.from===ME.pk,name=mine?t('you'):nameOf(m.from);
     const cont=prev===m.from&&m.ts-prevTs<300000,st=tickState(ch,m);
@@ -1235,18 +1297,131 @@ function renderMsgs(ch,isDM){
 function dmPeers(){
   const set=new Set(Object.keys(DB.dms));
   Object.values(DB.groups).forEach(g=>{if(g.sync)Object.keys(g.members).forEach(pk=>{if(pk!==ME.pk)set.add(pk)})});
-  return [...set];
+  Object.keys(DB.contacts).forEach(pk=>{if(DB.contacts[pk].rel==='friend')set.add(pk)});
+  return [...set].filter(pk=>!isBlocked(pk));
+}
+
+/* --- rubrica: amicizie, blocchi, ricerca per nome ---
+   Le persone sono identificate dalla chiave del loro telefono. Le richieste di amicizia viaggiano cifrate nella
+   «casella» personale del destinatario (vedi sync.js), così arrivano anche da chi non è in un gruppo in comune.
+   Stati: none → out (richiesta inviata) / in (richiesta ricevuta) → friend. Il blocco nasconde messaggi e richieste. */
+function isBlocked(pk){const c=DB.contacts[pk];return !!(c&&c.blocked)}
+function reqInCount(){return Object.values(DB.contacts).filter(c=>c.rel==='in'&&!c.blocked).length}
+function relOf(pk){const c=DB.contacts[pk];return c?(c.blocked?'blocked':c.rel||'none'):'none'}
+function ensureContact(pk){return DB.contacts[pk]=DB.contacts[pk]||{rel:'none',ts:0}}
+const REL_LABEL={friend:'stFriend',in:'stIn',out:'stOut',blocked:'stBlocked'};
+let inboxWatched=false;
+async function watchInbox(){
+  if(inboxWatched)return;inboxWatched=true;
+  try{HUB.watch('inbox',async pk=>pk===ME.pk||isBlocked(pk)?null:(await CCSync.dmChannel(ME.sk,pk)).key,await CCSync.inboxTopic(ME.pk),DB.inboxLast||0)}
+  catch(e){inboxWatched=false}
+}
+function myCard(){const p=SET.profile;return {name:(p.name||'').slice(0,24),status:(p.status||'').slice(0,80),avatar:p.avatar&&p.avatar.length<60000?p.avatar:''}}
+async function frSend(pk,a){
+  try{
+    const c=await CCSync.dmChannel(ME.sk,pk),topic=await CCSync.inboxTopic(pk);
+    watchInbox();if(!HUB.started){HUB.started=true;HUB.start()}
+    const ev=await HUB.publish(c.key,topic,Object.assign({t:'fr',a,id:CCSync.rid(),ts:Date.now()},myCard()));
+    DB.frOut=(DB.frOut||[]).concat(ev).slice(-100);persistSoon();
+  }catch(e){}
+}
+function onFriendOp(op,pk){
+  if(pk===ME.pk||!/^[0-9a-f]{64}$/.test(pk)||!op||op.t!=='fr')return;
+  const ts=+op.ts||0;if(!(ts>0)||ts>Date.now()+600000)return;
+  const c=ensureContact(pk);
+  if(typeof op.name==='string'&&op.name.trim()&&(c.infoTs||0)<=ts){c.name=op.name.slice(0,24);c.status=String(op.status||'').slice(0,80);c.avatar=AV_RE.test(op.avatar||'')&&op.avatar.length<80000?op.avatar:'';c.infoTs=ts}
+  if(c.blocked||op.a==='upd'||(c.ts||0)>=ts){renderSoon();return}
+  const prev=c.rel;
+  if(op.a==='req')c.rel=prev==='out'||prev==='friend'?'friend':'in';
+  else if(op.a==='acc'){if(prev!=='out'&&prev!=='friend')return;c.rel='friend'}
+  else if(op.a==='dec'||op.a==='rem')c.rel='none';
+  else return;
+  c.ts=ts;watchDM(pk);renderSoon();renderUnread();
+  if(op.a==='req'&&prev==='out')frSend(pk,'acc');   // richieste incrociate: diventate amici
+  const name=nameOf(pk);
+  if(c.rel==='in'&&prev!=='in'){fx('receive');notifyMsg(t('ctTab'),t('frReqBody',{name}),{chan:'contacts'})}
+  else if(c.rel==='friend'&&prev==='out'){fx('success');notifyMsg(t('ctTab'),t('frAccBody',{name}),{chan:'contacts'})}
+}
+function frAction(pk,act){
+  const c=ensureContact(pk),now=Date.now(),name=nameOf(pk);
+  if(!c.name&&name!==t('anon'))c.name=name;
+  if(act==='write'){closeSheet('ctSheet');openDM(pk);return}
+  if(act==='remove'&&!confirm(t('frRemoveQ',{name})))return;
+  if(act==='block'&&!confirm(t('frBlockQ',{name})))return;
+  switch(act){
+    case 'ask': c.rel=c.rel==='in'?'friend':'out';c.ts=now;frSend(pk,c.rel==='friend'?'acc':'req');toast(t(c.rel==='friend'?'frNowFriends':'frSent',{name}));break;
+    case 'accept': c.rel='friend';c.ts=now;frSend(pk,'acc');fx('success');break;
+    case 'decline': c.rel='none';c.ts=now;frSend(pk,'dec');break;
+    case 'cancel': case 'remove': c.rel='none';c.ts=now;frSend(pk,'rem');fx('delete');break;
+    case 'block': if(c.rel!=='none')frSend(pk,'rem');c.rel='none';c.blocked=true;c.ts=now;fx('delete');break;
+    case 'unblock': c.blocked=false;c.ts=now;break;
+    default: return;
+  }
+  DB.inboxOn=true;watchDM(pk);persist();startSync();
+  renderUnread();renderChat();if(!$('ctSheet').hidden)openContact(pk);
+}
+function addContact(ct){
+  if(ct.pk===ME.pk){toast(t('addSelf'));return}
+  const c=ensureContact(ct.pk);if(!c.name&&ct.name)c.name=ct.name;
+  closeSheet('addCtSheet');chatView='contacts';curDM=null;setTab('chat');
+  if(!c.blocked&&(c.rel==='none'||c.rel==='in'))frAction(ct.pk,c.rel==='in'?'accept':'ask');
+  else{persist();renderChat()}
+  openContact(ct.pk);
+}
+function knownPeople(){
+  const set=new Set(Object.keys(DB.contacts));
+  Object.values(DB.groups).forEach(g=>{if(g.sync)Object.keys(g.members).forEach(pk=>set.add(pk))});
+  set.delete(ME.pk);return [...set];
+}
+function renderContacts(){
+  const q=$('ctSearch').value.trim().toLowerCase();
+  const all=knownPeople().map(pk=>({pk,name:nameOf(pk),rel:relOf(pk)})).filter(x=>!q||x.name.toLowerCase().includes(q)).sort((a,b)=>a.name.localeCompare(b.name,LOCALE));
+  let html='';
+  [['in','ctReqIn'],['friend','ctFriends'],['out','ctReqOut'],['none','ctOthers'],['blocked','ctBlocked']].forEach(([rel,k])=>{
+    const l=all.filter(x=>x.rel===rel);if(!l.length)return;
+    html+=`<h3 class="cthd">${esc(t(k))} <span class="count">${l.length}</span></h3><ul class="dmlist ctlist">`+l.map(x=>{
+      const i=infoOf(x.pk);
+      const quick=rel==='in'?`<span class="ctq"><button class="btn primary sm" type="button" data-fr="accept" data-pk="${x.pk}">${esc(t('frAccept'))}</button><button class="btn sm" type="button" data-fr="decline" data-pk="${x.pk}">${esc(t('frDecline'))}</button></span>`:'';
+      return `<li><button type="button" data-ct="${x.pk}">${avatarOf(x.pk,'lg')}<div class="who"><b>${esc(x.name)}</b><span>${esc(rel==='none'?(i.status||''):t(REL_LABEL[rel]))}</span></div></button>${quick}</li>`;
+    }).join('')+'</ul>';
+  });
+  $('ctList').innerHTML=html||`<p class="hint">${esc(t(q?'ctNone':'ctEmpty'))}</p>`;
+}
+function openContact(pk){
+  const rel=relOf(pk),i=infoOf(pk),B=(act,k,cls)=>`<button class="btn block ${cls||''}" type="button" data-fr="${act}" data-pk="${pk}">${esc(t(k))}</button>`;
+  $('ctName').textContent=nameOf(pk);$('ctAv').innerHTML=avatarOf(pk,'lg');
+  $('ctState').textContent=REL_LABEL[rel]?t(REL_LABEL[rel]):'';$('ctStatus').textContent=i.status||'';
+  let h='';
+  if(rel!=='blocked')h+=B('write','frWrite','primary');
+  if(rel==='none')h+=B('ask','frAsk');
+  if(rel==='out')h+=B('cancel','frCancel');
+  if(rel==='in')h+=B('accept','frAccept','primary')+B('decline','frDecline');
+  if(rel==='friend')h+=B('remove','frRemove');
+  h+=rel==='blocked'?B('unblock','frUnblock'):B('block','frBlock','danger');
+  $('ctActions').innerHTML=h;
+  if($('ctSheet').hidden)openSheet('ctSheet');
+}
+function openMyCode(){
+  DB.inboxOn=true;persist();startSync();
+  const link=CCSync.contactLink(ME.pk,SET.profile.name||'');
+  drawQR(link,$('ctQr'));$('ctMe').textContent=SET.profile.name||t('you');
+  $('ctShare').onclick=async()=>{if(!await shareText(t('contactMsg')+'\n'+link,'Conti Chiari'))toast(t('shareUnavailable'))};
+  $('ctCopy').onclick=async()=>{try{await navigator.clipboard.writeText(link);toast(t('linkCopied'))}catch(e){toast(t('copyManual'))}};
+  openSheet('myCodeSheet');
 }
 function renderChat(){
   const g=G(),on=!!g.sync,anyOnline=Object.values(DB.groups).some(x=>x.sync);
   document.querySelectorAll('#chatSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.cv===(chatView==='dm'?'list':chatView)));
   const dmUnread=Object.values(DB.dms).reduce((s,d)=>s+(d.unread||0),0);$('dmBadge').hidden=!dmUnread;$('dmBadge').textContent=dmUnread;
-  const inDM=chatView==='dm'&&curDM,inList=chatView==='list',inGroup=chatView==='group';
+  const inDM=chatView==='dm'&&curDM,inList=chatView==='list',inGroup=chatView==='group',inCt=chatView==='contacts';
   $('chatSeg').hidden=!!inDM;$('dmHead').hidden=!inDM;
-  $('dmListBox').hidden=!inList;
+  $('dmListBox').hidden=!inList;$('ctBox').hidden=!inCt;
+  const rq=reqInCount();$('ctBadge').hidden=!rq;$('ctBadge').textContent=rq;
   const conv=(inGroup&&on)||inDM;
   $('msgs').hidden=!conv;$('chatForm').hidden=!conv;$('ephRow').hidden=!conv;
   $('chatOff').hidden=!(inGroup&&!on)&&!(inList&&!anyOnline);
+  if(!conv)$('ephNote').hidden=true;
+  if(inCt){renderContacts();return}
   if(inList){
     const peers=dmPeers().map(pk=>({pk,d:DB.dms[pk]})).sort((a,b)=>((b.d&&b.d.chat.length?b.d.chat[b.d.chat.length-1].ts:0)-(a.d&&a.d.chat.length?a.d.chat[a.d.chat.length-1].ts:0)));
     $('dmEmpty').hidden=!!peers.length||!anyOnline;
@@ -1302,6 +1477,7 @@ async function notifyMsg(title,body,data){
 }
 function openChan(chan){
   if(!chan)return;
+  if(chan==='contacts'){chatView='contacts';curDM=null;setTab('chat');renderChat();return}
   if(chan.startsWith('dm:'))openDM(chan.slice(3));
   else if(DB.groups[chan]){DB.current=chan;chatView='group';render();setTab('chat')}
 }
@@ -1331,9 +1507,9 @@ function renderNotifState(){
   $('notifState').textContent=st==='denied'?t('notifDenied'):st==='unsupported'?t('notifUnsupported'):t('notifLimit');
 }
 /* --- QR --- */
-function drawQR(text){
+function drawQR(text,cv=$('qr')){
   const qr=qrcode(0,'M');qr.addData(text);qr.make();
-  const n=qr.getModuleCount(),cv=$('qr'),q=4,size=n+q*2,scale=Math.floor(480/size)||1;
+  const n=qr.getModuleCount(),q=4,size=n+q*2,scale=Math.floor(480/size)||1;
   cv.width=cv.height=size*scale;const c=cv.getContext('2d');
   c.fillStyle='#fff';c.fillRect(0,0,cv.width,cv.height);c.fillStyle='#0f2a30';
   for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(qr.isDark(r,k))c.fillRect((k+q)*scale,(r+q)*scale,scale,scale);
@@ -1466,6 +1642,8 @@ function loadAvatar(file){
 let scanStream=null,scanRAF=0,detector=null,jsQRLoading=null;
 function loadJsQR(){if(window.jsQR)return Promise.resolve();if(!jsQRLoading)jsQRLoading=new Promise((res,rej)=>{const s=document.createElement('script');s.src='lib/jsQR.js';s.onload=res;s.onerror=rej;document.head.append(s)});return jsQRLoading}
 function handleScanned(text){
+  const ct=CCSync.parseContact(text);
+  if(ct){closeSheet('scanSheet');stopScan();addContact(ct);return true}
   const inv=CCSync.parseInvite(text);
   if(inv){joinGroup(inv);return true}
   if(/CC1:/.test(text)){try{const g=decodeGroup(text);importGroup(g)}catch(e){toast(e.message)}closeSheet('scanSheet');return true}
@@ -1666,6 +1844,13 @@ $('chatForm').addEventListener('submit',e=>{
 });
 document.querySelectorAll('#chatSeg button').forEach(b=>b.onclick=()=>{chatView=b.dataset.cv;curDM=null;renderChat();if(chatView==='group')requestAnimationFrame(()=>$('main').scrollTop=$('main').scrollHeight)});
 $('dmBack').onclick=()=>{chatView='list';curDM=null;renderChat()};
+// rubrica
+$('ctSearch').addEventListener('input',renderContacts);
+$('ctMyCode').onclick=openMyCode;
+$('ctAdd').onclick=()=>{$('ctCodeIn').value='';$('ctCodeErr').textContent='';openSheet('addCtSheet')};
+$('ctScan').onclick=()=>{closeSheet('addCtSheet');startScan()};
+$('ctCodeGo').onclick=()=>{const ct=CCSync.parseContact($('ctCodeIn').value);if(!ct){$('ctCodeErr').textContent=t('addCodeErr');fx('error');return}addContact(ct)};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-fr],[data-ct]');if(!b||!b.closest('#ctList,#ctActions'))return;if(b.dataset.ct)openContact(b.dataset.ct);else frAction(b.dataset.pk,b.dataset.fr)});
 $('dmList').addEventListener('click',e=>{const pk=e.target.closest('[data-peer]')?.dataset.peer;if(pk)openDM(pk)});
 $('members').addEventListener('click',e=>{const pk=e.target.closest('[data-dm]')?.dataset.dm;if(pk)openDM(pk)});
 $('chatDel').onclick=clearChat;
@@ -1853,12 +2038,14 @@ $('openTour').onclick=tourOpen;
   // l'APK è la strada consigliata: niente banner «Installa app» di Chrome (crea una WebAPK tramite il Play Store)
   window.addEventListener('beforeinstallprompt',ev=>ev.preventDefault());
 })();
+(function(){const ct=CCSync.parseContact(location.hash);if(ct){window.CT_HASH=true;history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>addContact(ct),300)}})();
+window.addEventListener('hashchange',()=>{const ct=CCSync.parseContact(location.hash);if(ct){history.replaceState(null,'',location.pathname+location.search);addContact(ct)}});
 (function(){const m=location.hash.match(/^#chat=(.+)$/);if(m){history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>openChan(decodeURIComponent(m[1])),50)}})();
-if(!SET.tutorialDone&&!CCSync.parseInvite(location.hash)&&!/^#chat=/.test(location.hash))setTimeout(tourOpen,350);
+if(!SET.tutorialDone&&!CCSync.parseInvite(location.hash)&&!window.CT_HASH&&!/^#chat=/.test(location.hash))setTimeout(tourOpen,350);
 
 /* ---------- offline ---------- */
 if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="feedback.js?v=21"></script>
+<script src="feedback.js?v=22"></script>
 </body>
 </html>
