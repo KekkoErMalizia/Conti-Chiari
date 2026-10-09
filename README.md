@@ -70,7 +70,7 @@ Conti Chiari tiene traccia di chi ha pagato cosa e alla fine ti dice **chi deve 
 | **Funziona offline** | Una volta installata, l'app funziona anche senza connessione. |
 | **19 lingue** | Italiano, inglese, spagnolo, francese, tedesco, portoghese, olandese, polacco, rumeno, svedese, turco, greco, russo, ucraino, arabo, hindi, cinese, giapponese e coreano. Si sceglie da sola in base al telefono, e si può cambiare a mano. |
 | **Tutte le valute del mondo** | Ogni gruppo ha la sua valuta: euro per la casa, yen per il viaggio in Giappone. I decimali sono corretti per ogni valuta (lo yen, per esempio, non ha centesimi). |
-| **Sfondo personalizzato** | Scegli un colore tra quelli proposti, uno qualsiasi con il selettore, oppure una tua foto. |
+| **Sfondo personalizzato** | Scegli un colore tra quelli proposti, uno della tavolozza completa (12 tinte in 7 sfumature più i grigi), uno qualsiasi con il selettore o con il codice esadecimale, oppure una tua foto. Al colore puoi aggiungere una sfumatura lineare o radiale verso un secondo colore e una texture (puntini, griglia, righe, tratteggio, scacchi, zigzag, lino, grana) regolandone intensità e dimensione. |
 | **Tema chiaro e scuro** | Segue automaticamente le impostazioni del telefono. |
 
 I calcoli sono al centesimo. Quando un importo non si divide in parti uguali, il centesimo in più viene assegnato in modo che i totali tornino sempre.
