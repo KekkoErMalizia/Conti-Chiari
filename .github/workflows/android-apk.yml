@@ -48,6 +48,13 @@ jobs:
           sed -i 's#</application>#    <provider android:name="androidx.startup.InitializationProvider" android:authorities="${applicationId}.androidx-startup" android:exported="false" tools:node="merge">\n            <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer" tools:node="remove" />\n        </provider>\n    </application>#' $M
           grep -n "tools:\|EmojiCompat" $M
 
+      - name: Attività in background (servizio in primo piano per le notifiche a schermo spento)
+        run: |
+          M=android/app/src/main/AndroidManifest.xml
+          sed -i 's#</application>#    <service android:name=".KeepAliveService" android:exported="false" android:foregroundServiceType="remoteMessaging" />\n    </application>#' $M
+          sed -i 's#</manifest>#    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />\n    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />\n</manifest>#' $M
+          grep -n "KeepAlive\|FOREGROUND\|BATTERY" $M
+
       - name: Permesso fotocamera (scansione QR)
         run: sed -i 's#</manifest>#    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.VIBRATE" />\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />\n</manifest>#' android/app/src/main/AndroidManifest.xml && grep -n CAMERA android/app/src/main/AndroidManifest.xml
 

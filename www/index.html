@@ -502,6 +502,12 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
           <p class="hint" data-t="notifHint"></p>
           <p class="hint" id="notifState"></p>
         </div>
+        <div class="subtle" id="keepBox" hidden>
+          <div class="setrow"><label for="keepOn" data-t="keepOn"></label><input type="checkbox" class="switch" id="keepOn" role="switch"></div>
+          <p class="hint" data-t="keepHint"></p>
+          <p class="hint" id="keepState"></p>
+          <button class="btn" type="button" id="keepBattery" hidden data-t="keepBattery"></button>
+        </div>
         <div class="subtle">
           <div class="setrow"><label for="rcptOn" data-t="receipts"></label><input type="checkbox" class="switch" id="rcptOn" role="switch"></div>
           <p class="hint" data-t="receiptsHint"></p>
@@ -677,10 +683,10 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
 
-<script src="i18n.js?v=15"></script>
+<script src="i18n.js?v=16"></script>
 <script src="lib/secp256k1.js"></script>
 <script src="lib/qrcode.js"></script>
-<script src="sync.js?v=15"></script>
+<script src="sync.js?v=16"></script>
 <script>
 'use strict';
 const KEY='conti-chiari-app-v1', SKEY='conti-chiari-settings', PKEY='conti-chiari-photo';
@@ -698,7 +704,7 @@ const IC={
 };
 
 /* ---------- impostazioni e lingua ---------- */
-let SET={lang:'auto',bg:{type:'default',color:'#d6ece2'},profile:{name:'',status:'',avatar:''},sound:true,vib:true,vol:50,vibInt:50,vision:'auto',textSize:50,voiceRate:50,notify:true,receipts:true};
+let SET={lang:'auto',bg:{type:'default',color:'#d6ece2'},profile:{name:'',status:'',avatar:''},sound:true,vib:true,keepAlive:false,vol:50,vibInt:50,vision:'auto',textSize:50,voiceRate:50,notify:true,receipts:true};
 const fx=k=>{try{window.FX&&FX.play(k)}catch(e){}};
 try{const s=JSON.parse(localStorage.getItem(SKEY));if(s)SET=Object.assign(SET,s,{profile:Object.assign(SET.profile,s.profile||{})})}catch(e){}
 const saveSet=()=>{try{localStorage.setItem(SKEY,JSON.stringify(SET))}catch(e){toast(t('storageFull'))}};
@@ -1255,6 +1261,25 @@ function openChan(chan){
 }
 if(navigator.serviceWorker)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.openChat)openChan(e.data.openChat)});
 try{const LN=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;if(LN)LN.addListener('localNotificationActionPerformed',a=>openChan(a.notification.extra&&a.notification.extra.chan))}catch(e){}
+/* --- attività in background (solo app Android): tiene viva l'app a schermo spento per ricevere i messaggi --- */
+const keepPlugin=()=>window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Background;
+let keepInfo=null;
+async function applyKeepAlive(){
+  const P=keepPlugin();if(!P)return;
+  try{
+    if(SET.keepAlive&&SET.notify!==false)keepInfo=await P.start({title:t('keepNotifTitle'),text:t('keepNotifText')});
+    else keepInfo=await P.stop();
+  }catch(e){keepInfo=null}
+  renderKeepAlive();
+}
+async function renderKeepAlive(){
+  const P=keepPlugin();$('keepBox').hidden=!P;if(!P)return;
+  if(!keepInfo)try{keepInfo=await P.status()}catch(e){}
+  const on=!!SET.keepAlive,notifOff=SET.notify===false,battOk=!!(keepInfo&&keepInfo.batteryOk);
+  $('keepOn').checked=on;
+  $('keepState').textContent=!on?'':notifOff?t('keepNeedsNotif'):battOk?t('keepBatteryOk'):t('keepBatteryWarn');
+  $('keepBattery').hidden=!on||notifOff||battOk;
+}
 function renderNotifState(){
   const st=notifPermission();
   $('notifState').textContent=st==='denied'?t('notifDenied'):st==='unsupported'?t('notifUnsupported'):t('notifLimit');
@@ -1602,14 +1627,23 @@ $('ephSel').onchange=e=>{
   const ch=curChan(),v=+e.target.value;const op={t:'eph',id:CCSync.rid(),ts:Date.now(),s:v};
   applyChat(ch,op,ME.pk);persist();publish(ch,op);fx('toggle');renderChat();
 };
-$('notifOn').onchange=e=>{SET.notify=e.target.checked;saveSet();if(SET.notify)askNotif();renderNotifState()};
+$('notifOn').onchange=e=>{SET.notify=e.target.checked;saveSet();if(SET.notify)askNotif();renderNotifState();applyKeepAlive()};
+$('keepOn').onchange=async e=>{
+  SET.keepAlive=e.target.checked;saveSet();
+  if(SET.keepAlive){await askNotif();await applyKeepAlive();if(keepInfo&&!keepInfo.batteryOk)keepPlugin().openBatterySettings().catch(()=>{})}
+  else applyKeepAlive();
+};
+$('keepBattery').onclick=()=>{const P=keepPlugin();if(P)P.openBatterySettings().catch(()=>{})};
+// al ritorno nell'app (per esempio dalla richiesta della batteria) aggiorna lo stato
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&keepPlugin()){keepInfo=null;renderKeepAlive()}});
+applyKeepAlive();
 $('rcptOn').onchange=e=>{SET.receipts=e.target.checked;saveSet();renderChat()};
 $('chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&matchMedia('(hover:hover)').matches){e.preventDefault();$('chatForm').requestSubmit()}});
 $('chatIn').addEventListener('input',e=>{e.target.style.height='';e.target.style.height=Math.min(140,e.target.scrollHeight)+'px'});
 
 // impostazioni
 $('langSel').onchange=e=>{
-  SET.lang=e.target.value;saveSet();setLang();
+  SET.lang=e.target.value;saveSet();setLang();if(SET.keepAlive)applyKeepAlive();   // testo della notifica fissa nella nuova lingua
   for(const k in fmtCache)delete fmtCache[k];
   const s=DB.groups.esempio;if(s&&s.sample&&s.lang!==LANG){DB.groups.esempio=sampleGroup();persist()}
   applyStatic();render();renderSettings();
@@ -1648,7 +1682,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)persist()})
 /* ---------- suoni, vibrazione e accessibilità ---------- */
 const VISION=[['auto','vmAuto'],['standard','vmStandard'],['low','vmLow'],['contrast','vmContrast'],['protan','vmProtan'],['deutan','vmDeutan'],['tritan','vmTritan'],['mono','vmMono'],['blind','vmBlind'],['photo','vmPhoto']];
 function renderA11y(){
-  $('notifOn').checked=SET.notify!==false;$('rcptOn').checked=SET.receipts!==false;renderNotifState();
+  $('notifOn').checked=SET.notify!==false;$('rcptOn').checked=SET.receipts!==false;renderNotifState();renderKeepAlive();
   $('sndOn').checked=SET.sound!==false;$('vibOn').checked=SET.vib!==false;
   $('sndVol').value=SET.vol;$('vibInt').value=SET.vibInt;$('txtSize').value=SET.textSize;$('voiceRate').value=SET.voiceRate;
   $('sndVolOut').textContent=SET.vol+'%';$('vibIntOut').textContent=SET.vibInt+'%';$('txtSizeOut').textContent=SET.textSize+'%';$('voiceRateOut').textContent=SET.voiceRate+'%';
@@ -1727,6 +1761,6 @@ if(!SET.tutorialDone&&!CCSync.parseInvite(location.hash)&&!/^#chat=/.test(locati
 /* ---------- offline ---------- */
 if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="feedback.js?v=15"></script>
+<script src="feedback.js?v=16"></script>
 </body>
 </html>
