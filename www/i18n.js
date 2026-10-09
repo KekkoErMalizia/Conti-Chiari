@@ -838,3 +838,26 @@ ko:["그룹","개인","개인 채팅","다른 사람과 온라인 그룹에 참�
 ['ja',"連絡先","名前で検索","自分のコード","コードで追加","オンライングループのメンバーと、コードで追加した連絡先が表示されます。公開ユーザー一覧はありません。グループ外の人を追加するには連絡先コードを交換してください。","受け取ったリクエスト","友だち","送ったリクエスト","グループのメンバー","ブロック中","この名前の人はいません。","連絡先は空です。オンライングループに参加するか、連絡先コードで追加してください。","友だち申請","承認","拒否","申請を取り消す","友だちから削除","ブロック","ブロック解除","メッセージ","友だち","友だち申請が届いています","申請済み","ブロック中","{name} を友だちから削除しますか？","{name} をブロックしますか？個別メッセージやリクエストが届かなくなり、グループ内のメッセージも非表示になります。","{name} に友だち申請を送りました","{name} と友だちになりました","{name} が Conti Chiari で友だちになりたがっています","{name} が友だち申請を承認しました","この QR を読み取ってもらうか、リンクを送ってください。開いた人から友だち申請が届きます。","リンクまたは連絡先コードを貼り付け","無効な連絡先コードです。","これはあなた自身の連絡先コードです。","Conti Chiari で追加してね："],
 ['ko',"연락처","이름으로 검색","내 코드","코드로 추가","온라인 그룹의 멤버와 코드로 추가한 연락처가 여기에 표시됩니다. 공개 사용자 목록은 없습니다. 그룹 밖의 사람을 추가하려면 연락처 코드를 서로 교환하세요.","받은 요청","친구","보낸 요청","내 그룹의 사람들","차단됨","이 이름의 사람이 없습니다.","연락처가 비어 있습니다. 온라인 그룹에 참여하거나 연락처 코드로 추가하세요.","친구 신청","수락","거절","신청 취소","친구 삭제","차단","차단 해제","메시지","친구","친구 신청을 보냈어요","신청을 보냈어요","차단됨","{name}님을 친구에서 삭제할까요?","{name}님을 차단할까요? 개인 메시지와 요청을 더 이상 받지 않고, 그룹 메시지도 숨겨집니다.","{name}님에게 친구 신청을 보냈어요","이제 {name}님과 친구예요","{name}님이 Conti Chiari에서 친구가 되고 싶어 해요","{name}님이 친구 신청을 수락했어요","이 QR을 스캔하게 하거나 링크를 보내세요. 연 사람이 친구 신청을 보냅니다.","링크 또는 연락처 코드 붙여넣기","잘못된 연락처 코드입니다.","내 연락처 코드입니다.","Conti Chiari에서 나를 추가해 줘:"],
 ].forEach(([l,ctTab,ctSearchPh,ctMyCode,ctAddCode,ctHint,ctReqIn,ctFriends,ctReqOut,ctOthers,ctBlocked,ctNone,ctEmpty,frAsk,frAccept,frDecline,frCancel,frRemove,frBlock,frUnblock,frWrite,stFriend,stIn,stOut,stBlocked,frRemoveQ,frBlockQ,frSent,frNowFriends,frReqBody,frAccBody,myCodeHint,addCodePh,addCodeErr,addSelf,contactMsg])=>{if(I18N[l])Object.assign(I18N[l],{ctTab,ctSearchPh,ctMyCode,ctAddCode,ctHint,ctReqIn,ctFriends,ctReqOut,ctOthers,ctBlocked,ctNone,ctEmpty,frAsk,frAccept,frDecline,frCancel,frRemove,frBlock,frUnblock,frWrite,stFriend,stIn,stOut,stBlocked,frRemoveQ,frBlockQ,frSent,frNowFriends,frReqBody,frAccBody,myCodeHint,addCodePh,addCodeErr,addSelf,contactMsg})});
+
+/* ---- Aggiornamento obbligatorio dell'app Android ---- */
+[
+['it',"Aggiornamento Disponibile","Per continuare a usare l'app installa l'aggiornamento."],
+['en',"Update Available","To keep using the app, install the update."],
+['es',"Actualización Disponible","Para seguir usando la app, instala la actualización."],
+['fr',"Mise à Jour Disponible","Pour continuer à utiliser l'app, installez la mise à jour."],
+['de',"Update Verfügbar","Installiere das Update, um die App weiter zu nutzen."],
+['pt',"Atualização Disponível","Para continuar a usar a app, instale a atualização."],
+['nl',"Update Beschikbaar","Installeer de update om de app te blijven gebruiken."],
+['pl',"Dostępna Aktualizacja","Aby dalej korzystać z aplikacji, zainstaluj aktualizację."],
+['ro',"Actualizare Disponibilă","Pentru a folosi în continuare aplicația, instalează actualizarea."],
+['sv',"Uppdatering Tillgänglig","Installera uppdateringen för att fortsätta använda appen."],
+['tr',"Güncelleme Mevcut","Uygulamayı kullanmaya devam etmek için güncellemeyi yükle."],
+['el',"Διαθέσιμη Ενημέρωση","Για να συνεχίσεις να χρησιμοποιείς την εφαρμογή, εγκατάστησε την ενημέρωση."],
+['ru',"Доступно Обновление","Чтобы продолжить пользоваться приложением, установите обновление."],
+['uk',"Доступне Оновлення","Щоб і далі користуватися застосунком, установіть оновлення."],
+['ar',"يتوفر تحديث","لمواصلة استخدام التطبيق، ثبّت التحديث."],
+['hi',"अपडेट उपलब्ध है","ऐप का उपयोग जारी रखने के लिए अपडेट इंस्टॉल करें।"],
+['zh',"有可用更新","要继续使用本应用，请安装更新。"],
+['ja',"アップデートがあります","アプリを引き続き使うには、アップデートをインストールしてください。"],
+['ko',"업데이트 가능","앱을 계속 사용하려면 업데이트를 설치하세요."],
+].forEach(([l,updTitle,updRequired])=>{if(I18N[l])Object.assign(I18N[l],{updTitle,updRequired})});

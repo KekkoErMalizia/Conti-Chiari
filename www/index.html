@@ -103,6 +103,19 @@ textarea{min-height:110px;font-family:var(--f-mono);font-size:13px;resize:vertic
 input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .btn{cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--surface);padding:11px 16px;font-weight:600;text-align:center;display:inline-flex;align-items:center;justify-content:center;gap:8px}
 a.btn{color:inherit;text-decoration:none}
+/* aggiornamento obbligatorio: finestra al centro su sfondo sfocato e scurito al 30% */
+.updmodal{position:fixed;top:0;right:0;bottom:0;left:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(10,20,24,.3);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.updcard{width:100%;max-width:420px;max-height:calc(100vh - 32px);overflow-y:auto;background:var(--surface);color:var(--ink);border-radius:20px;padding:20px 18px;box-shadow:0 20px 60px rgba(0,0,0,.35);display:grid;gap:12px}
+.updcard h3{margin:0;font-size:21px;text-align:center}
+.updcard #updInfo{margin:0;text-align:center;color:var(--muted)}
+.updcard .note{margin:0}
+.updcard .iossteps{margin:0}
+.updic{width:56px;height:56px;border-radius:16px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;justify-self:center}
+.updic svg{width:30px;height:30px}
+/* punto rosso lampeggiante sulla scheda Impostazioni finché c'è un aggiornamento da installare */
+.upddot{position:absolute;top:6px;left:calc(50% + 7px);width:10px;height:10px;border-radius:50%;background:var(--neg);box-shadow:0 0 0 2px var(--bar);animation:updBlink 1.1s ease-in-out infinite}
+@keyframes updBlink{50%{opacity:.15;transform:scale(.7)}}
+@media (prefers-reduced-motion:reduce){.upddot{animation:none}}
 .btn.sm{padding:7px 11px;font-size:13px;border-radius:9px}
 .cthd{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.04em}
 .cthd .count{font-family:var(--f-mono);font-size:12px;background:var(--chip);border-radius:999px;padding:0 8px}
@@ -606,7 +619,7 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
     <button role="tab" aria-selected="false" data-tab="saldi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg><span data-t="tabBal"></span></button>
     <button role="tab" aria-selected="false" data-tab="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H9l-5 4z"/></svg><span data-t="tabChat"></span><i class="unread" id="unread"></i></button>
     <button role="tab" aria-selected="false" data-tab="gruppo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.2c2.8.3 5 2.6 5 5.8"/></svg><span data-t="tabGroup"></span></button>
-    <button role="tab" aria-selected="false" data-tab="impostazioni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg><span data-t="tabSet"></span></button>
+    <button role="tab" aria-selected="false" data-tab="impostazioni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg><span data-t="tabSet"></span><i class="upddot" id="updDot" hidden aria-hidden="true"></i></button>
   </nav>
 </div>
 
@@ -759,6 +772,23 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
   </div>
 </div>
 
+<!-- Aggiornamento obbligatorio (app Android): al centro, sfondo sfocato, non si chiude finché l'app non è aggiornata -->
+<div class="updmodal" id="updModal" hidden role="alertdialog" aria-modal="true" aria-labelledby="updTitleEl" aria-describedby="updInfo">
+  <div class="updcard">
+    <div class="updic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg></div>
+    <h3 id="updTitleEl" data-t="updTitle"></h3>
+    <p id="updInfo"></p>
+    <p class="note" data-t="updRequired"></p>
+    <ol class="iossteps">
+      <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></span><span data-t="dlStep1"></span></li>
+      <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg></span><span data-t="dlStep2"></span></li>
+      <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span><span data-t="dlStep3"></span></li>
+      <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span><span data-t="dlStep4"></span></li>
+    </ol>
+    <a class="btn primary block" id="updGo" data-t="updGo"></a>
+  </div>
+</div>
+
 <div class="sheet" id="videoSheet" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="vTitle">
     <div class="grab"></div>
@@ -782,10 +812,10 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
 
-<script src="i18n.js?v=22"></script>
+<script src="i18n.js?v=23"></script>
 <script src="lib/secp256k1.js"></script>
 <script src="lib/qrcode.js"></script>
-<script src="sync.js?v=22"></script>
+<script src="sync.js?v=23"></script>
 <script>
 'use strict';
 const KEY='conti-chiari-app-v1', SKEY='conti-chiari-settings', PKEY='conti-chiari-photo';
@@ -1879,25 +1909,32 @@ async function checkUpdate(manual){
     if(!appBuild)appBuild=await (await fetch('build.json',{cache:'no-store'})).json();
     if(!appBuild||!appBuild.build||!appBuild.repo)return;
     $('appVer').textContent=t('appVersion',{n:appBuild.build});$('appVer').hidden=$('updCheck').hidden=false;
-    if(!manual&&Date.now()-(+lsGet('cc-upd-check')||0)<6*3600e3)return;
+    updState(+lsGet('cc-upd-latest')||0);   // subito, anche senza rete, con l'ultima versione già vista
+    if(!manual&&Date.now()-(+lsGet('cc-upd-check')||0)<10*60e3)return;   // all'avvio e al ritorno nell'app, al massimo ogni 10 minuti
     lsSet('cc-upd-check',Date.now());
     const rel=await (await fetch(`https://api.github.com/repos/${appBuild.repo}/releases/tags/android-latest`,{cache:'no-store'})).json();
     const m=String(rel&&rel.body||'').match(/build:\s*(\d+)/),latest=m?+m[1]:0;
-    if(latest>appBuild.build)showUpdate(latest);
-    else if(manual)toast(t('updNone'));
+    if(latest){lsSet('cc-upd-latest',latest);updState(latest)}
+    if(manual&&!(latest>appBuild.build))toast(t('updNone'));
   }catch(e){if(manual)toast(t('updFail'))}
 }
-function showUpdate(latest){
-  if(!$('tour').hidden)return setTimeout(()=>showUpdate(latest),1000);   // dopo il tutorial della prima apertura
-  const url=`https://github.com/${appBuild.repo}/releases/download/android-latest/ContiChiari.apk`;
-  $('apkTitle').textContent=t('updTitle');
-  $('apkInfo').textContent=t('updInfo',{n:latest,cur:appBuild.build});$('apkInfo').hidden=false;
-  $('apkGo').href=url;$('apkGo').textContent=t('updGo');
-  $('apkGo').onclick=()=>setTimeout(()=>closeSheet('apkSheet'),300);   // il link si apre nel browser, che scarica l'APK
-  openSheet('apkSheet');
+// aggiornamento necessario: punto rosso su Impostazioni e finestra che obbliga ad aggiornare; spariscono con l'app aggiornata
+let updLatest=0;
+function updState(latest){
+  const need=!!(appBuild&&latest>appBuild.build);updLatest=need?latest:0;
+  $('updDot').hidden=!need;
+  if(need)showUpdate();else $('updModal').hidden=true;
+}
+function showUpdate(){
+  if(!updLatest)return;
+  if(!$('tour').hidden)return setTimeout(showUpdate,400);   // appena il tutorial della prima apertura non è più visibile
+  $('updInfo').textContent=t('updInfo',{n:updLatest,cur:appBuild.build});
+  $('updGo').href=`https://github.com/${appBuild.repo}/releases/download/android-latest/ContiChiari.apk`;   // si apre nel browser, che scarica l'APK
+  $('updModal').hidden=false;
 }
 $('updCheck').onclick=()=>checkUpdate(true);
-setTimeout(()=>checkUpdate(false),1500);   // dopo l'eventuale tutorial della prima apertura (parte a 350 ms)
+setTimeout(()=>checkUpdate(false),500);   // all'avvio, dopo l'eventuale apertura del tutorial (a 350 ms)
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate(false)});
 $('rcptOn').onchange=e=>{SET.receipts=e.target.checked;saveSet();renderChat()};
 $('chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&matchMedia('(hover:hover)').matches){e.preventDefault();$('chatForm').requestSubmit()}});
 $('chatIn').addEventListener('input',e=>{e.target.style.height='';e.target.style.height=Math.min(140,e.target.scrollHeight)+'px'});
@@ -1905,6 +1942,7 @@ $('chatIn').addEventListener('input',e=>{e.target.style.height='';e.target.style
 // impostazioni
 $('langSel').onchange=e=>{
   SET.lang=e.target.value;saveSet();setLang();if(SET.keepAlive)applyKeepAlive();   // testo della notifica fissa nella nuova lingua
+  if(!$('updModal').hidden)showUpdate();
   for(const k in fmtCache)delete fmtCache[k];
   const s=DB.groups.esempio;if(s&&s.sample&&s.lang!==LANG){DB.groups.esempio=sampleGroup();persist()}
   applyStatic();render();renderSettings();
@@ -2046,6 +2084,6 @@ if(!SET.tutorialDone&&!CCSync.parseInvite(location.hash)&&!window.CT_HASH&&!/^#c
 /* ---------- offline ---------- */
 if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="feedback.js?v=22"></script>
+<script src="feedback.js?v=23"></script>
 </body>
 </html>
