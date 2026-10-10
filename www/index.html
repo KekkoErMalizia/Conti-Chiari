@@ -1633,6 +1633,9 @@ function decodeGroup(code){
   return blankGroup({id:isId(g.id)?g.id:uid(),name:g.name.slice(0,40)||t('myGroup'),cur:ALL_CUR.includes(g.cur)?g.cur:'EUR',people,expenses,payments});
 }
 async function shareText(text,title){
+  // app Android: la WebView non ha navigator.share, si usa il pannello di condivisione di sistema
+  const SP=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.ShareText;
+  if(SP){try{await SP.share({text,title:title||'Conti Chiari'});return true}catch(e){}}
   if(navigator.share){try{await navigator.share({title,text});return true}catch(e){if(e&&e.name==='AbortError')return true}}
   try{await navigator.clipboard.writeText(text);toast(t('copied'));return true}catch(e){return false}
 }
