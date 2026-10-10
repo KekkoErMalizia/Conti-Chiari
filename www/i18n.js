@@ -961,3 +961,26 @@ ko:["그룹","개인","개인 채팅","다른 사람과 온라인 그룹에 참�
 ["ja", "招待を開いています…", "招待が見つからないか期限切れです。新しいリンクをもらうか、QRコードを読み取ってください。"],
 ["ko", "초대를 여는 중…", "초대를 찾을 수 없거나 만료되었어요. 새 링크를 받거나 QR 코드를 스캔하세요."]
 ].forEach(([l,shortOpening,shortNotFound])=>{if(I18N[l])Object.assign(I18N[l],{shortOpening,shortNotFound})});
+
+/* ---- Notifiche nella barra del telefono: canali Android e avviso di aggiornamento ---- */
+[
+['it',"Messaggi","Aggiornamenti","Nuovo aggiornamento","È disponibile la versione {n} di Conti Chiari. Tocca per aggiornare."],
+['en',"Messages","Updates","New update","Conti Chiari version {n} is available. Tap to update."],
+['es',"Mensajes","Actualizaciones","Nueva actualización","Ya está disponible la versión {n} de Conti Chiari. Toca para actualizar."],
+['fr',"Messages","Mises à jour","Nouvelle mise à jour","La version {n} de Conti Chiari est disponible. Touchez pour mettre à jour."],
+['de',"Nachrichten","Updates","Neues Update","Version {n} von Conti Chiari ist verfügbar. Zum Aktualisieren tippen."],
+['pt',"Mensagens","Atualizações","Nova atualização","A versão {n} do Conti Chiari está disponível. Toque para atualizar."],
+['nl',"Berichten","Updates","Nieuwe update","Versie {n} van Conti Chiari is beschikbaar. Tik om bij te werken."],
+['pl',"Wiadomości","Aktualizacje","Nowa aktualizacja","Dostępna jest wersja {n} Conti Chiari. Dotknij, aby zaktualizować."],
+['ro',"Mesaje","Actualizări","Actualizare nouă","Versiunea {n} a Conti Chiari este disponibilă. Atinge pentru a actualiza."],
+['sv',"Meddelanden","Uppdateringar","Ny uppdatering","Version {n} av Conti Chiari finns. Tryck för att uppdatera."],
+['tr',"Mesajlar","Güncellemeler","Yeni güncelleme","Conti Chiari'nin {n} sürümü hazır. Güncellemek için dokun."],
+['el',"Μηνύματα","Ενημερώσεις","Νέα ενημέρωση","Η έκδοση {n} του Conti Chiari είναι διαθέσιμη. Πάτησε για ενημέρωση."],
+['ru',"Сообщения","Обновления","Новое обновление","Доступна версия {n} Conti Chiari. Нажмите, чтобы обновить."],
+['uk',"Повідомлення","Оновлення","Нове оновлення","Доступна версія {n} Conti Chiari. Торкніться, щоб оновити."],
+['ar',"الرسائل","التحديثات","تحديث جديد","الإصدار {n} من Conti Chiari متوفر. اضغط للتحديث."],
+['hi',"संदेश","अपडेट","नया अपडेट","Conti Chiari का संस्करण {n} उपलब्ध है। अपडेट करने के लिए टैप करें।"],
+['zh',"消息","更新","新更新","Conti Chiari {n} 版已发布。点按即可更新。"],
+['ja',"メッセージ","アップデート","新しいアップデート","Conti Chiari のバージョン {n} が利用できます。タップして更新してください。"],
+['ko',"메시지","업데이트","새 업데이트","Conti Chiari {n} 버전을 사용할 수 있어요. 탭하여 업데이트하세요."]
+].forEach(([l,chMsgs,chUpd,updNotifTitle,updNotifBody])=>{if(I18N[l])Object.assign(I18N[l],{chMsgs,chUpd,updNotifTitle,updNotifBody})});
