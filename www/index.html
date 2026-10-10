@@ -344,6 +344,12 @@ body.custom-bg .chatbar{background:none}
 .scan video{width:100%;height:100%;object-fit:cover;display:block}
 .scan::after{content:"";position:absolute;inset:18%;border:3px solid rgba(255,255,255,.85);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
 
+/* rinnovo chiave */
+.rklist{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.rklist label{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;cursor:pointer}
+.rklist input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+.rklist .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+
 /* codice a 6 cifre */
 .pin{font-family:var(--f-mono);font-size:44px;font-weight:700;letter-spacing:.14em;text-align:center;margin:2px 0 0;direction:ltr;font-variant-numeric:tabular-nums}
 .pin.off{color:var(--muted);text-decoration:line-through}
@@ -565,6 +571,8 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
       <section id="membersBox" hidden>
         <h2><span data-t="members"></span><span class="count" id="memCount"></span></h2>
         <ul class="members" id="members"></ul>
+        <p class="err" id="goneNote" style="margin-top:10px"></p>
+        <button class="btn block" type="button" id="rekeyBtn" hidden style="margin-top:12px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2M12 15v2"/></svg><span data-t="rekeyBtn"></span></button>
       </section>
       <section class="stack" id="onlineBox">
         <h2 style="margin:0" data-t="goOnline"></h2>
@@ -795,6 +803,20 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
   </div>
 </div>
 
+<!-- Foglio: rinnova la chiave del gruppo -->
+<div class="sheet" id="rekeySheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="rkTitle">
+    <div class="grab"></div>
+    <h3><span id="rkTitle" data-t="rekeyBtn"></span><button class="link" type="button" data-close data-t="cancel"></button></h3>
+    <div class="stack">
+      <p class="hint" data-t="rekeyText" style="margin:0"></p>
+      <b data-t="rekeyKeep"></b>
+      <ul class="rklist" id="rkList"></ul>
+      <p class="err" id="rkErr" role="alert"></p>
+      <button class="btn primary block" type="button" id="rkGo" data-t="rekeyGo"></button>
+    </div>
+  </div>
+</div>
 <!-- Foglio: invito monouso aperto da link o QR -->
 <div class="sheet" id="tkSheet" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="tkTitle">
@@ -1160,7 +1182,7 @@ const HUB=new CCSync.Hub({relays:Array.isArray(RELAYS)&&RELAYS.length?RELAYS:und
     if(gid==='inbox'){DB.inboxLast=Math.max(DB.inboxLast||0,createdAt);onFriendOp(op,pk);persistSoon();return}
     let ch,isDM=gid.startsWith('dm:');
     if(isDM){ch=ensureDM(gid.slice(3));if(pk!==ME.pk&&pk!==ch.peer)return;if(pk!==ME.pk&&isBlocked(pk)){ch.sync.last=Math.max(ch.sync.last||0,createdAt);return}}
-    else{ch=DB.groups[gid];if(!ch||!ch.sync)return}
+    else{ch=DB.groups[gid];if(!ch||!ch.sync)return;if(op.t==='rekey'){onRekey(ch,op,pk);return}}
     const newExp=!isDM&&op.t==='exp'&&pk!==ME.pk&&op.e&&!ch.expenses.some(e=>e.id===op.e.id)&&!(ch.dead&&ch.dead['e:'+op.e.id]);
     const kind=isDM?applyChat(ch,op,pk):applyOp(ch,op,pk);
     if(newExp&&Date.now()/1000-createdAt<900&&!isBlocked(pk))expenseIn(ch,op.e.id,pk);   // solo spese recenti: niente raffica quando si scarica lo storico
@@ -1255,12 +1277,68 @@ async function joinGroup(inv){
   commit(memberOp(g),g);
   render();setTab('gruppo');fx('scan');toast(t('joined',{name:g.name}));
 }
+/* ---------- rinnovo della chiave del gruppo ----------
+   Chi ha creato il gruppo genera una chiave nuova e la manda, cifrata ECDH, solo ai membri che sceglie. L'annuncio
+   viaggia sul vecchio argomento, ma chi ha solo la vecchia chiave vede buste che non può aprire. Poi tutti passano al
+   nuovo argomento e ripubblicano il proprio stato; inviti e QR non usati smettono di valere. */
+function canRekey(g){return !!(g&&g.sync&&(!g.sync.owner||g.sync.owner===ME.pk))}
+async function switchKey(g,key,owner,keep){
+  HUB.unwatch(g.sync.topic);
+  // inviti in sospeso: chi li apre dopo trova subito «scaduto»
+  const now=Date.now(),open=Object.entries(g.tickets||{}).filter(([,T])=>!T.used&&T.exp>now).map(([tk,T])=>[tk,T.exp]);
+  if(g.qrTk&&!g.qrTk.used&&g.qrTk.exp>now)open.push([g.qrTk.tk,g.qrTk.exp]);
+  open.forEach(([tk,exp])=>CCSync.ticketKeys(tk).then(({key,topic})=>HUB.publish(key,topic,{t:'tkUsed',ts:now,exp,x:1})).catch(()=>{}));
+  Object.keys(g.tickets||{}).forEach(unwatchTicket);if(g.qrTk)unwatchTicket(g.qrTk.tk);
+  g.tickets={};delete g.qrTk;
+  g.sync={key,topic:await CCSync.topicOf(key),last:0,owner,ownLock:1};g.outbox=[];
+  if(keep){const k=new Set(keep);Object.keys(g.members).forEach(pk=>{if(!k.has(pk))delete g.members[pk]})}
+  persist();startSync();
+  snapOps(g).forEach(op=>commit(op,g));commit(memberOp(g),g);   // il proprio stato sul nuovo argomento: niente si perde
+  if(tab==='gruppo'&&G().id===g.id)qrTick(g.id);
+  render();
+}
+function openRekey(){
+  const g=G();if(!canRekey(g))return;
+  const others=Object.entries(g.members).filter(([pk])=>pk!==ME.pk).sort((a,b)=>b[1].ts-a[1].ts);
+  $('rkList').innerHTML=others.length?others.map(([pk,m])=>{const p=m.personId&&personIn(g,m.personId),nm=m.name||(p&&p.name)||t('anon');
+    return `<li><label><input type="checkbox" checked data-rk="${pk}">${avatarHtml(nm,p?p.color:'#5b6f76',m.avatar)}<span class="nm">${esc(nm)}${p&&p.name!==nm?' · '+esc(p.name):''}</span></label></li>`}).join('')
+    :`<li class="hint">${esc(t('rekeyAlone'))}</li>`;
+  $('rkErr').textContent='';$('rkGo').disabled=false;openSheet('rekeySheet');
+}
+async function doRekey(){
+  const g=G();if(!canRekey(g))return;
+  if(!netCount){$('rkErr').textContent=t('rekeyNet');fx('error');return}
+  $('rkGo').disabled=true;
+  try{
+    const keep=[...document.querySelectorAll('#rkList [data-rk]')].filter(x=>x.checked).map(x=>x.dataset.rk);
+    const key=CCSync.newGroupKey(),env={};
+    for(const pk of keep){const dm=await CCSync.dmChannel(ME.sk,pk);env[pk]=await CCSync.seal(dm.key,{k:key,id:g.id})}
+    const owner=g.sync.owner||ME.pk;
+    await HUB.publish(g.sync.key,g.sync.topic,{t:'rekey',id:CCSync.rid(),ts:Date.now(),env,owner});
+    await switchKey(g,key,owner,keep.concat(ME.pk));
+    closeSheet('rekeySheet');fx('success');toast(t('rekeyDone',{name:g.name}));
+  }catch(e){$('rkErr').textContent=t('rekeyNet');$('rkGo').disabled=false}
+}
+async function onRekey(g,op,pk){
+  if(pk===ME.pk||!op.env||typeof op.env!=='object')return;
+  const owner=g.sync.owner;
+  if(owner?pk!==owner:!g.members[pk])return;   // solo chi ha creato il gruppo (o, nei gruppi senza, un membro)
+  if(g.sync.gone)return;
+  const box=op.env[ME.pk];
+  if(!box){g.sync.gone=1;persist();toast(t('rekeyOut',{name:g.name}));fx('error');renderSoon();return}
+  try{
+    const dm=await CCSync.dmChannel(ME.sk,pk),m=await CCSync.open(dm.key,box);
+    if(!m||typeof m.k!=='string'||m.k.length<40)return;
+    await switchKey(g,m.k,owner||pk,Object.keys(op.env).concat(pk));
+    toast(t('rekeyGot',{name:g.name}));
+  }catch(e){}
+}
 /* ---------- inviti monouso: link e QR ----------
    Link e QR contengono un biglietto casuale, non la chiave. Il primo che lo usa manda una richiesta; un membro online
    (per gli amici: io) gli risponde con la chiave cifrata solo per lui e brucia il biglietto su tutti i telefoni.
    I biglietti dei link sono condivisi coi membri del gruppo (op «inv»), quelli del QR restano su questo telefono,
    valgono 10 minuti e si rinnovano da soli, anche subito dopo ogni scansione. */
-const QR_MIN=10,LINK_DAYS=30,TKW={};let TJ=null;
+const QR_MIN=10,LINK_HOURS=24,TKW={};let TJ=null;
 function ticketsOf(owner){
   if(owner==='me')return DB.myTickets=DB.myTickets||{};
   const g=DB.groups[owner];return g?(g.tickets=g.tickets||{}):null;
@@ -1294,7 +1372,7 @@ function beacon(owner,tk,exp){
 }
 // nuovo link monouso
 function newLink(owner){
-  const tk=CCSync.newTicket(),exp=Date.now()+LINK_DAYS*864e5;
+  const tk=CCSync.newTicket(),exp=Date.now()+LINK_HOURS*36e5;
   if(owner==='me'){DB.inboxOn=true;ticketsOf('me')[tk]={exp,used:0};persist()}
   else{const g=DB.groups[owner];if(!g||!g.sync)return '';commit({t:'inv',tk,exp},g)}
   hubOn();beacon(owner,tk,exp);watchTickets();startSync();
@@ -2074,6 +2152,8 @@ function render(){
     if(tab==='gruppo')qrTick(g.id);
     $('meSel').innerHTML=`<option value="">${esc(t('notSet'))}</option>`+g.people.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
     $('meSel').value=g.me||'';
+    $('rekeyBtn').hidden=!canRekey(g);
+    $('goneNote').textContent=g.sync.gone?t('rekeyOut',{name:g.name}):'';if(g.sync.gone){$('inviteBox').hidden=true;$('rekeyBtn').hidden=true}
     const ms=Object.entries(g.members).sort((a,b)=>b[1].ts-a[1].ts);
     $('memCount').textContent=ms.length||'';
     $('members').innerHTML=ms.map(([pk,m])=>{const p=m.personId&&personIn(g,m.personId),mine=pk===ME.pk,nm=(mine?SET.profile.name:m.name)||(p&&p.name)||t('anon');
@@ -2435,6 +2515,8 @@ $('ctAdd').onclick=()=>{$('ctCodeIn').value='';$('ctCodeErr').textContent='';ope
 $('ctScan').onclick=()=>{closeSheet('addCtSheet');startScan()};
 // codice a 6 cifre
 $('pinGroup').onclick=()=>pinHost('g');
+$('rekeyBtn').onclick=openRekey;
+$('rkGo').onclick=doRekey;
 $('pinContact').onclick=()=>{closeSheet('myCodeSheet');pinHost('c')};
 $('pinNew').onclick=()=>pinHost(pinMode);
 $('openPinEnter').onclick=()=>{closeSheet('groupSheet');openPinEnter()};

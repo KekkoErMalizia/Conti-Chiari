@@ -160,7 +160,10 @@ Sì, se il gruppo è online: scheda **Gruppo → Attiva gruppo online**, poi l'a
 Tocca il nome del gruppo in alto → **Scansiona QR** e inquadra il codice. Su Android puoi anche inquadrarlo con la fotocamera del telefono. Se la fotocamera non è disponibile, usa **Usa una foto del QR**.
 
 **Posso riusare un link di invito?**
-No. Ogni link e ogni QR valgono per una sola persona: per invitare qualcun altro tocca di nuovo **Invia link** o mostra il QR, che nel frattempo si è già rinnovato. Se chi ti ha invitato non è online quando apri il link, entri da solo appena apre Conti Chiari.
+No. Ogni link vale per una sola persona e per 24 ore, ogni QR per una persona e 10 minuti: per invitare qualcun altro tocca di nuovo **Invia link** o mostra il QR, che nel frattempo si è già rinnovato. Se chi ti ha invitato non è online quando apri il link, entri da solo appena apre Conti Chiari.
+
+**Ho mandato un invito alla persona sbagliata, o qualcuno non deve più vedere il gruppo. Cosa faccio?**
+Chi ha creato il gruppo apre la scheda **Gruppo → Membri → Rinnova chiave del gruppo**, toglie la spunta a chi deve uscire e conferma. La chiave nuova arriva, cifrata, solo a chi resta; chi era offline la riceve appena riapre l'app. Chi è stato escluso, e chiunque abbia la vecchia chiave, vecchi link o foto di vecchi QR, non vede più nulla di nuovo. Anche gli inviti non ancora usati smettono di valere.
 
 **Posso entrare senza QR né link, ad esempio al telefono?**
 Sì, con il **codice a 6 cifre**. Chi invita tocca **Codice a 6 cifre** (scheda Gruppo, oppure Rubrica → Il mio codice per un'amicizia) e detta le cifre. L'altro tocca il nome del gruppo in alto → **Inserisci codice a 6 cifre** (o Rubrica → Aggiungi con codice). Chi invita vede la richiesta con il nome e tocca **Fai entrare**. Il codice vale 10 minuti, e la chiave del gruppo parte solo dopo la conferma: anche chi indovinasse le cifre non entra senza il tuo sì.
