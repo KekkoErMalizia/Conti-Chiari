@@ -269,9 +269,12 @@ a.btn{color:inherit;text-decoration:none}
 .dmhead b{display:block}
 .dmhead span{display:block;font-size:13px;color:var(--muted)}
 .dmlist{list-style:none;margin:0;padding:0;display:grid;gap:4px}
-.dmlist button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;gap:12px;align-items:center;padding:10px;border-radius:14px}
-.dmlist button:hover{background:var(--chip)}
-.dmlist button:focus-visible{background:var(--chip)}
+.dmlist li{display:flex;align-items:center;gap:2px}
+.dmlist button[data-peer]{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;gap:12px;align-items:center;padding:10px;border-radius:14px}
+.dmlist button[data-peer]:hover{background:var(--chip)}
+.dmlist button[data-peer]:focus-visible{background:var(--chip)}
+.dmlist .chatdel{opacity:.75}
+.dmlist .chatdel:hover,.dmlist .chatdel:focus-visible{opacity:1;background:var(--chip)}
 .dmlist .who{min-width:0;flex:1}
 .dmlist .who b{display:block}
 .dmlist .who span{display:block;font-size:14px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -492,6 +495,7 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
         <div class="dmhead" id="dmHead" hidden>
           <button class="back" type="button" id="dmBack" data-ta="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
           <span id="dmAv"></span><div style="min-width:0;flex:1"><b id="dmName"></b><span id="dmSub"></span></div>
+          <button class="icon-btn chatdel" type="button" id="dmDel" data-ta="delChat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
         </div>
         <div class="row" id="ephRow" style="justify-content:space-between;gap:8px">
           <div class="e2e" id="e2e" style="flex:1 1 auto;justify-content:flex-start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span id="e2eText" data-t="e2e"></span></div>
@@ -600,6 +604,8 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
         <div class="subtle">
           <div class="setrow"><label for="notifOn" data-t="notifMsgs"></label><input type="checkbox" class="switch" id="notifOn" role="switch"></div>
           <p class="hint" data-t="notifHint"></p>
+          <div class="setrow"><label for="notifExpOn" data-t="notifExp"></label><input type="checkbox" class="switch" id="notifExpOn" role="switch"></div>
+          <p class="hint" data-t="notifExpHint"></p>
           <p class="hint" id="notifState"></p>
         </div>
         <div class="subtle" id="keepBox" hidden>
@@ -1090,7 +1096,9 @@ const HUB=new CCSync.Hub({relays:Array.isArray(RELAYS)&&RELAYS.length?RELAYS:und
     let ch,isDM=gid.startsWith('dm:');
     if(isDM){ch=ensureDM(gid.slice(3));if(pk!==ME.pk&&pk!==ch.peer)return;if(pk!==ME.pk&&isBlocked(pk)){ch.sync.last=Math.max(ch.sync.last||0,createdAt);return}}
     else{ch=DB.groups[gid];if(!ch||!ch.sync)return}
+    const newExp=!isDM&&op.t==='exp'&&pk!==ME.pk&&op.e&&!ch.expenses.some(e=>e.id===op.e.id)&&!(ch.dead&&ch.dead['e:'+op.e.id]);
     const kind=isDM?applyChat(ch,op,pk):applyOp(ch,op,pk);
+    if(newExp&&Date.now()/1000-createdAt<900&&!isBlocked(pk))expenseIn(ch,op.e.id,pk);   // solo spese recenti: niente raffica quando si scarica lo storico
     ch.sync.last=Math.max(ch.sync.last||0,createdAt);
     if(kind==='msg'&&pk!==ME.pk&&!isBlocked(pk))incoming(ch,gid,op,pk);
     persistSoon();if(isDM||gid===DB.current)renderSoon();
@@ -1405,13 +1413,18 @@ function retryClr(g){
 }
 const isOwner=g=>!!(g&&g.sync&&g.sync.owner===ME.pk);
 function canClear(ch){return ch.peer?true:isOwner(ch)}
-function clearChat(){
-  const ch=curChan();if(!canClear(ch))return;
+// chat privata: cancella i messaggi per entrambi e la toglie dall'elenco finché non arriva un messaggio nuovo
+function clearChat(ch=curChan()){
+  if(!canClear(ch))return false;
   const q=ch.peer?t('delChatQdm',{name:nameOf(ch.peer)}):t('delChatQgroup',{name:ch.name});
-  if(!confirm(q))return;
+  if(!confirm(q))return false;
   const op={t:'clr',id:CCSync.rid(),ts:Date.now()};
-  applyChat(ch,op,ME.pk);ch.updated=Date.now();persist();publish(ch,op);fx('delete');toast(t('chatDeleted'));renderChat();renderUnread();
+  if(ch.chat.length){applyChat(ch,op,ME.pk);publish(ch,op)}
+  if(ch.peer)ch.hid=op.ts;
+  ch.unread=0;ch.updated=Date.now();persist();fx('delete');toast(t('chatDeleted'));renderChat();renderUnread();
+  return true;
 }
+const dmHidden=d=>!!(d&&d.hid&&!d.chat.some(m=>!m.sys&&m.ts>d.hid));
 function curChan(){return chatView==='dm'&&curDM?ensureDM(curDM):G()}
 function sendChat(ch,text){
   const op={t:'msg',id:CCSync.rid(),ts:Date.now(),text:text.slice(0,1000)};
@@ -1435,6 +1448,13 @@ function incoming(ch,chanId,op,pk){
   if(viewing){markRead(ch);return}
   ch.unread=(ch.unread||0)+1;renderUnread();
   notifyMsg(isDM?t('privateFrom',{name:nameOf(pk)}):`${nameOf(pk)} · ${ch.name}`,op.text,{chan:chanId});
+}
+// spesa nuova di un altro membro: notifica «Nuova spesa · gruppo» con chi l'ha aggiunta, cosa e quanto
+function expenseIn(g,id,pk){
+  if(SET.notifyExp===false)return;
+  const e=g.expenses.find(x=>x.id===id);if(!e)return;
+  if(document.visibilityState==='visible'&&tab==='mov'&&DB.current===g.id)return;   // la sta già guardando
+  notifyMsg(t('expNotifTitle',{group:g.name}),t('expNotifBody',{name:nameOf(pk),desc:e.desc,amount:fmt(e.amount,g.cur)}),{chan:'exp:'+g.id},'spese');
 }
 function tickState(ch,m){
   if(m.from!==ME.pk||m.sys)return '';
@@ -1601,16 +1621,16 @@ function renderChat(){
   if(!conv)$('ephNote').hidden=true;
   if(inCt){renderContacts();return}
   if(inList){
-    const peers=dmPeers().map(pk=>({pk,d:DB.dms[pk]})).sort((a,b)=>((b.d&&b.d.chat.length?b.d.chat[b.d.chat.length-1].ts:0)-(a.d&&a.d.chat.length?a.d.chat[a.d.chat.length-1].ts:0)));
+    const peers=dmPeers().filter(pk=>!dmHidden(DB.dms[pk])).map(pk=>({pk,d:DB.dms[pk]})).sort((a,b)=>((b.d&&b.d.chat.length?b.d.chat[b.d.chat.length-1].ts:0)-(a.d&&a.d.chat.length?a.d.chat[a.d.chat.length-1].ts:0)));
     $('dmEmpty').hidden=!!peers.length||!anyOnline;
     $('dmList').innerHTML=peers.map(({pk,d})=>{const last=d&&[...d.chat].reverse().find(m=>!m.sys);const i=infoOf(pk);
-      return `<li><button type="button" data-peer="${pk}">${avatarOf(pk,'lg')}<div class="who"><b>${esc(nameOf(pk))}</b><span>${esc(last?(last.from===ME.pk?t('you')+': ':'')+last.text:(i.status||t('startPrivate')))}</span></div><div class="meta">${last?esc(new Date(last.ts).toLocaleTimeString(LOCALE,{hour:'2-digit',minute:'2-digit'})):''}${d&&d.unread?`<span class="badge">${d.unread}</span>`:''}</div></button></li>`}).join('');
+      return `<li><button type="button" data-peer="${pk}">${avatarOf(pk,'lg')}<div class="who"><b>${esc(nameOf(pk))}</b><span>${esc(last?(last.from===ME.pk?t('you')+': ':'')+last.text:(i.status||t('startPrivate')))}</span></div><div class="meta">${last?esc(new Date(last.ts).toLocaleTimeString(LOCALE,{hour:'2-digit',minute:'2-digit'})):''}${d&&d.unread?`<span class="badge">${d.unread}</span>`:''}</div></button><button class="icon-btn chatdel" type="button" data-del="${pk}" aria-label="${esc(t('delChat'))}" title="${esc(t('delChat'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></li>`}).join('');
     return;
   }
   if(!conv){$('msgs').innerHTML='';return}
   const ch=curChan();
   $('ephSel').innerHTML=EPH.filter(e=>inDM?e[0]>0:true).map(([v,k])=>`<option value="${v}">${esc(t(k))}</option>`).join('');$('ephSel').value=String(ch.eph||0);
-  $('chatDel').hidden=!canClear(ch)||!ch.chat.length;
+  $('chatDel').hidden=!!inDM||!canClear(ch)||!ch.chat.length;
   $('ephNote').hidden=!ch.eph;$('ephNote').innerHTML=ch.eph?EPH_IC+esc(t('ephOn',{d:ephLabel(ch.eph)})):'';
   if(inDM){$('dmAv').innerHTML=avatarOf(curDM);$('dmName').textContent=nameOf(curDM);$('dmSub').textContent=t('privateHint',{name:nameOf(curDM)})}
   renderMsgs(ch,!!inDM);
@@ -1632,6 +1652,16 @@ setInterval(()=>{if(sweepExpired()&&tab==='chat')renderChat()},15000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&tab==='chat')renderChat()});
 
 /* --- notifiche --- */
+const LNP=()=>window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;
+// app Android: canali «Messaggi» (con avviso in alto e suono) e «Aggiornamenti»; il nome segue la lingua dell'app
+async function notifChannels(){
+  const LN=LNP();if(!LN||!LN.createChannel)return;
+  try{
+    await LN.createChannel({id:'messaggi',name:t('chMsgs'),importance:4,visibility:1,vibration:true,lights:true,lightColor:'#1f5f6b'});
+    await LN.createChannel({id:'spese',name:t('chExp'),importance:4,visibility:1,vibration:true});
+    await LN.createChannel({id:'aggiornamenti',name:t('chUpd'),importance:3,visibility:1});
+  }catch(e){}
+}
 function notifPermission(){if(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications)return 'native';return 'Notification' in window?Notification.permission:'unsupported'}
 async function askNotif(){
   try{
@@ -1641,12 +1671,13 @@ async function askNotif(){
   }catch(e){}
   renderNotifState();
 }
-async function notifyMsg(title,body,data){
-  if(SET.notify===false)return;
-  if(document.visibilityState==='visible'){toast(title+': '+String(body).slice(0,80));return}
+// nell'app la notifica va sempre nella barra del telefono, con l'icona di Conti Chiari (anche ad app aperta, se non si sta guardando quella chat)
+async function notifyMsg(title,body,data,channel='messaggi'){
+  if(SET.notify===false&&channel==='messaggi')return;
+  const LN=LNP();
+  if(!LN&&document.visibilityState==='visible'){toast(title+': '+String(body).slice(0,80));return}
   try{
-    const LN=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;
-    if(LN){await LN.schedule({notifications:[{id:Math.floor(Math.random()*2e9),title,body:String(body).slice(0,200),extra:data}]});return}
+    if(LN){await LN.schedule({notifications:[{id:Math.floor(Math.random()*2e9),title,body:String(body).slice(0,200),largeBody:String(body).slice(0,1000),extra:data,channelId:channel,smallIcon:'ic_stat_contichiari',largeIcon:'ic_notif_large',iconColor:'#1f5f6b',group:data.chan}]});return}
     if(!('Notification' in window)||Notification.permission!=='granted')return;
     const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();
     const opts={body:String(body).slice(0,200),icon:'icons/icon-192.png',badge:'icons/icon-192.png',tag:data.chan,renotify:true,data};
@@ -1655,12 +1686,17 @@ async function notifyMsg(title,body,data){
 }
 function openChan(chan){
   if(!chan)return;
+  if(chan==='update'){setTab('impostazioni');showUpdate();return}
+  if(chan.startsWith('exp:')){const gid=chan.slice(4);if(DB.groups[gid]){DB.current=gid;render();setTab('mov')}return}
   if(chan==='contacts'){chatView='contacts';curDM=null;setTab('chat');renderChat();return}
   if(chan.startsWith('dm:'))openDM(chan.slice(3));
   else if(DB.groups[chan]){DB.current=chan;chatView='group';render();setTab('chat')}
 }
 if(navigator.serviceWorker)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.openChat)openChan(e.data.openChat)});
-try{const LN=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;if(LN)LN.addListener('localNotificationActionPerformed',a=>openChan(a.notification.extra&&a.notification.extra.chan))}catch(e){}
+notifChannels();
+// app Android 13+: chiede subito il permesso, così messaggi e aggiornamenti arrivano nella barra delle notifiche
+if(SET.notify!==false)setTimeout(async()=>{try{const LN=LNP();if(LN&&(await LN.checkPermissions()).display==='prompt')await LN.requestPermissions()}catch(e){}},1500);
+try{const LN=LNP();if(LN)LN.addListener('localNotificationActionPerformed',a=>openChan(a.notification.extra&&a.notification.extra.chan))}catch(e){}
 /* --- attività in background (solo app Android): tiene viva l'app a schermo spento per ricevere i messaggi --- */
 const keepPlugin=()=>window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Background;
 let keepInfo=null;
@@ -2084,13 +2120,15 @@ $('ctAdd').onclick=()=>{$('ctCodeIn').value='';$('ctCodeErr').textContent='';ope
 $('ctScan').onclick=()=>{closeSheet('addCtSheet');startScan()};
 $('ctCodeGo').onclick=()=>{const sc=CCSync.parseShort($('ctCodeIn').value);if(sc){openShort(sc);return}const ct=CCSync.parseContact($('ctCodeIn').value);if(!ct){$('ctCodeErr').textContent=t('addCodeErr');fx('error');return}addContact(ct)};
 document.addEventListener('click',e=>{const b=e.target.closest('[data-fr],[data-ct]');if(!b||!b.closest('#ctList,#ctActions'))return;if(b.dataset.ct)openContact(b.dataset.ct);else frAction(b.dataset.pk,b.dataset.fr)});
-$('dmList').addEventListener('click',e=>{const pk=e.target.closest('[data-peer]')?.dataset.peer;if(pk)openDM(pk)});
+$('dmList').addEventListener('click',e=>{const del=e.target.closest('[data-del]');if(del){clearChat(ensureDM(del.dataset.del));return}const pk=e.target.closest('[data-peer]')?.dataset.peer;if(pk)openDM(pk)});
+$('dmDel').onclick=()=>{if(clearChat(ensureDM(curDM))){chatView='list';curDM=null;renderChat()}};
 $('members').addEventListener('click',e=>{const pk=e.target.closest('[data-dm]')?.dataset.dm;if(pk)openDM(pk)});
 $('chatDel').onclick=clearChat;
 $('ephSel').onchange=e=>{
   const ch=curChan(),v=+e.target.value;const op={t:'eph',id:CCSync.rid(),ts:Date.now(),s:v};
   applyChat(ch,op,ME.pk);persist();publish(ch,op);fx('toggle');renderChat();
 };
+$('notifExpOn').onchange=e=>{SET.notifyExp=e.target.checked;saveSet();if(SET.notifyExp)askNotif()};
 $('notifOn').onchange=e=>{SET.notify=e.target.checked;saveSet();if(SET.notify)askNotif();renderNotifState();applyKeepAlive()};
 $('keepOn').onchange=async e=>{
   SET.keepAlive=e.target.checked;saveSet();
@@ -2126,6 +2164,7 @@ let updLatest=0;
 function updState(latest){
   const need=!!(appBuild&&latest>appBuild.build);updLatest=need?latest:0;
   $('updDot').hidden=!need;
+  if(need&&+lsGet('cc-upd-notified')!==latest){lsSet('cc-upd-notified',latest);notifyMsg(t('updNotifTitle'),t('updNotifBody',{n:latest}),{chan:'update'},'aggiornamenti')}
   if(need)showUpdate();else $('updModal').hidden=true;
 }
 function showUpdate(){
@@ -2154,13 +2193,14 @@ $('updGo').addEventListener('click',async e=>{
 $('updCheck').onclick=()=>checkUpdate(true);
 setTimeout(()=>checkUpdate(false),500);   // all'avvio, dopo l'eventuale apertura del tutorial (a 350 ms)
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate(false)});
+setInterval(()=>checkUpdate(false),30*60e3);   // anche con l'app in background (attività in background attiva): avviso nella barra delle notifiche
 $('rcptOn').onchange=e=>{SET.receipts=e.target.checked;saveSet();renderChat()};
 $('chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&matchMedia('(hover:hover)').matches){e.preventDefault();$('chatForm').requestSubmit()}});
 $('chatIn').addEventListener('input',e=>{e.target.style.height='';e.target.style.height=Math.min(140,e.target.scrollHeight)+'px'});
 
 // impostazioni
 $('langSel').onchange=e=>{
-  SET.lang=e.target.value;saveSet();setLang();if(SET.keepAlive)applyKeepAlive();   // testo della notifica fissa nella nuova lingua
+  SET.lang=e.target.value;saveSet();setLang();notifChannels();if(SET.keepAlive)applyKeepAlive();   // testo della notifica fissa nella nuova lingua
   for(const k in fmtCache)delete fmtCache[k];
   const s=DB.groups.esempio;if(s&&s.sample&&s.lang!==LANG){DB.groups.esempio=sampleGroup();persist()}
   applyStatic();render();renderSettings();
@@ -2217,7 +2257,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)persist()})
 /* ---------- suoni, vibrazione e accessibilità ---------- */
 const VISION=[['auto','vmAuto'],['standard','vmStandard'],['low','vmLow'],['contrast','vmContrast'],['protan','vmProtan'],['deutan','vmDeutan'],['tritan','vmTritan'],['mono','vmMono'],['blind','vmBlind'],['photo','vmPhoto']];
 function renderA11y(){
-  $('notifOn').checked=SET.notify!==false;$('rcptOn').checked=SET.receipts!==false;renderNotifState();renderKeepAlive();
+  $('notifOn').checked=SET.notify!==false;$('notifExpOn').checked=SET.notifyExp!==false;$('rcptOn').checked=SET.receipts!==false;renderNotifState();renderKeepAlive();
   $('sndOn').checked=SET.sound!==false;$('vibOn').checked=SET.vib!==false;
   $('sndVol').value=SET.vol;$('vibInt').value=SET.vibInt;$('txtSize').value=SET.textSize;$('voiceRate').value=SET.voiceRate;
   $('sndVolOut').textContent=SET.vol+'%';$('vibIntOut').textContent=SET.vibInt+'%';$('txtSizeOut').textContent=SET.textSize+'%';$('voiceRateOut').textContent=SET.voiceRate+'%';

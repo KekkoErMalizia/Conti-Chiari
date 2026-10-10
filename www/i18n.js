@@ -961,3 +961,49 @@ ko:["그룹","개인","개인 채팅","다른 사람과 온라인 그룹에 참�
 ["ja", "招待を開いています…", "招待が見つからないか期限切れです。新しいリンクをもらうか、QRコードを読み取ってください。"],
 ["ko", "초대를 여는 중…", "초대를 찾을 수 없거나 만료되었어요. 새 링크를 받거나 QR 코드를 스캔하세요."]
 ].forEach(([l,shortOpening,shortNotFound])=>{if(I18N[l])Object.assign(I18N[l],{shortOpening,shortNotFound})});
+
+/* ---- Notifiche nella barra del telefono: canali Android e avviso di aggiornamento ---- */
+[
+['it',"Messaggi","Aggiornamenti","Nuovo aggiornamento","È disponibile la versione {n} di Conti Chiari. Tocca per aggiornare."],
+['en',"Messages","Updates","New update","Conti Chiari version {n} is available. Tap to update."],
+['es',"Mensajes","Actualizaciones","Nueva actualización","Ya está disponible la versión {n} de Conti Chiari. Toca para actualizar."],
+['fr',"Messages","Mises à jour","Nouvelle mise à jour","La version {n} de Conti Chiari est disponible. Touchez pour mettre à jour."],
+['de',"Nachrichten","Updates","Neues Update","Version {n} von Conti Chiari ist verfügbar. Zum Aktualisieren tippen."],
+['pt',"Mensagens","Atualizações","Nova atualização","A versão {n} do Conti Chiari está disponível. Toque para atualizar."],
+['nl',"Berichten","Updates","Nieuwe update","Versie {n} van Conti Chiari is beschikbaar. Tik om bij te werken."],
+['pl',"Wiadomości","Aktualizacje","Nowa aktualizacja","Dostępna jest wersja {n} Conti Chiari. Dotknij, aby zaktualizować."],
+['ro',"Mesaje","Actualizări","Actualizare nouă","Versiunea {n} a Conti Chiari este disponibilă. Atinge pentru a actualiza."],
+['sv',"Meddelanden","Uppdateringar","Ny uppdatering","Version {n} av Conti Chiari finns. Tryck för att uppdatera."],
+['tr',"Mesajlar","Güncellemeler","Yeni güncelleme","Conti Chiari'nin {n} sürümü hazır. Güncellemek için dokun."],
+['el',"Μηνύματα","Ενημερώσεις","Νέα ενημέρωση","Η έκδοση {n} του Conti Chiari είναι διαθέσιμη. Πάτησε για ενημέρωση."],
+['ru',"Сообщения","Обновления","Новое обновление","Доступна версия {n} Conti Chiari. Нажмите, чтобы обновить."],
+['uk',"Повідомлення","Оновлення","Нове оновлення","Доступна версія {n} Conti Chiari. Торкніться, щоб оновити."],
+['ar',"الرسائل","التحديثات","تحديث جديد","الإصدار {n} من Conti Chiari متوفر. اضغط للتحديث."],
+['hi',"संदेश","अपडेट","नया अपडेट","Conti Chiari का संस्करण {n} उपलब्ध है। अपडेट करने के लिए टैप करें।"],
+['zh',"消息","更新","新更新","Conti Chiari {n} 版已发布。点按即可更新。"],
+['ja',"メッセージ","アップデート","新しいアップデート","Conti Chiari のバージョン {n} が利用できます。タップして更新してください。"],
+['ko',"메시지","업데이트","새 업데이트","Conti Chiari {n} 버전을 사용할 수 있어요. 탭하여 업데이트하세요."]
+].forEach(([l,chMsgs,chUpd,updNotifTitle,updNotifBody])=>{if(I18N[l])Object.assign(I18N[l],{chMsgs,chUpd,updNotifTitle,updNotifBody})});
+
+/* ---- Notifiche delle spese aggiunte dagli altri membri ---- */
+[
+['it',"Spese","Notifiche delle spese","Avvisa quando un altro membro aggiunge una spesa in un gruppo online.","Nuova spesa · {group}","{name}: {desc} · {amount}"],
+['en',"Expenses","Expense notifications","Alert when another member adds an expense in an online group.","New expense · {group}","{name}: {desc} · {amount}"],
+['es',"Gastos","Notificaciones de gastos","Avisa cuando otro miembro añade un gasto en un grupo en línea.","Nuevo gasto · {group}","{name}: {desc} · {amount}"],
+['fr',"Dépenses","Notifications des dépenses","Prévient quand un autre membre ajoute une dépense dans un groupe en ligne.","Nouvelle dépense · {group}","{name} : {desc} · {amount}"],
+['de',"Ausgaben","Benachrichtigungen zu Ausgaben","Benachrichtigt, wenn ein anderes Mitglied in einer Online-Gruppe eine Ausgabe hinzufügt.","Neue Ausgabe · {group}","{name}: {desc} · {amount}"],
+['pt',"Despesas","Notificações de despesas","Avisa quando outro membro adiciona uma despesa num grupo online.","Nova despesa · {group}","{name}: {desc} · {amount}"],
+['nl',"Uitgaven","Meldingen van uitgaven","Meldt wanneer een ander lid een uitgave toevoegt in een online groep.","Nieuwe uitgave · {group}","{name}: {desc} · {amount}"],
+['pl',"Wydatki","Powiadomienia o wydatkach","Powiadamia, gdy inny członek doda wydatek w grupie online.","Nowy wydatek · {group}","{name}: {desc} · {amount}"],
+['ro',"Cheltuieli","Notificări pentru cheltuieli","Te anunță când alt membru adaugă o cheltuială într-un grup online.","Cheltuială nouă · {group}","{name}: {desc} · {amount}"],
+['sv',"Utgifter","Aviseringar om utgifter","Meddelar när en annan medlem lägger till en utgift i en onlinegrupp.","Ny utgift · {group}","{name}: {desc} · {amount}"],
+['tr',"Harcamalar","Harcama bildirimleri","Çevrimiçi bir grupta başka bir üye harcama eklediğinde bildirir.","Yeni harcama · {group}","{name}: {desc} · {amount}"],
+['el',"Έξοδα","Ειδοποιήσεις εξόδων","Ειδοποιεί όταν άλλο μέλος προσθέτει έξοδο σε μια διαδικτυακή ομάδα.","Νέο έξοδο · {group}","{name}: {desc} · {amount}"],
+['ru',"Расходы","Уведомления о расходах","Сообщает, когда другой участник добавляет расход в онлайн-группе.","Новый расход · {group}","{name}: {desc} · {amount}"],
+['uk',"Витрати","Сповіщення про витрати","Повідомляє, коли інший учасник додає витрату в онлайн-групі.","Нова витрата · {group}","{name}: {desc} · {amount}"],
+['ar',"المصاريف","إشعارات المصاريف","ينبّهك عندما يضيف عضو آخر مصروفًا في مجموعة متصلة.","مصروف جديد · {group}","{name}: {desc} · {amount}"],
+['hi',"खर्च","खर्च की सूचनाएँ","किसी ऑनलाइन समूह में कोई दूसरा सदस्य खर्च जोड़े तो सूचना देता है।","नया खर्च · {group}","{name}: {desc} · {amount}"],
+['zh',"支出","支出通知","当其他成员在在线群组中添加支出时提醒你。","新支出 · {group}","{name}：{desc} · {amount}"],
+['ja',"支出","支出の通知","オンラインのグループで他のメンバーが支出を追加したときに通知します。","新しい支出 · {group}","{name}：{desc} · {amount}"],
+['ko',"지출","지출 알림","온라인 그룹에서 다른 멤버가 지출을 추가하면 알려 줘요.","새 지출 · {group}","{name}: {desc} · {amount}"]
+].forEach(([l,chExp,notifExp,notifExpHint,expNotifTitle,expNotifBody])=>{if(I18N[l])Object.assign(I18N[l],{chExp,notifExp,notifExpHint,expNotifTitle,expNotifBody})});

@@ -2,6 +2,17 @@
   "appId": "it.contichiari.app",
   "appName": "Conti Chiari",
   "webDir": "www",
-  "android": { "backgroundColor": "#eef2f1" },
-  "ios": { "backgroundColor": "#eef2f1", "contentInset": "never" }
+  "android": {
+    "backgroundColor": "#eef2f1"
+  },
+  "ios": {
+    "backgroundColor": "#eef2f1",
+    "contentInset": "never"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_contichiari",
+      "iconColor": "#1f5f6b"
+    }
+  }
 }

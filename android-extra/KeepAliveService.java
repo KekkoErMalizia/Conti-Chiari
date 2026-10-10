@@ -50,7 +50,9 @@ public class KeepAliveService extends Service {
         Intent open = new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent tap = PendingIntent.getActivity(this, 0, open, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
         Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, CHANNEL) : new Notification.Builder(this);
-        b.setSmallIcon(android.R.drawable.stat_notify_chat)
+        // icona di Conti Chiari nella barra di stato (res/drawable/ic_stat_contichiari.xml, copiata dal workflow)
+        int icon = getResources().getIdentifier("ic_stat_contichiari", "drawable", getPackageName());
+        b.setSmallIcon(icon != 0 ? icon : android.R.drawable.stat_notify_chat)
             .setContentTitle(title)
             .setContentText(text)
             .setStyle(new Notification.BigTextStyle().bigText(text))

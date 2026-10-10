@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icona di Conti Chiari per la barra di stato: lo scontrino dell'app in bianco (Android la colora da solo),
+     con le righe e la moneta ritagliate. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M206,100 H794 V920 L745,862 L696,920 L647,862 L598,920 L549,862 L500,920 L451,862 L402,920 L353,862 L304,920 L255,862 L206,920 Z
+            M302,274 H698 A22,22 0 0 1 698,318 H302 A22,22 0 0 1 302,274 Z
+            M302,378 H594 A22,22 0 0 1 594,422 H302 A22,22 0 0 1 302,378 Z
+            M302,482 H560 A22,22 0 0 1 560,526 H302 A22,22 0 0 1 302,482 Z
+            M484,571 A130,130 0 0 0 484,829 Z
+            M516,571 A130,130 0 0 1 516,829 Z" />
+</vector>

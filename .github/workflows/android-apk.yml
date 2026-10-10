@@ -56,6 +56,15 @@ jobs:
           sed -i 's#</application>#    <provider android:name="androidx.startup.InitializationProvider" android:authorities="${applicationId}.androidx-startup" android:exported="false" tools:node="merge">\n            <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer" tools:node="remove" />\n        </provider>\n    </application>#' $M
           grep -n "tools:\|EmojiCompat" $M
 
+      # icona dell'app nelle notifiche: sagoma bianca per la barra di stato e icona a colori dentro la notifica
+      - name: Icone delle notifiche
+        run: |
+          R=android/app/src/main/res
+          cp -r android-extra/res/. $R/
+          mkdir -p $R/drawable-nodpi
+          cp www/icons/icon-192.png $R/drawable-nodpi/ic_notif_large.png
+          ls $R/drawable $R/drawable-nodpi
+
       - name: Attività in background (servizio in primo piano per le notifiche a schermo spento)
         run: |
           M=android/app/src/main/AndroidManifest.xml
