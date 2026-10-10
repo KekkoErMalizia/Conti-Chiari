@@ -66,9 +66,15 @@ body.custom-bg{--bar:var(--surface)}
 body.custom-bg .top,body.custom-bg nav.tabs{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 body.custom-bg section{box-shadow:0 4px 18px rgba(0,0,0,.12)}
 
-.top{padding:calc(var(--top) + 10px) 16px 12px;background:var(--bar);border-bottom:1px solid var(--line);display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.top{padding:calc(var(--top) + 8px) 16px 12px;background:var(--bar);border-bottom:1px solid var(--line);display:grid;gap:6px}
+/* nome dell'app al centro, seguito dall'icona, in una capsula con sfondo sfocato */
+.brand{justify-self:center;display:flex;align-items:center;gap:7px;padding:4px 5px 4px 13px;border-radius:999px;border:1px solid var(--line);background:var(--surface);-webkit-backdrop-filter:blur(12px) saturate(1.4);backdrop-filter:blur(12px) saturate(1.4);box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.brand b{font-family:var(--f-display);font-weight:700;font-size:14px;line-height:1;letter-spacing:.01em}
+.brand img{display:block;width:22px;height:22px;border-radius:6px;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.brand .net{margin-inline:-2px 3px}
+.trow{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+@supports (align-items:last baseline){.trow{align-items:last baseline}}
 .gbtn{all:unset;cursor:pointer;min-width:0;display:block}
-.gbtn .lbl{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:6px}
 .gbtn .nm{font-family:var(--f-display);font-weight:700;font-size:22px;line-height:1.2;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden}
 .gbtn .nm span{overflow:hidden;text-overflow:ellipsis}
 .gbtn .nm svg{flex:none;opacity:.6}
@@ -77,6 +83,7 @@ body.custom-bg section{box-shadow:0 4px 18px rgba(0,0,0,.12)}
 .net.on{background:var(--pos)}
 .tot{text-align:end;flex:none}
 .tot .lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tot .cur{font-family:var(--f-mono);font-weight:700;font-size:12px;letter-spacing:0;text-transform:none;color:var(--ink);margin-inline-start:3px}
 .tot .v{font-family:var(--f-mono);font-weight:600;font-size:18px;font-variant-numeric:tabular-nums}
 
 main{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 28px}
@@ -409,6 +416,7 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 /* Telefoni vecchi (2016 circa): colori semitrasparenti solo dove il browser li sa calcolare, misure fisse al posto di aspect-ratio */
 @supports (color:color-mix(in srgb,red 50%,blue)){
   body.custom-bg{--bar:color-mix(in srgb,var(--surface) 86%,transparent)}
+  .brand{border-color:color-mix(in srgb,var(--ink) 16%,transparent);background:color-mix(in srgb,var(--surface) 55%,transparent)}
   .exp .ic.in{background:color-mix(in srgb,var(--pos) 16%,transparent)}
   .exp .ic.out{background:color-mix(in srgb,var(--neg) 14%,transparent)}
 }
@@ -423,11 +431,13 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
 <div id="bgLayer"></div>
 <div class="app">
   <header class="top">
-    <button class="gbtn" id="openGroups" type="button">
-      <div class="lbl">Conti Chiari <span class="net" id="netDot" hidden></span></div>
-      <div class="nm"><span id="gName"></span><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg></div>
-    </button>
-    <div class="tot"><div class="lbl" data-t="total"></div><div class="v" id="total"></div></div>
+    <div class="brand"><b>Conti Chiari</b><img src="icons/icon.svg" alt=""><span class="net" id="netDot" hidden></span></div>
+    <div class="trow">
+      <button class="gbtn" id="openGroups" type="button">
+        <div class="nm"><span id="gName"></span><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg></div>
+      </button>
+      <div class="tot"><div class="lbl"><span data-t="total"></span><span class="cur" id="totalCur"></span></div><div class="v" id="total"></div></div>
+    </div>
   </header>
 
   <main id="main">
@@ -980,6 +990,13 @@ function fmt(minor,cur){
   cur=cur||G().cur||'EUR';const d=curDigits(cur),k=LOCALE+cur;
   if(!fmtCache[k]){try{fmtCache[k]=new Intl.NumberFormat(LOCALE,{style:'currency',currency:cur,currencyDisplay:'narrowSymbol'})}catch(e){fmtCache[k]=new Intl.NumberFormat(LOCALE,{style:'currency',currency:cur})}}
   return fmtCache[k].format(minor/10**d);
+}
+// importo senza simbolo della valuta (il simbolo sta nell'etichetta)
+const numCache={};
+function fmtNum(minor,cur){
+  cur=cur||G().cur||'EUR';const d=curDigits(cur),k=LOCALE+cur;
+  if(!numCache[k])numCache[k]=new Intl.NumberFormat(LOCALE,{minimumFractionDigits:d,maximumFractionDigits:d});
+  return numCache[k].format(minor/10**d);
 }
 function curSymbol(cur){try{return new Intl.NumberFormat(LOCALE,{style:'currency',currency:cur,currencyDisplay:'narrowSymbol'}).formatToParts(0).find(p=>p.type==='currency').value}catch(e){return cur}}
 function curName(c){try{return new Intl.DisplayNames([LOCALE],{type:'currency'}).of(c)}catch(e){return c}}
@@ -1679,7 +1696,8 @@ function drawQR(text,cv=$('qr')){
 function render(){
   const g=G();
   $('gName').textContent=g.name;
-  $('total').textContent=fmt(groupTotal(g));
+  $('total').textContent=fmtNum(groupTotal(g));
+  $('totalCur').textContent=curSymbol(g.cur||'EUR');
   $('sampleNote').hidden=!g.sample;
   renderMov();
 

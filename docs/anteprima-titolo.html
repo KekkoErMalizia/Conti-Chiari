@@ -1,0 +1,177 @@
+<title>Conti Chiari · Titolo in alto</title>
+<style>
+/* Layout: tre telefoni affiancati (oggi, proposta su sfondo normale, proposta su foto), sotto le note di progetto; su telefono tutto in colonna */
+:root{
+  --pg-bg:#e7ecea; --pg-ink:#14262e; --pg-muted:#5b6f76; --pg-line:#cfd9d7; --pg-card:#f7faf9; --pg-hl:#1f5f6b;
+  --f-display:ui-rounded,"SF Pro Rounded","Segoe UI Variable Display","Segoe UI",Roboto,system-ui,sans-serif;
+  --f-body:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",sans-serif;
+  --f-mono:ui-monospace,"SF Mono","Roboto Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--pg-bg:#0b1316;--pg-ink:#e4eeed;--pg-muted:#93a8ad;--pg-line:#22343a;--pg-card:#111c20;--pg-hl:#5fb3bf;color-scheme:dark}}
+:root[data-theme="dark"]{--pg-bg:#0b1316;--pg-ink:#e4eeed;--pg-muted:#93a8ad;--pg-line:#22343a;--pg-card:#111c20;--pg-hl:#5fb3bf;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--pg-bg);color:var(--pg-ink);font:15px/1.5 var(--f-body);padding-inline:16px;padding-block:28px 48px}
+.wrap{max-width:1140px;margin:0 auto;display:grid;gap:28px}
+header.pg h1{font:700 clamp(24px,4vw,34px)/1.15 var(--f-display);margin:0;text-wrap:balance}
+header.pg p{margin:6px 0 0;color:var(--pg-muted);max-width:62ch}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--pg-hl)}
+.stage{display:flex;flex-wrap:wrap;justify-content:center;gap:28px}
+.cap{font-size:13px;font-weight:600;color:var(--pg-muted);text-align:center;margin-top:10px}
+.cap b{color:var(--pg-ink)}
+
+/* ---------- telefono: palette dell'app (chiara / scura) ---------- */
+.screen{
+  --bg:#eef2f1; --surface:#ffffff; --ink:#14262e; --muted:#5b6f76; --line:#d5dfdd;
+  --accent:#1f5f6b; --accent-ink:#ffffff; --pos:#1d7a4f; --neg:#b3402d; --chip:#e3ebea; --bar:var(--surface);
+}
+.screen.dark{
+  --bg:#0f1a1e; --surface:#16252b; --ink:#e4eeed; --muted:#93a8ad; --line:#26393f;
+  --accent:#5fb3bf; --accent-ink:#0b1619; --pos:#5cc795; --neg:#ef8a74; --chip:#20343a;
+}
+.screen.photo{--bar:color-mix(in srgb,var(--surface) 70%,transparent)}
+.phone{width:320px;max-width:100%;height:640px;border-radius:44px;padding:10px;background:#0c1113;box-shadow:0 30px 60px -20px rgba(0,0,0,.45),inset 0 0 0 2px #2a3236}
+.screen{position:relative;height:100%;border-radius:35px;overflow:hidden;background:var(--bg);color:var(--ink);display:grid;grid-template-rows:auto 1fr auto;font-size:14px}
+.screen.photo{background:
+  radial-gradient(60% 40% at 20% 8%,#e9a25b 0%,transparent 70%),
+  radial-gradient(55% 45% at 85% 20%,#3d7f8c 0%,transparent 70%),
+  radial-gradient(70% 50% at 30% 70%,#25424a 0%,transparent 75%),
+  radial-gradient(50% 40% at 90% 85%,#b35b3c 0%,transparent 70%),
+  #182a30}
+.sb{display:flex;justify-content:space-between;padding:10px 22px 0;font:600 12px var(--f-body);color:var(--ink)}
+
+/* barra superiore attuale */
+.top{background:var(--bar);border-bottom:1px solid var(--line);padding:0 0 10px}
+.photo .top,.photo .tabs{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.row{padding:6px 16px 0;display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.brand+.row{align-items:last baseline}
+.lbl{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:6px}
+.nm{font:700 19px/1.2 var(--f-display);display:flex;align-items:center;gap:5px;white-space:nowrap}
+.nm svg{opacity:.6}
+.tot{text-align:end}
+.tot small{display:block;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tot .cur{font:700 11px var(--f-mono);letter-spacing:0;color:var(--ink);margin-inline-start:2px}
+.tot b{font:600 15px var(--f-mono)}
+.net{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--pos)}
+
+/* ---------- proposta: nome app al centro in una capsula sfocata ---------- */
+.brand{display:flex;justify-content:center;padding:8px 16px 2px}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:4px 5px 4px 13px;border-radius:999px;
+  border:1px solid color-mix(in srgb,var(--ink) 16%,transparent);
+  background:color-mix(in srgb,var(--surface) 55%,transparent);
+  backdrop-filter:blur(12px) saturate(1.4);-webkit-backdrop-filter:blur(12px) saturate(1.4);
+  box-shadow:0 2px 10px rgba(0,0,0,.08),inset 0 1px 0 color-mix(in srgb,#fff 35%,transparent)}
+.pill span{font:700 13.5px/1 var(--f-display);letter-spacing:.01em;color:var(--ink)}
+.pill svg{width:22px;height:22px;border-radius:6px;display:block;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.pill .net{margin-inline-start:-2px;margin-inline-end:3px}
+
+.body{overflow:hidden;padding:12px;display:grid;gap:12px;align-content:start}
+.sec{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.photo .sec{box-shadow:0 4px 18px rgba(0,0,0,.18)}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 10px;font:600 12.5px var(--f-body);text-align:center}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.exp{list-style:none;margin:0;padding:0}
+.exp li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 9px;padding:8px 0;border-top:1px solid var(--line)}
+.exp li:first-child{border-top:0}
+.exp .d{font-weight:600;font-size:13px}
+.exp .m{font-size:11px;color:var(--muted)}
+.exp .a{grid-row:1/span 2;grid-column:2;font:600 13px var(--f-mono);text-align:end;font-variant-numeric:tabular-nums}
+.day{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 2px}
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);background:var(--bar);border-top:1px solid var(--line);padding:8px 0 18px}
+.tabs span{display:grid;justify-items:center;gap:3px;font-size:9.5px;font-weight:600;color:var(--muted)}
+.tabs span::before{content:"";width:18px;height:18px;border-radius:5px;border:2px solid currentColor;opacity:.8}
+.tabs span.on{color:var(--accent)}
+
+/* ---------- note ---------- */
+.notes{background:var(--pg-card);border:1px solid var(--pg-line);border-radius:16px;padding:20px;display:grid;gap:10px;max-width:780px;justify-self:center;min-width:0}
+.notes h2{font:700 18px var(--f-display);margin:0}
+.notes ul{margin:0;padding-inline-start:20px;display:grid;gap:6px}
+.notes code{font:13px var(--f-mono);background:color-mix(in srgb,var(--pg-hl) 10%,transparent);padding:1px 5px;border-radius:5px}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="ico" viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="#1f5f6b"/><path fill="#f4f8f7" d="M206,100 H794 V920 L745,862 L696,920 L647,862 L598,920 L549,862 L500,920 L451,862 L402,920 L353,862 L304,920 L255,862 L206,920 Z"/><g stroke="#a9c3c6" stroke-width="44" stroke-linecap="round"><path d="M302,296 H698"/><path d="M302,400 H594"/><path d="M302,504 H560"/></g><path fill="#d6a12a" d="M602,484.65 A198,198 0 0 0 602,879.35 Z M634,484.65 A198,198 0 0 1 634,879.35 Z"/></symbol>
+  <symbol id="chev" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+</svg>
+
+<div class="wrap">
+  <header class="pg">
+    <div class="eyebrow">Anteprima di progetto · barra superiore</div>
+    <h1>Nome dell'app in alto al centro, con l'icona</h1>
+    <p>«Conti Chiari» passa dall'etichetta piccola a sinistra a una capsula centrata in cima allo schermo, seguita dalla miniatura dell'icona. La capsula ha un contorno sottile e uno sfondo sfocato che lascia intravedere ciò che c'è dietro.</p>
+  </header>
+
+  <div class="stage">
+    <div>
+      <div class="phone"><div class="screen" id="s0">
+        <div class="sb"><span>9:41</span><span>●●● 82%</span></div>
+        <div class="top">
+          <div class="row">
+            <div>
+              <div class="lbl">Conti Chiari <span class="net"></span></div>
+              <div class="nm">Vacanza Sardegna<svg width="16" height="16"><use href="#chev"/></svg></div>
+            </div>
+            <div class="tot"><small>Totale</small><b>900,00 €</b></div>
+          </div>
+        </div>
+        <div class="body" data-body></div>
+        <nav class="tabs" aria-hidden="true"><span class="on">Movimenti</span><span>Saldi</span><span>Chat</span><span>Persone</span><span>Altro</span></nav>
+      </div></div>
+      <div class="cap">Oggi</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="screen" id="s1">
+        <div class="sb"><span>9:41</span><span>●●● 82%</span></div>
+        <div class="top">
+          <div class="brand"><div class="pill"><span>Conti Chiari</span><svg aria-hidden="true"><use href="#ico"/></svg><i class="net" title="Online"></i></div></div>
+          <div class="row">
+            <div class="nm">Vacanza Sardegna<svg width="16" height="16"><use href="#chev"/></svg></div>
+            <div class="tot"><small>Totale <span class="cur">€</span></small><b>900,00</b></div>
+          </div>
+        </div>
+        <div class="body" data-body></div>
+        <nav class="tabs" aria-hidden="true"><span class="on">Movimenti</span><span>Saldi</span><span>Chat</span><span>Persone</span><span>Altro</span></nav>
+      </div></div>
+      <div class="cap"><b>Proposta</b> · tema chiaro</div>
+    </div>
+
+    <div>
+      <div class="phone"><div class="screen dark photo" id="s2">
+        <div class="sb"><span>9:41</span><span>●●● 82%</span></div>
+        <div class="top">
+          <div class="brand"><div class="pill"><span>Conti Chiari</span><svg aria-hidden="true"><use href="#ico"/></svg><i class="net" title="Online"></i></div></div>
+          <div class="row">
+            <div class="nm">Vacanza Sardegna<svg width="16" height="16"><use href="#chev"/></svg></div>
+            <div class="tot"><small>Totale <span class="cur">€</span></small><b>900,00</b></div>
+          </div>
+        </div>
+        <div class="body" data-body></div>
+        <nav class="tabs" aria-hidden="true"><span class="on">Movimenti</span><span>Saldi</span><span>Chat</span><span>Persone</span><span>Altro</span></nav>
+      </div></div>
+      <div class="cap"><b>Proposta</b> · tema scuro con foto di sfondo</div>
+    </div>
+  </div>
+
+  <section class="notes">
+    <h2>Come cambia la barra</h2>
+    <ul>
+      <li>Prima riga: capsula centrata con <b>Conti Chiari</b> e, subito dopo, l'icona dell'app in miniatura (22 px, angoli arrotondati). Il pallino verde della connessione resta, in coda all'icona.</li>
+      <li>Contorno di 1 px nel colore del testo al 16 %, sfondo della superficie al 55 % con <code>backdrop-filter: blur(12px)</code>: sullo sfondo normale appare come un vetro chiaro, sulla foto lascia trasparire i colori sfocati.</li>
+      <li>Seconda riga: nome del gruppo (tocco per cambiarlo) a sinistra, totale a destra, allineati sulla stessa linea di base del testo: «Vacanza Sardegna» e l'importo poggiano sulla stessa riga. Il simbolo della valuta del gruppo (qui €) compare accanto alla parola «Totale», così l'importo mostra solo la cifra. L'etichetta piccola «CONTI CHIARI» sopra il gruppo sparisce, perché il nome ora sta nella capsula.</li>
+      <li>La barra cresce di circa 30 px in altezza. Si adatta a chiaro, scuro e sfondo personalizzato senza colori aggiuntivi: usa i token esistenti (<code>--surface</code>, <code>--ink</code>).</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+const rows=`<div class="quick"><div class="btn primary">+ Spesa</div><div class="btn">Rimborso</div></div>
+<div class="sec"><div class="day">Oggi</div><ul class="exp">
+<li><span class="d">Cena al porto</span><span class="m">Pagato da Giulia · 4 persone</span><span class="a">96,00 €</span></li>
+<li><span class="d">Benzina</span><span class="m">Pagato da Marco · 4 persone</span><span class="a">62,40 €</span></li></ul></div>
+<div class="sec"><div class="day">Ieri</div><ul class="exp">
+<li><span class="d">Traghetto Livorno–Olbia</span><span class="m">Pagato da te · 4 persone</span><span class="a">348,00 €</span></li>
+<li><span class="d">Spesa supermercato</span><span class="m">Pagato da Sara · 4 persone</span><span class="a">71,85 €</span></li>
+<li><span class="d">Ombrellone e lettini</span><span class="m">Pagato da Giulia · 4 persone</span><span class="a">40,00 €</span></li></ul></div>`;
+document.querySelectorAll('[data-body]').forEach(b=>b.innerHTML=rows);
+</script>
