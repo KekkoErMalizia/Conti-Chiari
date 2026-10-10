@@ -43,6 +43,7 @@ header.pg p{margin:6px 0 0;color:var(--pg-muted);max-width:62ch}
 .top{background:var(--bar);border-bottom:1px solid var(--line);padding:0 0 10px}
 .photo .top,.photo .tabs{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .row{padding:6px 16px 0;display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.brand+.row{align-items:last baseline}
 .lbl{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:6px}
 .nm{font:700 19px/1.2 var(--f-display);display:flex;align-items:center;gap:5px;white-space:nowrap}
 .nm svg{opacity:.6}
@@ -156,7 +157,7 @@ header.pg p{margin:6px 0 0;color:var(--pg-muted);max-width:62ch}
     <ul>
       <li>Prima riga: capsula centrata con <b>Conti Chiari</b> e, subito dopo, l'icona dell'app in miniatura (22 px, angoli arrotondati). Il pallino verde della connessione resta, in coda all'icona.</li>
       <li>Contorno di 1 px nel colore del testo al 16 %, sfondo della superficie al 55 % con <code>backdrop-filter: blur(12px)</code>: sullo sfondo normale appare come un vetro chiaro, sulla foto lascia trasparire i colori sfocati.</li>
-      <li>Seconda riga invariata: nome del gruppo (tocco per cambiarlo) a sinistra, totale a destra. L'etichetta piccola «CONTI CHIARI» sopra il gruppo sparisce, perché il nome ora sta nella capsula.</li>
+      <li>Seconda riga: nome del gruppo (tocco per cambiarlo) a sinistra, totale a destra, allineati sulla stessa linea di base del testo: «Vacanza Sardegna» e l'importo poggiano sulla stessa riga. L'etichetta piccola «CONTI CHIARI» sopra il gruppo sparisce, perché il nome ora sta nella capsula.</li>
       <li>La barra cresce di circa 30 px in altezza. Si adatta a chiaro, scuro e sfondo personalizzato senza colori aggiuntivi: usa i token esistenti (<code>--surface</code>, <code>--ink</code>).</li>
     </ul>
   </section>
