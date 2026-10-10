@@ -159,6 +159,9 @@ Sì, se il gruppo è online: scheda **Gruppo → Attiva gruppo online**, poi l'a
 **Come entro in un gruppo con il QR?**
 Tocca il nome del gruppo in alto → **Scansiona QR** e inquadra il codice. Su Android puoi anche inquadrarlo con la fotocamera del telefono. Se la fotocamera non è disponibile, usa **Usa una foto del QR**.
 
+**Posso entrare senza QR né link, ad esempio al telefono?**
+Sì, con il **codice a 6 cifre**. Chi invita tocca **Codice a 6 cifre** (scheda Gruppo, oppure Rubrica → Il mio codice per un'amicizia) e detta le cifre. L'altro tocca il nome del gruppo in alto → **Inserisci codice a 6 cifre** (o Rubrica → Aggiungi con codice). Chi invita vede la richiesta con il nome e tocca **Fai entrare**. Il codice vale 10 minuti, e la chiave del gruppo parte solo dopo la conferma: anche chi indovinasse le cifre non entra senza il tuo sì.
+
 **Le notifiche arrivano anche con l'app chiusa?**
 Arrivano mentre l'app è aperta o in background. Con l'app chiusa del tutto no: servirebbe un server di notifiche, e Conti Chiari non ne usa per non dipendere da nessuno. Alla riapertura trovi tutti i messaggi.
 

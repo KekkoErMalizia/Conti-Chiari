@@ -344,6 +344,18 @@ body.custom-bg .chatbar{background:none}
 .scan video{width:100%;height:100%;object-fit:cover;display:block}
 .scan::after{content:"";position:absolute;inset:18%;border:3px solid rgba(255,255,255,.85);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
 
+/* codice a 6 cifre */
+.pin{font-family:var(--f-mono);font-size:44px;font-weight:700;letter-spacing:.14em;text-align:center;margin:2px 0 0;direction:ltr;font-variant-numeric:tabular-nums}
+.pin.off{color:var(--muted);text-decoration:line-through}
+.pintime{text-align:center;margin:0;font-variant-numeric:tabular-nums}
+.pinin{font-family:var(--f-mono);font-size:30px;text-align:center;letter-spacing:.2em;direction:ltr}
+.pinreqs{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.pinreqs li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px}
+.pinreqs .row{grid-column:1/-1}
+.pinreqs .row .btn{flex:1}
+.pinreqs .st{font-size:14px;color:var(--muted)}
+.pinreqs .st.ok{color:var(--pos)}
+
 /* gruppi */
 .glist{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .glist button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px;border-radius:12px;border:1px solid var(--line)}
@@ -547,6 +559,7 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
         <div class="qrbox"><canvas id="qr" width="240" height="240"></canvas></div>
         <p class="hint" data-t="inviteText"></p>
         <div class="row"><button class="btn primary" type="button" id="shareLink" data-t="shareLink"></button><button class="btn" type="button" id="copyLink" data-t="copyLink"></button></div>
+        <button class="btn block" type="button" id="pinGroup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 5h.01M12 5h.01M18 5h.01M6 11h.01M12 11h.01M18 11h.01M6 17h.01M12 17h.01M18 17h.01M12 22h.01" stroke-width="3.2"/></svg><span data-t="pinBtn"></span></button>
       </section>
       <section id="membersBox" hidden>
         <h2><span data-t="members"></span><span class="count" id="memCount"></span></h2>
@@ -757,6 +770,7 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
     <h3><span id="gTitle" data-t="yourGroups"></span><button class="link" type="button" data-close data-t="close"></button></h3>
     <div class="stack">
       <button class="btn primary block" type="button" id="openScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M7 12h10"/></svg><span data-t="scanQr"></span></button>
+      <button class="btn block" type="button" id="openPinEnter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 5h.01M12 5h.01M18 5h.01M6 11h.01M12 11h.01M18 11h.01M6 17h.01M12 17h.01M18 17h.01M12 22h.01" stroke-width="3.2"/></svg><span data-t="pinEnter"></span></button>
       <ul class="glist" id="glist"></ul>
       <form id="newGroup" class="stack newgroup">
         <input id="newGroupName" type="text" data-tp="newGroupPh" maxlength="40" autocomplete="off">
@@ -777,6 +791,34 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
         </div>
       </details>
     </div>
+  </div>
+</div>
+
+<!-- Fogli: codice a 6 cifre (mostrarlo e inserirlo) -->
+<div class="sheet" id="pinSheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+    <div class="grab"></div>
+    <h3><span id="pinTitle" data-t="pinTitle"></span><button class="link" type="button" data-close data-t="close"></button></h3>
+    <div class="stack">
+      <p class="pin" id="pinCode"></p>
+      <p class="hint pintime" id="pinTime" aria-live="polite"></p>
+      <p class="hint" id="pinHint" style="text-align:center;margin:0"></p>
+      <ul class="pinreqs" id="pinReqs" aria-live="polite"></ul>
+      <button class="btn primary block" type="button" id="pinNew" data-t="pinNew" hidden></button>
+    </div>
+  </div>
+</div>
+<div class="sheet" id="pinEnterSheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="peTitle">
+    <div class="grab"></div>
+    <h3><span id="peTitle" data-t="pinTitle"></span><button class="link" type="button" data-close data-t="cancel"></button></h3>
+    <form class="stack" id="pinForm">
+      <p class="hint" data-t="pinEnterHint" style="margin:0"></p>
+      <input type="text" id="pinIn" class="pinin" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="000 000" aria-labelledby="peTitle">
+      <p class="hint" id="pinState" aria-live="polite" style="margin:0"></p>
+      <p class="err" id="pinErr" role="alert"></p>
+      <button class="btn primary block" type="submit" id="pinGo" data-t="pinGo"></button>
+    </form>
   </div>
 </div>
 
@@ -844,6 +886,7 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
       <div class="qrbox"><canvas id="ctQr" width="240" height="240"></canvas><b id="ctMe"></b></div>
       <p class="hint" data-t="myCodeHint" style="text-align:center;margin:0"></p>
       <div class="row"><button class="btn primary" type="button" id="ctShare" data-t="shareLink"></button><button class="btn" type="button" id="ctCopy" data-t="copyLink"></button></div>
+      <button class="btn block" type="button" id="pinContact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 5h.01M12 5h.01M18 5h.01M6 11h.01M12 11h.01M18 11h.01M6 17h.01M12 17h.01M18 17h.01M12 22h.01" stroke-width="3.2"/></svg><span data-t="pinBtn"></span></button>
     </div>
   </div>
 </div>
@@ -853,6 +896,7 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
     <h3><span id="acTitle" data-t="ctAddCode"></span><button class="link" type="button" data-close data-t="cancel"></button></h3>
     <div class="stack">
       <button class="btn primary block" type="button" id="ctScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 18h2v2h-2zM18 14h2M14 18v2"/></svg><span data-t="scanQr"></span></button>
+      <button class="btn block" type="button" id="ctPinEnter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 5h.01M12 5h.01M18 5h.01M6 11h.01M12 11h.01M18 11h.01M6 17h.01M12 17h.01M18 17h.01M12 22h.01" stroke-width="3.2"/></svg><span data-t="pinEnter"></span></button>
       <input type="text" id="ctCodeIn" data-tp="addCodePh" autocomplete="off">
       <p class="err" id="ctCodeErr" style="margin:0"></p>
       <button class="btn block" type="button" id="ctCodeGo" data-t="add"></button>
@@ -1094,6 +1138,8 @@ let RELAYS;try{RELAYS=JSON.parse(localStorage.getItem('cc-relays'))}catch(e){}
 let netCount=0;
 const HUB=new CCSync.Hub({relays:Array.isArray(RELAYS)&&RELAYS.length?RELAYS:undefined,keys:ME,
   onOp:(gid,op,pk,createdAt)=>{
+    if(gid==='pin'){onPinReq(op,pk);return}
+    if(gid==='pinok'){onPinReply(op,pk);return}
     if(gid==='inbox'){DB.inboxLast=Math.max(DB.inboxLast||0,createdAt);onFriendOp(op,pk);persistSoon();return}
     let ch,isDM=gid.startsWith('dm:');
     if(isDM){ch=ensureDM(gid.slice(3));if(pk!==ME.pk&&pk!==ch.peer)return;if(pk!==ME.pk&&isBlocked(pk)){ch.sync.last=Math.max(ch.sync.last||0,createdAt);return}}
@@ -1178,8 +1224,10 @@ function snapOps(g){
   return ops;
 }
 async function goOnline(){
-  const g=G();if(g.sync)return;
+  let g=G();if(g.sync)return;
   if(g.sample){delete g.sample}
+  // il gruppo d'esempio ha lo stesso id su tutti i telefoni: online prende un id nuovo, così non si mescola con l'esempio degli altri
+  if(g.id==='esempio'){const nid=uid();delete DB.groups[g.id];g.id=nid;DB.groups[nid]=g;DB.current=nid}
   const key=CCSync.newGroupKey();
   g.sync={key,topic:await CCSync.topicOf(key),last:0,owner:ME.pk,ownLock:1};g.outbox=[];
   snapOps(g).forEach(op=>commit(op,g));
@@ -1189,6 +1237,7 @@ async function goOnline(){
 async function joinGroup(inv){
   closeSheet('scanSheet');closeSheet('groupSheet');stopScan();
   let g=DB.groups[inv.id];
+  if(g&&g.sample&&!g.sync){delete DB.groups[inv.id];g=null}   // l'esempio non tocca un gruppo vero
   if(!g){
     g=blankGroup({id:inv.id,name:inv.name||t('myGroup'),cur:'EUR'});
     g.sync={key:inv.key,topic:await CCSync.topicOf(inv.key),last:0};g.outbox=[];
@@ -1202,6 +1251,105 @@ async function joinGroup(inv){
   DB.current=g.id;persist();startSync();
   commit(memberOp(g),g);
   render();setTab('gruppo');fx('scan');toast(t('joined',{name:g.name}));
+}
+/* ---------- codice a 6 cifre ----------
+   Chi mostra il codice pubblica un «faro» (chi è, gruppo o contatto). Chi lo inserisce manda una richiesta cifrata
+   con la chiave ECDH tra i due telefoni; chi mostra il codice conferma, e solo allora parte il link vero (vedi sync.js). */
+let PIN=null,PJ=null,pinMode='g';const PIN_MINE={};   // codici mostrati da questo telefono
+function hubOn(){if(!HUB.started){HUB.started=true;HUB.start()}}
+const fmtPin=c=>c.slice(0,3)+' '+c.slice(3);
+async function pinHost(mode){
+  pinStop();pinMode=mode;
+  const g=G();if(mode==='g'&&!g.sync)return;
+  if(mode==='c'){DB.inboxOn=true;persist();startSync()}
+  hubOn();
+  const now=Date.now(),P=PIN={code:CCSync.newPin(),mode,gid:g.id,start:now,exp:now+CCSync.PIN_MIN*6e4,reqs:{}};
+  $('pinCode').textContent=fmtPin(P.code);$('pinCode').classList.remove('off');
+  $('pinHint').textContent=t(mode==='g'?'pinHintGroup':'pinHintContact',{name:g.name});
+  $('pinNew').hidden=true;renderPinReqs();openSheet('pinSheet');
+  PIN_MINE[P.code]=P.exp;P.timer=setInterval(pinTick,1000);pinTick();
+  const {key,topic}=await CCSync.pinKeys(P.code);if(PIN!==P)return;
+  P.topic=topic;
+  HUB.watch('pin',async pk=>pk===ME.pk||isBlocked(pk)?null:(await CCSync.dmChannel(ME.sk,pk)).key,topic,Math.floor(now/1000));
+  const b={t:'pinHost',ts:now,exp:P.exp,k:mode,name:(SET.profile.name||'').slice(0,24)};if(mode==='g')b.g=g.name.slice(0,40);
+  HUB.publish(key,topic,b).catch(()=>{});
+}
+function pinTick(){
+  const P=PIN;if(!P)return;
+  const left=P.exp-Date.now();
+  if(left<=0){
+    clearInterval(P.timer);if(P.topic)HUB.unwatch(P.topic);P.topic=null;
+    $('pinCode').classList.add('off');$('pinTime').textContent=t('pinExpired');$('pinNew').hidden=false;return;
+  }
+  const s=Math.ceil(left/1000),mm=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  $('pinTime').textContent=netCount?t('pinExpires',{time:mm}):t('pinOffline');
+}
+function pinStop(){if(!PIN)return;clearInterval(PIN.timer);if(PIN.topic)HUB.unwatch(PIN.topic);PIN=null}
+function onPinReq(op,pk){
+  const P=PIN;if(!P||!P.topic||!op||op.t!=='pinReq'||!/^[0-9a-f]{64}$/.test(pk)||pk===ME.pk||isBlocked(pk))return;
+  const ts=+op.ts||0;if(ts<P.start-60000||ts>Date.now()+600000||P.reqs[pk])return;
+  P.reqs[pk]={name:String(op.name||'').trim().slice(0,24)||t('anon'),avatar:AV_RE.test(op.avatar||'')&&op.avatar.length<80000?op.avatar:'',state:'new'};
+  fx('receive');renderPinReqs();
+}
+function renderPinReqs(){
+  const P=PIN,list=P?Object.entries(P.reqs):[];
+  $('pinReqs').innerHTML=list.length?list.map(([pk,r])=>{
+    const msg=esc(t(P.mode==='g'?'pinReqGroup':'pinReqContact',{name:r.name}));
+    const act=r.state==='new'?`<div class="row"><button class="btn primary" type="button" data-pin="ok" data-pk="${pk}">${esc(t('pinAccept'))}</button><button class="btn" type="button" data-pin="no" data-pk="${pk}">${esc(t('pinDecline'))}</button></div>`
+      :`<span class="st ${r.state==='ok'?'ok':''}" style="grid-column:1/-1">${esc(t(r.state==='ok'?'pinDone':'pinRefused',{name:r.name}))}</span>`;
+    return `<li>${avatarHtml(r.name,'#5b6f76',r.avatar)}<b>${msg}</b>${act}</li>`;
+  }).join(''):`<li style="display:block;text-align:center;border-style:dashed"><span class="st">${esc(t('pinWaiting'))}</span></li>`;
+}
+async function pinDecide(pk,yes){
+  const P=PIN,r=P&&P.reqs[pk];if(!r||r.state!=='new')return;
+  const now=Date.now(),op={t:yes?'pinOk':'pinNo',ts:now,exp:now+15*6e4};
+  if(yes){
+    if(P.mode==='g'){const g=DB.groups[P.gid];if(!g||!g.sync)return;op.l=CCSync.inviteLink(g)}
+    else{
+      op.l=CCSync.contactLink(ME.pk,SET.profile.name||'');
+      const c=ensureContact(pk);if(!c.name)c.name=r.name;if(!c.avatar&&r.avatar)c.avatar=r.avatar;
+      if(!c.blocked&&(c.rel==='none'||c.rel==='in')){c.rel=c.rel==='in'?'friend':'out';c.ts=now;frSend(pk,c.rel==='friend'?'acc':'req');DB.inboxOn=true;watchDM(pk);persist();startSync();renderUnread()}
+    }
+    fx('success');
+  }else fx('delete');
+  r.state=yes?'ok':'no';renderPinReqs();
+  try{const pair=await CCSync.pinPair(ME.sk,pk,P.code);await HUB.publish(pair.key,pair.topic,op)}catch(e){}
+}
+function openPinEnter(code){
+  pinJoinStop();$('pinIn').value=code?fmtPin(code):'';$('pinErr').textContent='';$('pinState').textContent='';
+  openSheet('pinEnterSheet');if(code)pinJoin(code);else setTimeout(()=>$('pinIn').focus(),250);
+}
+function pinJoinStop(){const J=PJ;PJ=null;$('pinGo').disabled=false;$('pinIn').disabled=false;if(!J)return;clearTimeout(J.timer);if(J.topic)HUB.unwatch(J.topic)}
+function pinFail(k){pinJoinStop();$('pinState').textContent='';$('pinErr').textContent=t(k);fx('error')}
+async function pinJoin(code){
+  pinJoinStop();if(PIN_MINE[code]>Date.now()){$('pinIn').value=fmtPin(code);pinFail('pinOwn');return}
+  const J=PJ={code};
+  $('pinErr').textContent='';$('pinState').textContent=t('pinSearching');$('pinGo').disabled=true;$('pinIn').disabled=true;
+  hubOn();
+  try{
+    const {key,topic}=await CCSync.pinKeys(code);if(PJ!==J)return;
+    const b=await HUB.fetchOnce(key,topic,12000);if(PJ!==J)return;
+    if(!b||b.t!=='pinHost'||!(+b.exp>Date.now())||!/^[0-9a-f]{64}$/.test(b.$pk||'')||(b.k!=='g'&&b.k!=='c')){pinFail(netCount?'pinNotFound':'pinOffline');return}
+    if(b.$pk===ME.pk){pinFail('pinOwn');return}
+    J.host=b.$pk;J.mode=b.k;
+    const who=String(b.name||'').slice(0,24)||t('anon');
+    $('pinState').textContent=t(b.k==='g'?'pinFoundGroup':'pinFoundContact',{name:who,group:String(b.g||'').slice(0,40)});
+    const dm=await CCSync.dmChannel(ME.sk,J.host),pair=await CCSync.pinPair(ME.sk,J.host,code);if(PJ!==J)return;
+    J.topic=pair.topic;
+    HUB.watch('pinok',pair.key,pair.topic,Math.floor(Date.now()/1000));
+    const now=Date.now();
+    await HUB.publish(dm.key,topic,Object.assign({t:'pinReq',ts:now,exp:now+15*6e4},myCard()));
+    J.timer=setTimeout(()=>{if(PJ===J)pinFail('pinNoAnswer')},5*6e4);
+  }catch(e){if(PJ===J)pinFail('pinNotFound')}
+}
+function onPinReply(op,pk){
+  const J=PJ;if(!J||pk!==J.host||!op)return;
+  if(op.t==='pinNo'){pinFail('pinDeclined');return}
+  if(op.t!=='pinOk'||typeof op.l!=='string')return;
+  pinJoinStop();closeSheet('pinEnterSheet');
+  if(J.mode==='c'){const ct=CCSync.parseContact(op.l);if(ct&&ct.pk===J.host){addContact(ct);return}}
+  else{const inv=CCSync.parseInvite(op.l);if(inv){joinGroup(inv);return}}
+  toast(t('pinNotFound'));fx('error');
 }
 let profT;
 function broadcastProfile(){clearTimeout(profT);profT=setTimeout(()=>{Object.values(DB.groups).forEach(g=>{if(g.sync)commit(memberOp(g),g)});Object.keys(DB.contacts).forEach(pk=>{const c=DB.contacts[pk];if(c.rel==='friend'&&!c.blocked)frSend(pk,'upd')})},1200)}
@@ -1275,7 +1423,7 @@ function setTab(x){
   renderUnread();
 }
 function openSheet(id){$(id).hidden=false;fx('open')}
-function closeSheet(id){if(!$(id).hidden)fx('close');$(id).hidden=true;if(id==='scanSheet')stopScan();if(id==='videoSheet')$('demoVideo').pause()}
+function closeSheet(id){if(!$(id).hidden)fx('close');$(id).hidden=true;if(id==='scanSheet')stopScan();if(id==='videoSheet')$('demoVideo').pause();if(id==='pinSheet')pinStop();if(id==='pinEnterSheet')pinJoinStop()}
 document.querySelectorAll('.sheet').forEach(s=>s.addEventListener('click',e=>{if(e.target===s||e.target.hasAttribute('data-close'))closeSheet(s.id)}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.sheet:not([hidden])').forEach(s=>closeSheet(s.id))});
 const fmtDay=d=>new Date(d+'T12:00').toLocaleDateString(LOCALE,{weekday:'short',day:'numeric',month:'long'});
@@ -2119,6 +2267,7 @@ function importGroup(g){
 $('doImport').onclick=()=>{
   $('importErr').textContent='';const v=$('codeIn').value;
   const inv=CCSync.parseInvite(v);if(inv){$('codeIn').value='';joinGroup(inv);return}
+  const pin=CCSync.parsePin(v);if(pin){$('codeIn').value='';closeSheet('groupSheet');openPinEnter(pin);return}
   const sc=CCSync.parseShort(v);if(sc){$('codeIn').value='';openShort(sc);return}
   try{importGroup(decodeGroup(v));$('codeIn').value=''}catch(err){$('importErr').textContent=err.message}
 };
@@ -2134,7 +2283,16 @@ $('ctSearch').addEventListener('input',renderContacts);
 $('ctMyCode').onclick=openMyCode;
 $('ctAdd').onclick=()=>{$('ctCodeIn').value='';$('ctCodeErr').textContent='';openSheet('addCtSheet')};
 $('ctScan').onclick=()=>{closeSheet('addCtSheet');startScan()};
-$('ctCodeGo').onclick=()=>{const sc=CCSync.parseShort($('ctCodeIn').value);if(sc){openShort(sc);return}const ct=CCSync.parseContact($('ctCodeIn').value);if(!ct){$('ctCodeErr').textContent=t('addCodeErr');fx('error');return}addContact(ct)};
+// codice a 6 cifre
+$('pinGroup').onclick=()=>pinHost('g');
+$('pinContact').onclick=()=>{closeSheet('myCodeSheet');pinHost('c')};
+$('pinNew').onclick=()=>pinHost(pinMode);
+$('openPinEnter').onclick=()=>{closeSheet('groupSheet');openPinEnter()};
+$('ctPinEnter').onclick=()=>{closeSheet('addCtSheet');openPinEnter()};
+$('pinReqs').addEventListener('click',e=>{const b=e.target.closest('[data-pin]');if(b)pinDecide(b.dataset.pk,b.dataset.pin==='ok')});
+$('pinIn').addEventListener('input',e=>{const d=e.target.value.replace(/\D/g,'').slice(0,6);e.target.value=d.length>3?d.slice(0,3)+' '+d.slice(3):d;$('pinErr').textContent='';if(d.length===6&&!PJ)pinJoin(d)});
+$('pinForm').addEventListener('submit',e=>{e.preventDefault();const c=CCSync.parsePin($('pinIn').value);if(!c){$('pinErr').textContent=t('pinBad');fx('error');return}pinJoin(c)});
+$('ctCodeGo').onclick=()=>{const pin=CCSync.parsePin($('ctCodeIn').value);if(pin){closeSheet('addCtSheet');openPinEnter(pin);return}const sc=CCSync.parseShort($('ctCodeIn').value);if(sc){openShort(sc);return}const ct=CCSync.parseContact($('ctCodeIn').value);if(!ct){$('ctCodeErr').textContent=t('addCodeErr');fx('error');return}addContact(ct)};
 document.addEventListener('click',e=>{const b=e.target.closest('[data-fr],[data-ct]');if(!b||!b.closest('#ctList,#ctActions'))return;if(b.dataset.ct)openContact(b.dataset.ct);else frAction(b.dataset.pk,b.dataset.fr)});
 $('dmList').addEventListener('click',e=>{const del=e.target.closest('[data-del]');if(del){clearChat(ensureDM(del.dataset.del));return}const pk=e.target.closest('[data-peer]')?.dataset.peer;if(pk)openDM(pk)});
 $('dmDel').onclick=()=>{if(clearChat(ensureDM(curDM))){chatView='list';curDM=null;renderChat()}};

@@ -166,7 +166,7 @@ class Hub{
     if(!key) return;
     let op; try{ op = await open(key, ev.content) }catch(e){ return }   // chiave sbagliata o dati manomessi
     if(!op || typeof op !== 'object' || typeof op.t !== 'string') return;
-    if(this.once[tag[1]]){ this.once[tag[1]].done(op); return }
+    if(this.once[tag[1]]){ op.$pk = ev.pubkey; this.once[tag[1]].done(op); return }   // $pk: chi l'ha scritto
     g.since = Math.max(g.since || 0, ev.created_at);
     this.onOp(g.id, op, ev.pubkey, ev.created_at);
   }
@@ -297,5 +297,35 @@ async function resolveShort(hub, code){
   return op && op.t === 'link' && typeof op.l === 'string' ? op.l : null;
 }
 
-window.CCSync = {newShortCode, shortLink, parseShort, publishShort, resolveShort, Hub, deviceKeys, newGroupKey, topicOf, seal, open, makeEvent, checkEvent, inviteLink, parseInvite, dmChannel, inboxTopic, contactLink, parseContact, rid, KIND, DEFAULT_RELAYS};
+/* ---------- codice a 6 cifre ---------- */
+// Chi mostra il codice pubblica un «faro» cifrato con una chiave ricavata dalle 6 cifre (chi è, e se è un gruppo o un contatto).
+// Chi inserisce il codice legge il faro e manda una richiesta cifrata con la chiave ECDH tra i due telefoni: solo chi ha
+// mostrato il codice la può leggere. Il link vero (chiave del gruppo o contatto) parte solo dopo la sua conferma, sempre
+// cifrato con ECDH. Così, anche indovinando le 6 cifre, nessuno ottiene la chiave senza che l'altro lo faccia entrare.
+const PIN_MIN = 10;
+function newPin(){
+  let s = '';
+  while(s.length < 6) for(const x of crypto.getRandomValues(new Uint8Array(8))) if(x < 250 && s.length < 6) s += String(x % 10);
+  return s;
+}
+function parsePin(text){
+  const m = String(text || '').trim().match(/^(\d{3})[\s.-]?(\d{3})$/);
+  return m ? m[1] + m[2] : '';
+}
+const pinCache = {};
+function pinKeys(code){
+  if(!pinCache[code]) pinCache[code] = (async () => {
+    const base = await subtle.importKey('raw', enc.encode(code), 'PBKDF2', false, ['deriveBits']);
+    const bits = new Uint8Array(await subtle.deriveBits({name: 'PBKDF2', hash: 'SHA-256', salt: enc.encode('conti-chiari/pin-6'), iterations: 200000}, base, 384));
+    return {key: b64url(bits.subarray(0, 32)), topic: hex(bits.subarray(32, 48))};
+  })();
+  return pinCache[code];
+}
+// argomento privato tra i due telefoni per la risposta (conferma o rifiuto)
+async function pinPair(sk, peerPk, code){
+  const c = await dmChannel(sk, peerPk);
+  return {key: c.key, topic: await topicOf('pin-ok:' + code + ':' + c.key)};
+}
+
+window.CCSync = {PIN_MIN, newPin, parsePin, pinKeys, pinPair, newShortCode, shortLink, parseShort, publishShort, resolveShort, Hub, deviceKeys, newGroupKey, topicOf, seal, open, makeEvent, checkEvent, inviteLink, parseInvite, dmChannel, inboxTopic, contactLink, parseContact, rid, KIND, DEFAULT_RELAYS};
 })();
