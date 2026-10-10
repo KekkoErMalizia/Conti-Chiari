@@ -193,10 +193,11 @@ L'app è una singola pagina web (HTML, CSS e JavaScript, senza librerie esterne)
 www/                  l'app: index.html, i18n.js (traduzioni), sync.js (sincronizzazione cifrata),
                       feedback.js (suoni, vibrazione, voce e modalità vista),
                       lib/ (QR e firme digitali), manifest, service worker (offline), icone
-assets/               icone e schermata di avvio per Android e iOS
+assets/               icone e schermata di avvio per Android e iOS (generate da scripts/icons.py)
 capacitor.config.json configurazione dell'app nativa (id: it.contichiari.app)
 package.json          dipendenze e comandi per creare i progetti Android/iOS
 scripts/compat.mjs    conversione per i telefoni vecchi (usata durante la pubblicazione)
+scripts/icons.py      disegna l'icona in vettoriale (SVG) e ne ricava tutte le immagini PNG
 .github/workflows/    costruzione automatica di APK e sito
 GUIDA.md              guida passo passo all'installazione
 ```
