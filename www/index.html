@@ -604,6 +604,8 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
         <div class="subtle">
           <div class="setrow"><label for="notifOn" data-t="notifMsgs"></label><input type="checkbox" class="switch" id="notifOn" role="switch"></div>
           <p class="hint" data-t="notifHint"></p>
+          <div class="setrow"><label for="notifExpOn" data-t="notifExp"></label><input type="checkbox" class="switch" id="notifExpOn" role="switch"></div>
+          <p class="hint" data-t="notifExpHint"></p>
           <p class="hint" id="notifState"></p>
         </div>
         <div class="subtle" id="keepBox" hidden>
@@ -1094,7 +1096,9 @@ const HUB=new CCSync.Hub({relays:Array.isArray(RELAYS)&&RELAYS.length?RELAYS:und
     let ch,isDM=gid.startsWith('dm:');
     if(isDM){ch=ensureDM(gid.slice(3));if(pk!==ME.pk&&pk!==ch.peer)return;if(pk!==ME.pk&&isBlocked(pk)){ch.sync.last=Math.max(ch.sync.last||0,createdAt);return}}
     else{ch=DB.groups[gid];if(!ch||!ch.sync)return}
+    const newExp=!isDM&&op.t==='exp'&&pk!==ME.pk&&op.e&&!ch.expenses.some(e=>e.id===op.e.id)&&!(ch.dead&&ch.dead['e:'+op.e.id]);
     const kind=isDM?applyChat(ch,op,pk):applyOp(ch,op,pk);
+    if(newExp&&Date.now()/1000-createdAt<900&&!isBlocked(pk))expenseIn(ch,op.e.id,pk);   // solo spese recenti: niente raffica quando si scarica lo storico
     ch.sync.last=Math.max(ch.sync.last||0,createdAt);
     if(kind==='msg'&&pk!==ME.pk&&!isBlocked(pk))incoming(ch,gid,op,pk);
     persistSoon();if(isDM||gid===DB.current)renderSoon();
@@ -1445,6 +1449,13 @@ function incoming(ch,chanId,op,pk){
   ch.unread=(ch.unread||0)+1;renderUnread();
   notifyMsg(isDM?t('privateFrom',{name:nameOf(pk)}):`${nameOf(pk)} · ${ch.name}`,op.text,{chan:chanId});
 }
+// spesa nuova di un altro membro: notifica «Nuova spesa · gruppo» con chi l'ha aggiunta, cosa e quanto
+function expenseIn(g,id,pk){
+  if(SET.notifyExp===false)return;
+  const e=g.expenses.find(x=>x.id===id);if(!e)return;
+  if(document.visibilityState==='visible'&&tab==='mov'&&DB.current===g.id)return;   // la sta già guardando
+  notifyMsg(t('expNotifTitle',{group:g.name}),t('expNotifBody',{name:nameOf(pk),desc:e.desc,amount:fmt(e.amount,g.cur)}),{chan:'exp:'+g.id},'spese');
+}
 function tickState(ch,m){
   if(m.from!==ME.pk||m.sys)return '';
   if(m.sent===0)return 'pending';
@@ -1647,6 +1658,7 @@ async function notifChannels(){
   const LN=LNP();if(!LN||!LN.createChannel)return;
   try{
     await LN.createChannel({id:'messaggi',name:t('chMsgs'),importance:4,visibility:1,vibration:true,lights:true,lightColor:'#1f5f6b'});
+    await LN.createChannel({id:'spese',name:t('chExp'),importance:4,visibility:1,vibration:true});
     await LN.createChannel({id:'aggiornamenti',name:t('chUpd'),importance:3,visibility:1});
   }catch(e){}
 }
@@ -1675,6 +1687,7 @@ async function notifyMsg(title,body,data,channel='messaggi'){
 function openChan(chan){
   if(!chan)return;
   if(chan==='update'){setTab('impostazioni');showUpdate();return}
+  if(chan.startsWith('exp:')){const gid=chan.slice(4);if(DB.groups[gid]){DB.current=gid;render();setTab('mov')}return}
   if(chan==='contacts'){chatView='contacts';curDM=null;setTab('chat');renderChat();return}
   if(chan.startsWith('dm:'))openDM(chan.slice(3));
   else if(DB.groups[chan]){DB.current=chan;chatView='group';render();setTab('chat')}
@@ -2115,6 +2128,7 @@ $('ephSel').onchange=e=>{
   const ch=curChan(),v=+e.target.value;const op={t:'eph',id:CCSync.rid(),ts:Date.now(),s:v};
   applyChat(ch,op,ME.pk);persist();publish(ch,op);fx('toggle');renderChat();
 };
+$('notifExpOn').onchange=e=>{SET.notifyExp=e.target.checked;saveSet();if(SET.notifyExp)askNotif()};
 $('notifOn').onchange=e=>{SET.notify=e.target.checked;saveSet();if(SET.notify)askNotif();renderNotifState();applyKeepAlive()};
 $('keepOn').onchange=async e=>{
   SET.keepAlive=e.target.checked;saveSet();
@@ -2243,7 +2257,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)persist()})
 /* ---------- suoni, vibrazione e accessibilità ---------- */
 const VISION=[['auto','vmAuto'],['standard','vmStandard'],['low','vmLow'],['contrast','vmContrast'],['protan','vmProtan'],['deutan','vmDeutan'],['tritan','vmTritan'],['mono','vmMono'],['blind','vmBlind'],['photo','vmPhoto']];
 function renderA11y(){
-  $('notifOn').checked=SET.notify!==false;$('rcptOn').checked=SET.receipts!==false;renderNotifState();renderKeepAlive();
+  $('notifOn').checked=SET.notify!==false;$('notifExpOn').checked=SET.notifyExp!==false;$('rcptOn').checked=SET.receipts!==false;renderNotifState();renderKeepAlive();
   $('sndOn').checked=SET.sound!==false;$('vibOn').checked=SET.vib!==false;
   $('sndVol').value=SET.vol;$('vibInt').value=SET.vibInt;$('txtSize').value=SET.textSize;$('voiceRate').value=SET.voiceRate;
   $('sndVolOut').textContent=SET.vol+'%';$('vibIntOut').textContent=SET.vibInt+'%';$('txtSizeOut').textContent=SET.textSize+'%';$('voiceRateOut').textContent=SET.voiceRate+'%';
