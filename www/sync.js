@@ -166,7 +166,7 @@ class Hub{
     if(!key) return;
     let op; try{ op = await open(key, ev.content) }catch(e){ return }   // chiave sbagliata o dati manomessi
     if(!op || typeof op !== 'object' || typeof op.t !== 'string') return;
-    if(this.once[tag[1]]){ op.$pk = ev.pubkey; this.once[tag[1]].done(op); return }   // $pk: chi l'ha scritto
+    if(this.once[tag[1]]){ op.$pk = ev.pubkey; op.$at = ev.created_at; const o = this.once[tag[1]]; if(o.all){ o.all.push(op); return } o.done(op); return }   // $pk: chi l'ha scritto
     g.since = Math.max(g.since || 0, ev.created_at);
     this.onOp(g.id, op, ev.pubkey, ev.created_at);
   }
@@ -177,6 +177,17 @@ class Hub{
       const done = v => { if(!this.once[topic]) return; clearTimeout(tm); delete this.once[topic]; this.unwatch(topic); res(v) };
       this.once[topic] = {done, eose: 0};
       tm = setTimeout(() => done(null), ms || 15000);
+      this.watch('once:' + topic, key, topic, 0);
+      this.start();
+    });
+  }
+  // legge tutto quello che c'è su un argomento (fino a fine elenco da tutti i relay, o ms)
+  fetchAll(key, topic, ms){
+    return new Promise(res => {
+      let tm; const all = [];
+      const done = () => { if(!this.once[topic]) return; clearTimeout(tm); delete this.once[topic]; this.unwatch(topic); res(all) };
+      this.once[topic] = {done, eose: 0, all};
+      tm = setTimeout(done, ms || 8000);
       this.watch('once:' + topic, key, topic, 0);
       this.start();
     });
@@ -297,6 +308,22 @@ async function resolveShort(hub, code){
   return op && op.t === 'link' && typeof op.l === 'string' ? op.l : null;
 }
 
+/* ---------- inviti monouso (link e QR) ---------- */
+// Il link o il QR contengono solo un «biglietto» casuale di 128 bit, non la chiave del gruppo. Chi lo usa manda una
+// richiesta cifrata col biglietto; un membro online risponde con la chiave, cifrata ECDH solo per lui, e brucia il
+// biglietto: chi riusa lo stesso link dopo trova «già usato» e non riceve nulla.
+const TK_RE = /^[1-9A-HJ-NP-Za-km-z]{16,24}$/;
+function newTicket(){ return b58(crypto.getRandomValues(new Uint8Array(16))) }
+async function ticketKeys(tk){
+  return {key: b64url(await sha256('cc-ticket-key:' + tk)), topic: hex(await sha256('cc-ticket-topic:' + tk)).slice(0, 32)};
+}
+function ticketLink(tk){ return appBase() + '#i=' + tk }
+function parseTicket(text){
+  const m = String(text || '').trim().match(/(?:^|[#\s?&])i=([1-9A-HJ-NP-Za-km-z]{16,24})(?![A-Za-z0-9_=-])/);
+  return m && TK_RE.test(m[1]) ? m[1] : '';
+}
+function ticketReply(tk, pk){ return topicOf('tk-ok:' + tk + ':' + pk) }
+
 /* ---------- codice a 6 cifre ---------- */
 // Chi mostra il codice pubblica un «faro» cifrato con una chiave ricavata dalle 6 cifre (chi è, e se è un gruppo o un contatto).
 // Chi inserisce il codice legge il faro e manda una richiesta cifrata con la chiave ECDH tra i due telefoni: solo chi ha
@@ -327,5 +354,5 @@ async function pinPair(sk, peerPk, code){
   return {key: c.key, topic: await topicOf('pin-ok:' + code + ':' + c.key)};
 }
 
-window.CCSync = {PIN_MIN, newPin, parsePin, pinKeys, pinPair, newShortCode, shortLink, parseShort, publishShort, resolveShort, Hub, deviceKeys, newGroupKey, topicOf, seal, open, makeEvent, checkEvent, inviteLink, parseInvite, dmChannel, inboxTopic, contactLink, parseContact, rid, KIND, DEFAULT_RELAYS};
+window.CCSync = {TK_RE, newTicket, ticketKeys, ticketLink, parseTicket, ticketReply, PIN_MIN, newPin, parsePin, pinKeys, pinPair, newShortCode, shortLink, parseShort, publishShort, resolveShort, Hub, deviceKeys, newGroupKey, topicOf, seal, open, makeEvent, checkEvent, inviteLink, parseInvite, dmChannel, inboxTopic, contactLink, parseContact, rid, KIND, DEFAULT_RELAYS};
 })();

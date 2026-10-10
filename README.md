@@ -136,7 +136,7 @@ Se il gruppo esiste già sul suo telefono, viene aggiornato con i dati nuovi.
 
 - **Nessun account.** I gruppi normali restano solo sul tuo telefono.
 - **Gruppi online cifrati end-to-end.** Quando attivi un gruppo online, il telefono genera una chiave segreta casuale. Ogni spesa, messaggio o modifica viene **cifrata sul telefono** (AES-256-GCM) prima di partire. Viaggia attraverso alcuni server pubblici gratuiti della rete [Nostr](https://nostr.com), che vedono solo dati illeggibili.
-- **La chiave è nel QR.** Chi ha il QR o il link di invito può leggere il gruppo: mostralo solo alle persone che vuoi far entrare.
+- **Inviti monouso.** Link e QR non contengono la chiave del gruppo, ma un biglietto casuale. Il primo che lo usa riceve la chiave da un membro online, cifrata solo per lui, e il biglietto viene bruciato su tutti i telefoni: chi riprova lo stesso link o una foto del QR trova «già usato». Il QR vale 10 minuti e si rinnova da solo, anche subito dopo ogni scansione. Gli inviti delle versioni precedenti, che contenevano la chiave, non vengono più accettati.
 - Ogni messaggio è **firmato** dal telefono che lo ha scritto, quindi nessuno può fingersi un altro membro.
 - Nessuna pubblicità, nessun tracciamento, nessun cookie di terze parti.
 
@@ -158,6 +158,9 @@ Sì, se il gruppo è online: scheda **Gruppo → Attiva gruppo online**, poi l'a
 
 **Come entro in un gruppo con il QR?**
 Tocca il nome del gruppo in alto → **Scansiona QR** e inquadra il codice. Su Android puoi anche inquadrarlo con la fotocamera del telefono. Se la fotocamera non è disponibile, usa **Usa una foto del QR**.
+
+**Posso riusare un link di invito?**
+No. Ogni link e ogni QR valgono per una sola persona: per invitare qualcun altro tocca di nuovo **Invia link** o mostra il QR, che nel frattempo si è già rinnovato. Se chi ti ha invitato non è online quando apri il link, entri da solo appena apre Conti Chiari.
 
 **Posso entrare senza QR né link, ad esempio al telefono?**
 Sì, con il **codice a 6 cifre**. Chi invita tocca **Codice a 6 cifre** (scheda Gruppo, oppure Rubrica → Il mio codice per un'amicizia) e detta le cifre. L'altro tocca il nome del gruppo in alto → **Inserisci codice a 6 cifre** (o Rubrica → Aggiungi con codice). Chi invita vede la richiesta con il nome e tocca **Fai entrare**. Il codice vale 10 minuti, e la chiave del gruppo parte solo dopo la conferma: anche chi indovinasse le cifre non entra senza il tuo sì.

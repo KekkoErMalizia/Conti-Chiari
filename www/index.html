@@ -556,8 +556,9 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
       </section>
       <section class="stack" id="inviteBox" hidden>
         <h2 style="margin:0"><span data-t="inviteQr"></span><span class="badge-line" id="netLine"></span></h2>
-        <div class="qrbox"><canvas id="qr" width="240" height="240"></canvas></div>
+        <div class="qrbox"><canvas id="qr" width="240" height="240"></canvas><span class="hint pintime" id="qrTime" aria-live="off"></span></div>
         <p class="hint" data-t="inviteText"></p>
+        <p class="hint" data-t="linkOnce" style="margin:0"></p>
         <div class="row"><button class="btn primary" type="button" id="shareLink" data-t="shareLink"></button><button class="btn" type="button" id="copyLink" data-t="copyLink"></button></div>
         <button class="btn block" type="button" id="pinGroup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 5h.01M12 5h.01M18 5h.01M6 11h.01M12 11h.01M18 11h.01M6 17h.01M12 17h.01M18 17h.01M12 22h.01" stroke-width="3.2"/></svg><span data-t="pinBtn"></span></button>
       </section>
@@ -794,6 +795,17 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
   </div>
 </div>
 
+<!-- Foglio: invito monouso aperto da link o QR -->
+<div class="sheet" id="tkSheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="tkTitle">
+    <div class="grab"></div>
+    <h3><span id="tkTitle" data-t="tkTitle"></span><button class="link" type="button" data-close data-t="close"></button></h3>
+    <div class="stack">
+      <p id="tkState" aria-live="polite" style="margin:0"></p>
+      <p class="err" id="tkErr" role="alert"></p>
+    </div>
+  </div>
+</div>
 <!-- Fogli: codice a 6 cifre (mostrarlo e inserirlo) -->
 <div class="sheet" id="pinSheet" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
@@ -883,8 +895,9 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
     <div class="grab"></div>
     <h3><span id="mcTitle" data-t="ctMyCode"></span><button class="link" type="button" data-close data-t="close"></button></h3>
     <div class="stack">
-      <div class="qrbox"><canvas id="ctQr" width="240" height="240"></canvas><b id="ctMe"></b></div>
+      <div class="qrbox"><canvas id="ctQr" width="240" height="240"></canvas><b id="ctMe"></b><span class="hint pintime" id="ctQrTime" aria-live="off"></span></div>
       <p class="hint" data-t="myCodeHint" style="text-align:center;margin:0"></p>
+      <p class="hint" data-t="linkOnce" style="text-align:center;margin:0"></p>
       <div class="row"><button class="btn primary" type="button" id="ctShare" data-t="shareLink"></button><button class="btn" type="button" id="ctCopy" data-t="copyLink"></button></div>
       <button class="btn block" type="button" id="pinContact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 5h.01M12 5h.01M18 5h.01M6 11h.01M12 11h.01M18 11h.01M6 17h.01M12 17h.01M18 17h.01M12 22h.01" stroke-width="3.2"/></svg><span data-t="pinBtn"></span></button>
     </div>
@@ -1122,6 +1135,8 @@ function applyOp(g,op,pk){
       (op.expenses||[]).forEach(e=>up('e:'+(e&&e.id),'expenses',cleanExp(e)));
       (op.payments||[]).forEach(p=>up('y:'+(p&&p.id),'payments',cleanPay(p)));
       break;
+    case 'inv': if(CCSync.TK_RE.test(op.tk||'')&&+op.exp>0){g.tickets=g.tickets||{};if(!g.tickets[op.tk]){g.tickets[op.tk]={exp:+op.exp,used:0};setTimeout(watchTickets,0)}}break;
+    case 'invUsed': if(CCSync.TK_RE.test(op.tk||'')){g.tickets=g.tickets||{};const T=g.tickets[op.tk]||(g.tickets[op.tk]={exp:+op.exp||0});T.used=1;setTimeout(()=>unwatchTicket(op.tk),0)}break;
     case 'msg': case 'rcpt': case 'eph': case 'clr': return applyChat(g,op,pk);
     case 'member': {
       const m=g.members[pk];
@@ -1138,6 +1153,8 @@ let RELAYS;try{RELAYS=JSON.parse(localStorage.getItem('cc-relays'))}catch(e){}
 let netCount=0;
 const HUB=new CCSync.Hub({relays:Array.isArray(RELAYS)&&RELAYS.length?RELAYS:undefined,keys:ME,
   onOp:(gid,op,pk,createdAt)=>{
+    if(gid.startsWith('tk:')){onTicketOp(gid.slice(3),op,pk,createdAt);return}
+    if(gid.startsWith('tkok:')){onTkReply(gid.slice(5),op,pk);return}
     if(gid==='pin'){onPinReq(op,pk);return}
     if(gid==='pinok'){onPinReply(op,pk);return}
     if(gid==='inbox'){DB.inboxLast=Math.max(DB.inboxLast||0,createdAt);onFriendOp(op,pk);persistSoon();return}
@@ -1183,23 +1200,9 @@ function startSync(){
   const hasContacts=Object.keys(DB.contacts).length>0;
   Object.keys(DB.contacts).forEach(pk=>{if(!isBlocked(pk))watchDM(pk)});
   if(any||hasContacts||DB.inboxOn){watchInbox();if(DB.frOut&&DB.frOut.length)HUB.resend(DB.frOut);any=true}
+  if(watchTickets())any=true;
+  DB.tkWait=(DB.tkWait||[]).filter(e=>e.until>Date.now());(DB.tkWait).forEach(watchTkReply);if(DB.tkWait&&DB.tkWait.length)any=true;
   if(any&&!HUB.started){HUB.started=true;HUB.start()}
-}
-/* link brevi: il codice si prepara (e si salva sui relay) appena il pannello è aperto, così copia e condividi restano immediati */
-const SHORT_OK={};
-function prepShort(owner,long){
-  if(!owner.short||!/^[1-9A-HJ-NP-Za-km-z]{8}$/.test(owner.short)){owner.short=CCSync.newShortCode();persistSoon()}
-  const k=owner.short+'|'+long;if(SHORT_OK[k])return;SHORT_OK[k]='…';
-  CCSync.publishShort(HUB,owner.short,long).then(()=>{SHORT_OK[k]=1},()=>{delete SHORT_OK[k]});
-}
-function bestLink(owner,long){return owner.short&&SHORT_OK[owner.short+'|'+long]===1&&netCount?CCSync.shortLink(owner.short):long}
-async function openShort(code){
-  if(!HUB.started){HUB.started=true;HUB.start()}
-  toast(t('shortOpening'));
-  const l=await CCSync.resolveShort(HUB,code);
-  const ct=l&&CCSync.parseContact(l);if(ct){addContact(ct);return}
-  const inv=l&&CCSync.parseInvite(l);if(inv){joinGroup(inv);return}
-  toast(t('shortNotFound'));fx('error');
 }
 function publish(ch,op){
   if(!ch.sync)return;
@@ -1252,6 +1255,157 @@ async function joinGroup(inv){
   commit(memberOp(g),g);
   render();setTab('gruppo');fx('scan');toast(t('joined',{name:g.name}));
 }
+/* ---------- inviti monouso: link e QR ----------
+   Link e QR contengono un biglietto casuale, non la chiave. Il primo che lo usa manda una richiesta; un membro online
+   (per gli amici: io) gli risponde con la chiave cifrata solo per lui e brucia il biglietto su tutti i telefoni.
+   I biglietti dei link sono condivisi coi membri del gruppo (op «inv»), quelli del QR restano su questo telefono,
+   valgono 10 minuti e si rinnovano da soli, anche subito dopo ogni scansione. */
+const QR_MIN=10,LINK_DAYS=30,TKW={};let TJ=null;
+function ticketsOf(owner){
+  if(owner==='me')return DB.myTickets=DB.myTickets||{};
+  const g=DB.groups[owner];return g?(g.tickets=g.tickets||{}):null;
+}
+function ticketOf(owner,tk){const all=ticketsOf(owner);if(all&&all[tk])return all[tk];const q=qrOwner(owner);return q&&q.tk===tk?q:null}
+function qrOwner(owner){if(owner==='me')return DB.myQr;const g=DB.groups[owner];return g&&g.qrTk}
+async function watchTicket(tk,owner){
+  if(TKW[tk])return;TKW[tk]={owner};
+  const {key,topic}=await CCSync.ticketKeys(tk);if(!TKW[tk])return;
+  TKW[tk].topic=topic;HUB.watch('tk:'+tk,key,topic,0);
+}
+function unwatchTicket(tk){const w=TKW[tk];if(!w)return;delete TKW[tk];clearTimeout(w.tm);if(w.topic)HUB.unwatch(w.topic)}
+// ascolta i biglietti ancora validi; true se ce n'è almeno uno
+function watchTickets(){
+  const now=Date.now();let n=0;
+  const each=(owner,tk,T)=>{if(!T)return;if(T.used||T.exp<=now){unwatchTicket(tk);return}n++;watchTicket(tk,owner)};
+  Object.values(DB.groups).forEach(g=>{
+    if(!g.sync)return;
+    Object.entries(g.tickets||{}).forEach(([tk,T])=>{if(T.exp<now-864e5)delete g.tickets[tk];else each(g.id,tk,T)});
+    if(g.qrTk)each(g.id,g.qrTk.tk,g.qrTk);
+  });
+  Object.entries(DB.myTickets||{}).forEach(([tk,T])=>{if(T.exp<now-864e5)delete DB.myTickets[tk];else each('me',tk,T)});
+  if(DB.myQr)each('me',DB.myQr.tk,DB.myQr);
+  if(n)hubOn();
+  return n>0;
+}
+function beacon(owner,tk,exp){
+  const b={t:'tkHost',ts:Date.now(),exp,name:(SET.profile.name||'').slice(0,24)};
+  if(owner==='me')b.k='c';else{const g=DB.groups[owner];b.k='g';b.g=g.name.slice(0,40);b.gid=g.id}
+  CCSync.ticketKeys(tk).then(({key,topic})=>HUB.publish(key,topic,b)).catch(()=>{});
+}
+// nuovo link monouso
+function newLink(owner){
+  const tk=CCSync.newTicket(),exp=Date.now()+LINK_DAYS*864e5;
+  if(owner==='me'){DB.inboxOn=true;ticketsOf('me')[tk]={exp,used:0};persist()}
+  else{const g=DB.groups[owner];if(!g||!g.sync)return '';commit({t:'inv',tk,exp},g)}
+  hubOn();beacon(owner,tk,exp);watchTickets();startSync();
+  return CCSync.ticketLink(tk);
+}
+// QR: un biglietto alla volta, 10 minuti; si rinnova se scade o se qualcuno lo ha usato
+function qrTick(owner){
+  const cv=owner==='me'?$('ctQr'):$('qr'),lab=owner==='me'?$('ctQrTime'):$('qrTime');
+  const now=Date.now();let q=qrOwner(owner);
+  if(owner!=='me'&&!(DB.groups[owner]&&DB.groups[owner].sync))return;
+  if(!q||q.used||q.exp-now<1000){
+    if(q){unwatchTicket(q.tk);if(!q.used){const old=q;CCSync.ticketKeys(old.tk).then(({key,topic})=>HUB.publish(key,topic,{t:'tkUsed',ts:Date.now(),exp:old.exp,x:1})).catch(()=>{})}}   // il QR sostituito non vale più
+    q={tk:CCSync.newTicket(),exp:now+QR_MIN*6e4,used:0};
+    if(owner==='me'){DB.myQr=q;DB.inboxOn=true}else DB.groups[owner].qrTk=q;
+    persistSoon();hubOn();beacon(owner,q.tk,q.exp);watchTickets();startSync();
+  }
+  const link=CCSync.ticketLink(q.tk);if(cv.dataset.link!==link){drawQR(link,cv);cv.dataset.link=link}
+  const sec=Math.ceil((q.exp-now)/1000);lab.textContent=t('qrRenews',{time:Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0')});
+}
+setInterval(()=>{
+  if(document.hidden)return;
+  if(tab==='gruppo'&&G().sync&&!$('inviteBox').hidden)qrTick(G().id);
+  if(!$('myCodeSheet').hidden)qrTick('me');
+},1000);
+// qualcuno ha usato un mio biglietto
+function onTicketOp(tk,op,pk,at){
+  const w=TKW[tk];if(!w||!op)return;
+  const T=ticketOf(w.owner,tk);if(!T)return;
+  if(op.t==='tkUsed'){if(!T.used){T.used=1;persistSoon()}unwatchTicket(tk);return}
+  if(op.t!=='tkReq'||pk===ME.pk||!/^[0-9a-f]{64}$/.test(pk)||isBlocked(pk))return;
+  if(T.used){tkAnswer(tk,pk,{t:'tkNo'});return}
+  if(at*1000>T.exp+60000)return;
+  (w.cands=w.cands||[]).push({pk,op,at});
+  clearTimeout(w.tm);w.tm=setTimeout(()=>ticketDecide(tk),1500);   // se arrivano più richieste insieme vince la prima
+}
+async function tkAnswer(tk,pk,op){
+  try{
+    const now=Date.now(),dm=await CCSync.dmChannel(ME.sk,pk),rt=await CCSync.ticketReply(tk,pk);
+    await HUB.publish(dm.key,rt,Object.assign({ts:now,exp:now+7*864e5},op));
+  }catch(e){}
+}
+async function ticketDecide(tk){
+  const w=TKW[tk];if(!w||!w.cands||!w.cands.length)return;
+  const T=ticketOf(w.owner,tk);if(!T)return;
+  const cands=w.cands.sort((a,b)=>a.at-b.at||(a.pk<b.pk?-1:1));w.cands=[];
+  if(T.used){cands.forEach(c=>tkAnswer(tk,c.pk,{t:'tkNo'}));return}
+  const c=cands[0],name=String(c.op.name||'').trim().slice(0,24)||t('anon');
+  let l;
+  if(w.owner==='me'){
+    l=CCSync.contactLink(ME.pk,SET.profile.name||'');
+    const ct=ensureContact(c.pk),now=Date.now();if(!ct.name)ct.name=name;
+    if(!ct.avatar&&AV_RE.test(c.op.avatar||'')&&c.op.avatar.length<80000)ct.avatar=c.op.avatar;
+    if(!ct.blocked&&(ct.rel==='none'||ct.rel==='in')){ct.rel=ct.rel==='in'?'friend':'out';ct.ts=now;frSend(c.pk,ct.rel==='friend'?'acc':'req');watchDM(c.pk);renderUnread()}
+  }else{const g=DB.groups[w.owner];if(!g||!g.sync)return;l=CCSync.inviteLink(g)}
+  // brucia il biglietto: su questo telefono, per gli altri membri e per chi riprova lo stesso link
+  T.used=1;persist();
+  const g=w.owner==='me'?null:DB.groups[w.owner];
+  if(g&&!(g.qrTk&&g.qrTk.tk===tk))commit({t:'invUsed',tk,exp:T.exp},g);
+  const {key,topic}=await CCSync.ticketKeys(tk);
+  HUB.publish(key,topic,{t:'tkUsed',ts:Date.now(),exp:T.exp}).catch(()=>{});
+  await tkAnswer(tk,c.pk,{t:'tkOk',l});
+  cands.slice(1).forEach(x=>tkAnswer(tk,x.pk,{t:'tkNo'}));
+  setTimeout(()=>unwatchTicket(tk),20000);   // ancora un po' in ascolto, per rispondere «già usato» a chi arriva tardi
+  fx('success');toast(t(w.owner==='me'?'tkFriendIn':'tkGroupIn',{name}));
+  if(w.owner==='me'){if(!$('myCodeSheet').hidden)qrTick('me')}else if(tab==='gruppo'&&G().id===w.owner)qrTick(w.owner);
+  renderSoon();
+}
+/* --- chi riceve il link o scansiona il QR --- */
+function watchTkReply(e){
+  CCSync.ticketReply(e.tk,ME.pk).then(topic=>{e.topic=topic;HUB.watch('tkok:'+e.tk,async pk=>pk===ME.pk?null:(await CCSync.dmChannel(ME.sk,pk)).key,topic,0)}).catch(()=>{});
+}
+function tkWaitDrop(tk){
+  DB.tkWait=(DB.tkWait||[]).filter(e=>{if(e.tk!==tk)return true;if(e.topic)HUB.unwatch(e.topic);return false});persistSoon();
+}
+function tkFail(k){const J=TJ;TJ=null;if(J&&J.tk)tkWaitDrop(J.tk);$('tkState').textContent='';$('tkErr').textContent=t(k);openSheetIf('tkSheet');fx('error')}
+function openSheetIf(id){if($(id).hidden)openSheet(id)}
+async function tkJoin(tk){
+  ['scanSheet','groupSheet','addCtSheet','pinEnterSheet'].forEach(id=>{if(!$(id).hidden)closeSheet(id)});stopScan();
+  const J=TJ={tk};
+  $('tkErr').textContent='';$('tkState').textContent=t('tkChecking');openSheetIf('tkSheet');hubOn();
+  try{
+    const {key,topic}=await CCSync.ticketKeys(tk);
+    const items=await HUB.fetchAll(key,topic,9000);if(TJ!==J)return;
+    const b=items.filter(o=>o.t==='tkHost'&&/^[0-9a-f]{64}$/.test(o.$pk||'')&&(o.k==='g'||o.k==='c')).sort((x,y)=>x.$at-y.$at)[0];
+    if(!b){tkFail(netCount?'tkNotFound':'pinOffline');return}
+    if(b.$pk===ME.pk){tkFail('tkOwn');return}
+    const used=items.find(o=>o.t==='tkUsed');if(used){tkFail(used.x?'tkExpired':'tkUsedErr');return}
+    if(!(+b.exp>Date.now())){tkFail('tkExpired');return}
+    const who=String(b.name||'').slice(0,24)||t('anon');
+    if(b.k==='g'&&b.gid&&DB.groups[b.gid]&&DB.groups[b.gid].sync){TJ=null;closeSheet('tkSheet');DB.current=b.gid;persist();render();setTab('gruppo');toast(t('tkAlready'));return}
+    if(b.k==='c'&&relOf(b.$pk)==='friend'){TJ=null;closeSheet('tkSheet');openContact(b.$pk);return}
+    $('tkState').textContent=t(b.k==='g'?'tkJoiningGroup':'tkJoiningContact',{name:who,group:String(b.g||'').slice(0,40)});
+    const e={tk,k:b.k,host:b.$pk,until:Math.min(+b.exp+864e5,Date.now()+7*864e5)};
+    tkWaitDrop(tk);(DB.tkWait=DB.tkWait||[]).push(e);persist();watchTkReply(e);
+    const now=Date.now();
+    await HUB.publish(key,topic,Object.assign({t:'tkReq',ts:now,exp:+b.exp},myCard()));
+    setTimeout(()=>{if(TJ===J&&!$('tkSheet').hidden)$('tkState').textContent=t('tkWaitOffline')},12000);
+  }catch(err){if(TJ===J)tkFail('tkNotFound')}
+}
+function onTkReply(tk,op,pk){
+  const e=(DB.tkWait||[]).find(x=>x.tk===tk);if(!e||!op)return;
+  const mine=TJ&&TJ.tk===tk;
+  if(op.t==='tkNo'){tkWaitDrop(tk);if(mine)tkFail('tkUsedErr');return}
+  if(op.t!=='tkOk'||typeof op.l!=='string')return;
+  tkWaitDrop(tk);if(mine){TJ=null;closeSheet('tkSheet')}
+  if(e.k==='c'){const ct=CCSync.parseContact(op.l);if(ct&&ct.pk===pk){addContact(ct);return}}
+  else{const inv=CCSync.parseInvite(op.l);if(inv){joinGroup(inv);return}}
+}
+// link e QR delle versioni precedenti contenevano la chiave: non si accettano più
+function isOldInvite(text){return !!(CCSync.parseInvite(text)||CCSync.parseContact(text)||CCSync.parseShort(text))}
+function oldInvite(){['scanSheet'].forEach(id=>{if(!$(id).hidden)closeSheet(id)});stopScan();toast(t('oldLink'));fx('error')}
 /* ---------- codice a 6 cifre ----------
    Chi mostra il codice pubblica un «faro» (chi è, gruppo o contatto). Chi lo inserisce manda una richiesta cifrata
    con la chiave ECDH tra i due telefoni; chi mostra il codice conferma, e solo allora parte il link vero (vedi sync.js). */
@@ -1750,11 +1904,9 @@ function openContact(pk){
 }
 function openMyCode(){
   DB.inboxOn=true;persist();startSync();
-  const long=CCSync.contactLink(ME.pk,SET.profile.name||'');
-  drawQR(long,$('ctQr'));$('ctMe').textContent=SET.profile.name||t('you');
-  DB.myLink=DB.myLink||{};prepShort(DB.myLink,long);
-  $('ctShare').onclick=async()=>{const link=bestLink(DB.myLink,long);if(!await shareText(t('contactMsg')+'\n'+link,'Conti Chiari'))toast(t('shareUnavailable'))};
-  $('ctCopy').onclick=async()=>{const link=bestLink(DB.myLink,long);try{await navigator.clipboard.writeText(link);toast(t('linkCopied'))}catch(e){toast(t('copyManual'))}};
+  $('ctMe').textContent=SET.profile.name||t('you');qrTick('me');
+  $('ctShare').onclick=async()=>{const link=newLink('me');if(!await shareText(t('contactMsg')+'\n'+link,'Conti Chiari'))toast(t('shareUnavailable'))};
+  $('ctCopy').onclick=async()=>{const link=newLink('me');try{await navigator.clipboard.writeText(link);toast(t('linkCopied'))}catch(e){toast(t('copyManual'))}};
   openSheet('myCodeSheet');
 }
 function renderChat(){
@@ -1919,7 +2071,7 @@ function render(){
   const on=!!g.sync;
   $('onlineBox').hidden=on||!!g.sample;$('inviteBox').hidden=!on;$('membersBox').hidden=!on;$('whoBox').hidden=!on||!g.people.length;
   if(on){
-    const link=CCSync.inviteLink(g);if($('qr').dataset.link!==link){drawQR(link);$('qr').dataset.link=link}prepShort(g.sync,link);
+    if(tab==='gruppo')qrTick(g.id);
     $('meSel').innerHTML=`<option value="">${esc(t('notSet'))}</option>`+g.people.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
     $('meSel').value=g.me||'';
     const ms=Object.entries(g.members).sort((a,b)=>b[1].ts-a[1].ts);
@@ -2073,11 +2225,9 @@ function loadAvatar(file){
 let scanStream=null,scanRAF=0,detector=null,jsQRLoading=null;
 function loadJsQR(){if(window.jsQR)return Promise.resolve();if(!jsQRLoading)jsQRLoading=new Promise((res,rej)=>{const s=document.createElement('script');s.src='lib/jsQR.js';s.onload=res;s.onerror=rej;document.head.append(s)});return jsQRLoading}
 function handleScanned(text){
-  const ct=CCSync.parseContact(text);
-  if(ct){closeSheet('scanSheet');stopScan();addContact(ct);return true}
-  const inv=CCSync.parseInvite(text);
-  if(inv){joinGroup(inv);return true}
-  const sc=CCSync.parseShort(text);if(sc){closeSheet('scanSheet');stopScan();openShort(sc);return true}
+  const tk=CCSync.parseTicket(text);if(tk){tkJoin(tk);return true}
+  const pin=CCSync.parsePin(text);if(pin){closeSheet('scanSheet');openPinEnter(pin);return true}
+  if(isOldInvite(text)){oldInvite();return true}
   if(/CC1:/.test(text)){try{const g=decodeGroup(text);importGroup(g)}catch(e){toast(e.message)}closeSheet('scanSheet');return true}
   return false;
 }
@@ -2223,8 +2373,8 @@ let renT;
 $('renameInput').addEventListener('input',e=>{clearTimeout(renT);renT=setTimeout(()=>{const v=e.target.value.trim();if(v&&v!==G().name){commit({t:'meta',name:v,cur:G().cur});$('gName').textContent=v}},600)});
 
 document.querySelectorAll('[data-goonline]').forEach(b=>b.onclick=()=>goOnline());
-$('shareLink').onclick=async()=>{const g=G(),link=bestLink(g.sync,CCSync.inviteLink(g));if(!await shareText(t('inviteMsg',{name:G().name})+'\n'+link,G().name))toast(t('shareUnavailable'))};
-$('copyLink').onclick=async()=>{const g=G(),link=bestLink(g.sync,CCSync.inviteLink(g));try{await navigator.clipboard.writeText(link);toast(t('linkCopied'))}catch(e){const o=$('codeOut');o.value=link;o.hidden=false;o.select();toast(t('copyManual'))}};
+$('shareLink').onclick=async()=>{const g=G(),link=newLink(g.id);if(!link)return;if(!await shareText(t('inviteMsg',{name:G().name})+'\n'+link,G().name))toast(t('shareUnavailable'))};
+$('copyLink').onclick=async()=>{const g=G(),link=newLink(g.id);if(!link)return;try{await navigator.clipboard.writeText(link);toast(t('linkCopied'))}catch(e){const o=$('codeOut');o.value=link;o.hidden=false;o.select();toast(t('copyManual'))}};
 $('shareCode').onclick=async()=>{
   const code=encodeGroup(G()),msg=t('shareMsg',{name:G().name})+'\n\n'+code;
   const out=$('codeOut');out.value=code;out.hidden=false;
@@ -2266,9 +2416,9 @@ function importGroup(g){
 }
 $('doImport').onclick=()=>{
   $('importErr').textContent='';const v=$('codeIn').value;
-  const inv=CCSync.parseInvite(v);if(inv){$('codeIn').value='';joinGroup(inv);return}
+  const tk=CCSync.parseTicket(v);if(tk){$('codeIn').value='';tkJoin(tk);return}
+  if(isOldInvite(v)){$('importErr').textContent=t('oldLink');return}
   const pin=CCSync.parsePin(v);if(pin){$('codeIn').value='';closeSheet('groupSheet');openPinEnter(pin);return}
-  const sc=CCSync.parseShort(v);if(sc){$('codeIn').value='';openShort(sc);return}
   try{importGroup(decodeGroup(v));$('codeIn').value=''}catch(err){$('importErr').textContent=err.message}
 };
 
@@ -2292,7 +2442,7 @@ $('ctPinEnter').onclick=()=>{closeSheet('addCtSheet');openPinEnter()};
 $('pinReqs').addEventListener('click',e=>{const b=e.target.closest('[data-pin]');if(b)pinDecide(b.dataset.pk,b.dataset.pin==='ok')});
 $('pinIn').addEventListener('input',e=>{const d=e.target.value.replace(/\D/g,'').slice(0,6);e.target.value=d.length>3?d.slice(0,3)+' '+d.slice(3):d;$('pinErr').textContent='';if(d.length===6&&!PJ)pinJoin(d)});
 $('pinForm').addEventListener('submit',e=>{e.preventDefault();const c=CCSync.parsePin($('pinIn').value);if(!c){$('pinErr').textContent=t('pinBad');fx('error');return}pinJoin(c)});
-$('ctCodeGo').onclick=()=>{const pin=CCSync.parsePin($('ctCodeIn').value);if(pin){closeSheet('addCtSheet');openPinEnter(pin);return}const sc=CCSync.parseShort($('ctCodeIn').value);if(sc){openShort(sc);return}const ct=CCSync.parseContact($('ctCodeIn').value);if(!ct){$('ctCodeErr').textContent=t('addCodeErr');fx('error');return}addContact(ct)};
+$('ctCodeGo').onclick=()=>{const v=$('ctCodeIn').value,pin=CCSync.parsePin(v);if(pin){closeSheet('addCtSheet');openPinEnter(pin);return}const tk=CCSync.parseTicket(v);if(tk){tkJoin(tk);return}$('ctCodeErr').textContent=t(isOldInvite(v)?'oldLink':'addCodeErr');fx('error')};
 document.addEventListener('click',e=>{const b=e.target.closest('[data-fr],[data-ct]');if(!b||!b.closest('#ctList,#ctActions'))return;if(b.dataset.ct)openContact(b.dataset.ct);else frAction(b.dataset.pk,b.dataset.fr)});
 $('dmList').addEventListener('click',e=>{const del=e.target.closest('[data-del]');if(del){clearChat(ensureDM(del.dataset.del));return}const pk=e.target.closest('[data-peer]')?.dataset.peer;if(pk)openDM(pk)});
 $('dmDel').onclick=()=>{if(clearChat(ensureDM(curDM))){chatView='list';curDM=null;renderChat()}};
@@ -2422,8 +2572,12 @@ $('removePhoto').onclick=()=>{try{localStorage.removeItem(PKEY)}catch(e){}photoC
 applyStatic();applyBg();render();startSync();
 const START_HASH=location.hash;   // letto prima che i link di invito/contatto/chat lo ripuliscano
 // link di invito aperto dalla fotocamera del telefono
-(function(){const inv=CCSync.parseInvite(location.hash);if(inv){history.replaceState(null,'',location.pathname+location.search);joinGroup(inv)}})();
-window.addEventListener('hashchange',()=>{const inv=CCSync.parseInvite(location.hash);if(inv){history.replaceState(null,'',location.pathname+location.search);joinGroup(inv)}});
+function openHash(){
+  const h=location.hash;if(!h||/^#chat=/.test(h))return;
+  const tk=CCSync.parseTicket(h),old=!tk&&isOldInvite(h);if(!tk&&!old)return;
+  setTimeout(()=>{history.replaceState(null,'',location.pathname+location.search);if(tk)tkJoin(tk);else oldInvite()},300);
+}
+openHash();window.addEventListener('hashchange',openHash);
 window.addEventListener('beforeunload',persist);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)persist()});
 
@@ -2550,12 +2704,8 @@ $('openTour').onclick=tourOpen;
   // l'APK è la strada consigliata: niente banner «Installa app» di Chrome (crea una WebAPK tramite il Play Store)
   window.addEventListener('beforeinstallprompt',ev=>ev.preventDefault());
 })();
-(function(){const sc=CCSync.parseShort(location.hash);if(sc){history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>openShort(sc),300)}})();
-window.addEventListener('hashchange',()=>{const sc=CCSync.parseShort(location.hash);if(sc){history.replaceState(null,'',location.pathname+location.search);openShort(sc)}});
-(function(){const ct=CCSync.parseContact(location.hash);if(ct){history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>addContact(ct),300)}})();
-window.addEventListener('hashchange',()=>{const ct=CCSync.parseContact(location.hash);if(ct){history.replaceState(null,'',location.pathname+location.search);addContact(ct)}});
 (function(){const m=location.hash.match(/^#chat=(.+)$/);if(m){history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>openChan(decodeURIComponent(m[1])),50)}})();
-if(!SET.tutorialDone&&!CCSync.parseInvite(START_HASH)&&!CCSync.parseContact(START_HASH)&&!CCSync.parseShort(START_HASH)&&!/^#chat=/.test(START_HASH))setTimeout(tourOpen,350);
+if(!SET.tutorialDone&&!CCSync.parseTicket(START_HASH)&&!CCSync.parseInvite(START_HASH)&&!CCSync.parseContact(START_HASH)&&!CCSync.parseShort(START_HASH)&&!/^#chat=/.test(START_HASH))setTimeout(tourOpen,350);
 
 /* ---------- offline ---------- */
 if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
