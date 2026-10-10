@@ -49,6 +49,7 @@ header.pg p{margin:6px 0 0;color:var(--pg-muted);max-width:62ch}
 .nm svg{opacity:.6}
 .tot{text-align:end}
 .tot small{display:block;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tot .cur{font:700 11px var(--f-mono);letter-spacing:0;color:var(--ink);margin-inline-start:2px}
 .tot b{font:600 15px var(--f-mono)}
 .net{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--pos)}
 
@@ -126,7 +127,7 @@ header.pg p{margin:6px 0 0;color:var(--pg-muted);max-width:62ch}
           <div class="brand"><div class="pill"><span>Conti Chiari</span><svg aria-hidden="true"><use href="#ico"/></svg><i class="net" title="Online"></i></div></div>
           <div class="row">
             <div class="nm">Vacanza Sardegna<svg width="16" height="16"><use href="#chev"/></svg></div>
-            <div class="tot"><small>Totale</small><b>900,00 €</b></div>
+            <div class="tot"><small>Totale <span class="cur">€</span></small><b>900,00</b></div>
           </div>
         </div>
         <div class="body" data-body></div>
@@ -142,7 +143,7 @@ header.pg p{margin:6px 0 0;color:var(--pg-muted);max-width:62ch}
           <div class="brand"><div class="pill"><span>Conti Chiari</span><svg aria-hidden="true"><use href="#ico"/></svg><i class="net" title="Online"></i></div></div>
           <div class="row">
             <div class="nm">Vacanza Sardegna<svg width="16" height="16"><use href="#chev"/></svg></div>
-            <div class="tot"><small>Totale</small><b>900,00 €</b></div>
+            <div class="tot"><small>Totale <span class="cur">€</span></small><b>900,00</b></div>
           </div>
         </div>
         <div class="body" data-body></div>
@@ -157,7 +158,7 @@ header.pg p{margin:6px 0 0;color:var(--pg-muted);max-width:62ch}
     <ul>
       <li>Prima riga: capsula centrata con <b>Conti Chiari</b> e, subito dopo, l'icona dell'app in miniatura (22 px, angoli arrotondati). Il pallino verde della connessione resta, in coda all'icona.</li>
       <li>Contorno di 1 px nel colore del testo al 16 %, sfondo della superficie al 55 % con <code>backdrop-filter: blur(12px)</code>: sullo sfondo normale appare come un vetro chiaro, sulla foto lascia trasparire i colori sfocati.</li>
-      <li>Seconda riga: nome del gruppo (tocco per cambiarlo) a sinistra, totale a destra, allineati sulla stessa linea di base del testo: «Vacanza Sardegna» e l'importo poggiano sulla stessa riga. L'etichetta piccola «CONTI CHIARI» sopra il gruppo sparisce, perché il nome ora sta nella capsula.</li>
+      <li>Seconda riga: nome del gruppo (tocco per cambiarlo) a sinistra, totale a destra, allineati sulla stessa linea di base del testo: «Vacanza Sardegna» e l'importo poggiano sulla stessa riga. Il simbolo della valuta del gruppo (qui €) compare accanto alla parola «Totale», così l'importo mostra solo la cifra. L'etichetta piccola «CONTI CHIARI» sopra il gruppo sparisce, perché il nome ora sta nella capsula.</li>
       <li>La barra cresce di circa 30 px in altezza. Si adatta a chiaro, scuro e sfondo personalizzato senza colori aggiuntivi: usa i token esistenti (<code>--surface</code>, <code>--ink</code>).</li>
     </ul>
   </section>
