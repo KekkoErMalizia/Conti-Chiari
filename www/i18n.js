@@ -1007,3 +1007,26 @@ ko:["그룹","개인","개인 채팅","다른 사람과 온라인 그룹에 참�
 ['ja',"支出","支出の通知","オンラインのグループで他のメンバーが支出を追加したときに通知します。","新しい支出 · {group}","{name}：{desc} · {amount}"],
 ['ko',"지출","지출 알림","온라인 그룹에서 다른 멤버가 지출을 추가하면 알려 줘요.","새 지출 · {group}","{name}: {desc} · {amount}"]
 ].forEach(([l,chExp,notifExp,notifExpHint,expNotifTitle,expNotifBody])=>{if(I18N[l])Object.assign(I18N[l],{chExp,notifExp,notifExpHint,expNotifTitle,expNotifBody})});
+
+/* ---- Suono e vibrazione delle notifiche (app Android) ---- */
+[
+['it',"Suono e vibrazione","Il telefono ha reso silenziose le notifiche dei messaggi di Conti Chiari: tocca «Suono e vibrazione» e attiva suono e vibrazione."],
+['en',"Sound and vibration","Your phone has silenced Conti Chiari message notifications: tap “Sound and vibration” and turn sound and vibration on."],
+['es',"Sonido y vibración","El teléfono ha silenciado las notificaciones de mensajes de Conti Chiari: toca «Sonido y vibración» y activa el sonido y la vibración."],
+['fr',"Son et vibration","Le téléphone a rendu silencieuses les notifications de messages de Conti Chiari : touchez « Son et vibration » et activez le son et la vibration."],
+['de',"Ton und Vibration","Dein Handy hat die Nachrichten-Benachrichtigungen von Conti Chiari stummgeschaltet: Tippe auf „Ton und Vibration“ und schalte Ton und Vibration ein."],
+['pt',"Som e vibração","O telemóvel silenciou as notificações de mensagens do Conti Chiari: toque em «Som e vibração» e ative o som e a vibração."],
+['nl',"Geluid en trillen","Je telefoon heeft de berichtmeldingen van Conti Chiari stil gezet: tik op ‘Geluid en trillen’ en zet geluid en trillen aan."],
+['pl',"Dźwięk i wibracje","Telefon wyciszył powiadomienia o wiadomościach Conti Chiari: dotknij „Dźwięk i wibracje” i włącz dźwięk oraz wibracje."],
+['ro',"Sunet și vibrații","Telefonul a făcut silențioase notificările de mesaje Conti Chiari: atinge „Sunet și vibrații” și activează sunetul și vibrațiile."],
+['sv',"Ljud och vibration","Telefonen har tystat Conti Chiaris meddelandeaviseringar: tryck på ”Ljud och vibration” och slå på ljud och vibration."],
+['tr',"Ses ve titreşim","Telefon, Conti Chiari mesaj bildirimlerini sessize aldı: “Ses ve titreşim”e dokunup sesi ve titreşimi aç."],
+['el',"Ήχος και δόνηση","Το τηλέφωνο έκανε αθόρυβες τις ειδοποιήσεις μηνυμάτων του Conti Chiari: πάτησε «Ήχος και δόνηση» και ενεργοποίησε ήχο και δόνηση."],
+['ru',"Звук и вибрация","Телефон отключил звук уведомлений о сообщениях Conti Chiari: нажмите «Звук и вибрация» и включите звук и вибрацию."],
+['uk',"Звук і вібрація","Телефон вимкнув звук сповіщень про повідомлення Conti Chiari: торкніться «Звук і вібрація» та увімкніть звук і вібрацію."],
+['ar',"الصوت والاهتزاز","جعل الهاتف إشعارات رسائل Conti Chiari صامتة: اضغط «الصوت والاهتزاز» وفعّل الصوت والاهتزاز."],
+['hi',"ध्वनि और कंपन","फ़ोन ने Conti Chiari के संदेश सूचनाओं को मौन कर दिया है: «ध्वनि और कंपन» पर टैप करें और ध्वनि व कंपन चालू करें।"],
+['zh',"声音和振动","手机已将 Conti Chiari 的消息通知设为静音：点按“声音和振动”，然后开启声音和振动。"],
+['ja',"音とバイブレーション","スマートフォンが Conti Chiari のメッセージ通知をサイレントにしています。「音とバイブレーション」をタップして、音とバイブレーションをオンにしてください。"],
+['ko',"소리 및 진동","휴대폰이 Conti Chiari 메시지 알림을 무음으로 설정했어요. ‘소리 및 진동’을 탭하고 소리와 진동을 켜세요."]
+].forEach(([l,notifSndBtn,notifSndOff])=>{if(I18N[l])Object.assign(I18N[l],{notifSndBtn,notifSndOff})});
