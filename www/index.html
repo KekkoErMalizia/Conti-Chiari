@@ -1111,6 +1111,22 @@ function startSync(){
   if(any||hasContacts||DB.inboxOn){watchInbox();if(DB.frOut&&DB.frOut.length)HUB.resend(DB.frOut);any=true}
   if(any&&!HUB.started){HUB.started=true;HUB.start()}
 }
+/* link brevi: il codice si prepara (e si salva sui relay) appena il pannello è aperto, così copia e condividi restano immediati */
+const SHORT_OK={};
+function prepShort(owner,long){
+  if(!owner.short||!/^[1-9A-HJ-NP-Za-km-z]{8}$/.test(owner.short)){owner.short=CCSync.newShortCode();persistSoon()}
+  const k=owner.short+'|'+long;if(SHORT_OK[k])return;SHORT_OK[k]='…';
+  CCSync.publishShort(HUB,owner.short,long).then(()=>{SHORT_OK[k]=1},()=>{delete SHORT_OK[k]});
+}
+function bestLink(owner,long){return owner.short&&SHORT_OK[owner.short+'|'+long]===1&&netCount?CCSync.shortLink(owner.short):long}
+async function openShort(code){
+  if(!HUB.started){HUB.started=true;HUB.start()}
+  toast(t('shortOpening'));
+  const l=await CCSync.resolveShort(HUB,code);
+  const ct=l&&CCSync.parseContact(l);if(ct){addContact(ct);return}
+  const inv=l&&CCSync.parseInvite(l);if(inv){joinGroup(inv);return}
+  toast(t('shortNotFound'));fx('error');
+}
 function publish(ch,op){
   if(!ch.sync)return;
   if(!HUB.started)startSync();
@@ -1546,10 +1562,11 @@ function openContact(pk){
 }
 function openMyCode(){
   DB.inboxOn=true;persist();startSync();
-  const link=CCSync.contactLink(ME.pk,SET.profile.name||'');
-  drawQR(link,$('ctQr'));$('ctMe').textContent=SET.profile.name||t('you');
-  $('ctShare').onclick=async()=>{if(!await shareText(t('contactMsg')+'\n'+link,'Conti Chiari'))toast(t('shareUnavailable'))};
-  $('ctCopy').onclick=async()=>{try{await navigator.clipboard.writeText(link);toast(t('linkCopied'))}catch(e){toast(t('copyManual'))}};
+  const long=CCSync.contactLink(ME.pk,SET.profile.name||'');
+  drawQR(long,$('ctQr'));$('ctMe').textContent=SET.profile.name||t('you');
+  DB.myLink=DB.myLink||{};prepShort(DB.myLink,long);
+  $('ctShare').onclick=async()=>{const link=bestLink(DB.myLink,long);if(!await shareText(t('contactMsg')+'\n'+link,'Conti Chiari'))toast(t('shareUnavailable'))};
+  $('ctCopy').onclick=async()=>{const link=bestLink(DB.myLink,long);try{await navigator.clipboard.writeText(link);toast(t('linkCopied'))}catch(e){toast(t('copyManual'))}};
   openSheet('myCodeSheet');
 }
 function renderChat(){
@@ -1683,7 +1700,7 @@ function render(){
   const on=!!g.sync;
   $('onlineBox').hidden=on||!!g.sample;$('inviteBox').hidden=!on;$('membersBox').hidden=!on;$('whoBox').hidden=!on||!g.people.length;
   if(on){
-    const link=CCSync.inviteLink(g);if($('qr').dataset.link!==link){drawQR(link);$('qr').dataset.link=link}
+    const link=CCSync.inviteLink(g);if($('qr').dataset.link!==link){drawQR(link);$('qr').dataset.link=link}prepShort(g.sync,link);
     $('meSel').innerHTML=`<option value="">${esc(t('notSet'))}</option>`+g.people.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
     $('meSel').value=g.me||'';
     const ms=Object.entries(g.members).sort((a,b)=>b[1].ts-a[1].ts);
@@ -1841,6 +1858,7 @@ function handleScanned(text){
   if(ct){closeSheet('scanSheet');stopScan();addContact(ct);return true}
   const inv=CCSync.parseInvite(text);
   if(inv){joinGroup(inv);return true}
+  const sc=CCSync.parseShort(text);if(sc){closeSheet('scanSheet');stopScan();openShort(sc);return true}
   if(/CC1:/.test(text)){try{const g=decodeGroup(text);importGroup(g)}catch(e){toast(e.message)}closeSheet('scanSheet');return true}
   return false;
 }
@@ -1986,8 +2004,8 @@ let renT;
 $('renameInput').addEventListener('input',e=>{clearTimeout(renT);renT=setTimeout(()=>{const v=e.target.value.trim();if(v&&v!==G().name){commit({t:'meta',name:v,cur:G().cur});$('gName').textContent=v}},600)});
 
 document.querySelectorAll('[data-goonline]').forEach(b=>b.onclick=()=>goOnline());
-$('shareLink').onclick=async()=>{const link=CCSync.inviteLink(G());if(!await shareText(t('inviteMsg',{name:G().name})+'\n'+link,G().name))toast(t('shareUnavailable'))};
-$('copyLink').onclick=async()=>{const link=CCSync.inviteLink(G());try{await navigator.clipboard.writeText(link);toast(t('linkCopied'))}catch(e){const o=$('codeOut');o.value=link;o.hidden=false;o.select();toast(t('copyManual'))}};
+$('shareLink').onclick=async()=>{const g=G(),link=bestLink(g.sync,CCSync.inviteLink(g));if(!await shareText(t('inviteMsg',{name:G().name})+'\n'+link,G().name))toast(t('shareUnavailable'))};
+$('copyLink').onclick=async()=>{const g=G(),link=bestLink(g.sync,CCSync.inviteLink(g));try{await navigator.clipboard.writeText(link);toast(t('linkCopied'))}catch(e){const o=$('codeOut');o.value=link;o.hidden=false;o.select();toast(t('copyManual'))}};
 $('shareCode').onclick=async()=>{
   const code=encodeGroup(G()),msg=t('shareMsg',{name:G().name})+'\n\n'+code;
   const out=$('codeOut');out.value=code;out.hidden=false;
@@ -2030,6 +2048,7 @@ function importGroup(g){
 $('doImport').onclick=()=>{
   $('importErr').textContent='';const v=$('codeIn').value;
   const inv=CCSync.parseInvite(v);if(inv){$('codeIn').value='';joinGroup(inv);return}
+  const sc=CCSync.parseShort(v);if(sc){$('codeIn').value='';openShort(sc);return}
   try{importGroup(decodeGroup(v));$('codeIn').value=''}catch(err){$('importErr').textContent=err.message}
 };
 
@@ -2044,7 +2063,7 @@ $('ctSearch').addEventListener('input',renderContacts);
 $('ctMyCode').onclick=openMyCode;
 $('ctAdd').onclick=()=>{$('ctCodeIn').value='';$('ctCodeErr').textContent='';openSheet('addCtSheet')};
 $('ctScan').onclick=()=>{closeSheet('addCtSheet');startScan()};
-$('ctCodeGo').onclick=()=>{const ct=CCSync.parseContact($('ctCodeIn').value);if(!ct){$('ctCodeErr').textContent=t('addCodeErr');fx('error');return}addContact(ct)};
+$('ctCodeGo').onclick=()=>{const sc=CCSync.parseShort($('ctCodeIn').value);if(sc){openShort(sc);return}const ct=CCSync.parseContact($('ctCodeIn').value);if(!ct){$('ctCodeErr').textContent=t('addCodeErr');fx('error');return}addContact(ct)};
 document.addEventListener('click',e=>{const b=e.target.closest('[data-fr],[data-ct]');if(!b||!b.closest('#ctList,#ctActions'))return;if(b.dataset.ct)openContact(b.dataset.ct);else frAction(b.dataset.pk,b.dataset.fr)});
 $('dmList').addEventListener('click',e=>{const pk=e.target.closest('[data-peer]')?.dataset.peer;if(pk)openDM(pk)});
 $('members').addEventListener('click',e=>{const pk=e.target.closest('[data-dm]')?.dataset.dm;if(pk)openDM(pk)});
@@ -2297,10 +2316,12 @@ $('openTour').onclick=tourOpen;
   // l'APK è la strada consigliata: niente banner «Installa app» di Chrome (crea una WebAPK tramite il Play Store)
   window.addEventListener('beforeinstallprompt',ev=>ev.preventDefault());
 })();
+(function(){const sc=CCSync.parseShort(location.hash);if(sc){history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>openShort(sc),300)}})();
+window.addEventListener('hashchange',()=>{const sc=CCSync.parseShort(location.hash);if(sc){history.replaceState(null,'',location.pathname+location.search);openShort(sc)}});
 (function(){const ct=CCSync.parseContact(location.hash);if(ct){history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>addContact(ct),300)}})();
 window.addEventListener('hashchange',()=>{const ct=CCSync.parseContact(location.hash);if(ct){history.replaceState(null,'',location.pathname+location.search);addContact(ct)}});
 (function(){const m=location.hash.match(/^#chat=(.+)$/);if(m){history.replaceState(null,'',location.pathname+location.search);setTimeout(()=>openChan(decodeURIComponent(m[1])),50)}})();
-if(!SET.tutorialDone&&!CCSync.parseInvite(START_HASH)&&!CCSync.parseContact(START_HASH)&&!/^#chat=/.test(START_HASH))setTimeout(tourOpen,350);
+if(!SET.tutorialDone&&!CCSync.parseInvite(START_HASH)&&!CCSync.parseContact(START_HASH)&&!CCSync.parseShort(START_HASH)&&!/^#chat=/.test(START_HASH))setTimeout(tourOpen,350);
 
 /* ---------- offline ---------- */
 if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}

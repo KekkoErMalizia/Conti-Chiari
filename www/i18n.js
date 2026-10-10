@@ -941,3 +941,23 @@ ko:["그룹","개인","개인 채팅","다른 사람과 온라인 그룹에 참�
 ['ja',"外観","自動","ライト","ダーク","テーマをタップするとアプリの色が変わります。「自動」は端末の設定に合わせます。カスタム背景はそのままです。","テーマ「{name}」を適用しました","ラグーン","セージ","ブルーベリー","シトラス","コーラル","スレート"],
 ['ko',"화면 스타일","자동","라이트","다크","테마를 탭하면 앱 색상이 바뀌어요. ‘자동’은 휴대폰 설정을 따라요. 사용자 배경은 그대로예요.","‘{name}’ 테마를 적용했어요","라군","세이지","블루베리","시트러스","코럴","슬레이트"],
 ].forEach(([l,look,modeAuto,modeLight,modeDark,skinHint,skinApplied,sk_laguna,sk_salvia,sk_mirtillo,sk_agrume,sk_corallo,sk_ardesia])=>{if(I18N[l])Object.assign(I18N[l],{look,modeAuto,modeLight,modeDark,skinHint,skinApplied,sk_laguna,sk_salvia,sk_mirtillo,sk_agrume,sk_corallo,sk_ardesia})});
+[["it", "Apro l'invito…", "Invito non trovato o scaduto. Chiedi un nuovo link oppure scansiona il QR."],
+["en", "Opening the invite…", "Invite not found or expired. Ask for a new link or scan the QR code."],
+["es", "Abriendo la invitación…", "Invitación no encontrada o caducada. Pide un enlace nuevo o escanea el QR."],
+["fr", "Ouverture de l'invitation…", "Invitation introuvable ou expirée. Demandez un nouveau lien ou scannez le QR."],
+["de", "Einladung wird geöffnet…", "Einladung nicht gefunden oder abgelaufen. Bitte um einen neuen Link oder scanne den QR-Code."],
+["pt", "A abrir o convite…", "Convite não encontrado ou expirado. Peça um novo link ou leia o QR."],
+["nl", "Uitnodiging openen…", "Uitnodiging niet gevonden of verlopen. Vraag een nieuwe link of scan de QR-code."],
+["pl", "Otwieranie zaproszenia…", "Nie znaleziono zaproszenia lub wygasło. Poproś o nowy link albo zeskanuj kod QR."],
+["ro", "Se deschide invitația…", "Invitația nu a fost găsită sau a expirat. Cere un link nou sau scanează codul QR."],
+["sv", "Öppnar inbjudan…", "Inbjudan hittades inte eller har gått ut. Be om en ny länk eller skanna QR-koden."],
+["tr", "Davet açılıyor…", "Davet bulunamadı veya süresi doldu. Yeni bir bağlantı iste ya da QR kodunu tara."],
+["el", "Άνοιγμα πρόσκλησης…", "Η πρόσκληση δεν βρέθηκε ή έληξε. Ζήτησε νέο σύνδεσμο ή σάρωσε το QR."],
+["ru", "Открываю приглашение…", "Приглашение не найдено или истекло. Попросите новую ссылку или отсканируйте QR-код."],
+["uk", "Відкриваю запрошення…", "Запрошення не знайдено або воно застаріло. Попросіть нове посилання або відскануйте QR-код."],
+["ar", "جارٍ فتح الدعوة…", "لم يتم العثور على الدعوة أو انتهت صلاحيتها. اطلب رابطًا جديدًا أو امسح رمز QR."],
+["hi", "आमंत्रण खुल रहा है…", "आमंत्रण नहीं मिला या उसकी समय-सीमा खत्म हो गई। नया लिंक माँगें या QR स्कैन करें।"],
+["zh", "正在打开邀请…", "未找到邀请或邀请已过期。请索取新链接或扫描二维码。"],
+["ja", "招待を開いています…", "招待が見つからないか期限切れです。新しいリンクをもらうか、QRコードを読み取ってください。"],
+["ko", "초대를 여는 중…", "초대를 찾을 수 없거나 만료되었어요. 새 링크를 받거나 QR 코드를 스캔하세요."]
+].forEach(([l,shortOpening,shortNotFound])=>{if(I18N[l])Object.assign(I18N[l],{shortOpening,shortNotFound})});
