@@ -607,6 +607,8 @@ html.a-rm *,html.a-rm *::before,html.a-rm *::after{animation:none!important;tran
           <div class="setrow"><label for="notifExpOn" data-t="notifExp"></label><input type="checkbox" class="switch" id="notifExpOn" role="switch"></div>
           <p class="hint" data-t="notifExpHint"></p>
           <p class="hint" id="notifState"></p>
+          <p class="hint" id="notifSnd" hidden data-t="notifSndOff"></p>
+          <button class="btn" type="button" id="notifSndBtn" hidden data-t="notifSndBtn"></button>
         </div>
         <div class="subtle" id="keepBox" hidden>
           <div class="setrow"><label for="keepOn" data-t="keepOn"></label><input type="checkbox" class="switch" id="keepOn" role="switch"></div>
@@ -1653,14 +1655,28 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 
 /* --- notifiche --- */
 const LNP=()=>window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;
-// app Android: canali «Messaggi» (con avviso in alto e suono) e «Aggiornamenti»; il nome segue la lingua dell'app
+// app Android: canali «Messaggi» e «Spese» (avviso in alto, suono e vibrazione) e «Aggiornamenti»; il nome segue la lingua dell'app.
+// Li crea il plugin nativo «Notify», che imposta suono e vibrazione del telefono in modo esplicito.
+const NOTIFY=()=>window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Notify;
+const CHAN={messaggi:'messaggi-v2',spese:'spese-v2',aggiornamenti:'aggiornamenti-v2'};
+let notifSnd=null;
 async function notifChannels(){
-  const LN=LNP();if(!LN||!LN.createChannel)return;
+  const N=NOTIFY(),LN=LNP();
   try{
-    await LN.createChannel({id:'messaggi',name:t('chMsgs'),importance:4,visibility:1,vibration:true,lights:true,lightColor:'#1f5f6b'});
-    await LN.createChannel({id:'spese',name:t('chExp'),importance:4,visibility:1,vibration:true});
-    await LN.createChannel({id:'aggiornamenti',name:t('chUpd'),importance:3,visibility:1});
+    if(N)notifSnd=await N.channels({msgs:t('chMsgs'),exp:t('chExp'),upd:t('chUpd')});
+    else if(LN&&LN.createChannel){
+      await LN.createChannel({id:CHAN.messaggi,name:t('chMsgs'),importance:4,visibility:1,vibration:true,lights:true,lightColor:'#1f5f6b'});
+      await LN.createChannel({id:CHAN.spese,name:t('chExp'),importance:4,visibility:1,vibration:true});
+      await LN.createChannel({id:CHAN.aggiornamenti,name:t('chUpd'),importance:3,visibility:1,vibration:true});
+    }
   }catch(e){}
+  renderNotifSnd();
+}
+// il telefono (o l'utente) ha reso silenzioso il canale dei messaggi: avviso e pulsante per le impostazioni di Android
+async function renderNotifSnd(){
+  const N=NOTIFY();$('notifSndBtn').hidden=!N;if(!N)return;
+  try{notifSnd=await N.status()}catch(e){}
+  $('notifSnd').hidden=!notifSnd||(notifSnd.sound&&notifSnd.vibrate&&notifSnd.enabled);
 }
 function notifPermission(){if(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications)return 'native';return 'Notification' in window?Notification.permission:'unsupported'}
 async function askNotif(){
@@ -1677,7 +1693,7 @@ async function notifyMsg(title,body,data,channel='messaggi'){
   const LN=LNP();
   if(!LN&&document.visibilityState==='visible'){toast(title+': '+String(body).slice(0,80));return}
   try{
-    if(LN){await LN.schedule({notifications:[{id:Math.floor(Math.random()*2e9),title,body:String(body).slice(0,200),largeBody:String(body).slice(0,1000),extra:data,channelId:channel,smallIcon:'ic_stat_contichiari',largeIcon:'ic_notif_large',iconColor:'#1f5f6b',group:data.chan}]});return}
+    if(LN){await LN.schedule({notifications:[{id:Math.floor(Math.random()*2e9),title,body:String(body).slice(0,200),largeBody:String(body).slice(0,1000),extra:data,channelId:CHAN[channel]||channel,smallIcon:'ic_stat_contichiari',largeIcon:'ic_notif_large',iconColor:'#1f5f6b'}]});return}
     if(!('Notification' in window)||Notification.permission!=='granted')return;
     const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();
     const opts={body:String(body).slice(0,200),icon:'icons/icon-192.png',badge:'icons/icon-192.png',tag:data.chan,renotify:true,data};
@@ -2128,6 +2144,7 @@ $('ephSel').onchange=e=>{
   const ch=curChan(),v=+e.target.value;const op={t:'eph',id:CCSync.rid(),ts:Date.now(),s:v};
   applyChat(ch,op,ME.pk);persist();publish(ch,op);fx('toggle');renderChat();
 };
+$('notifSndBtn').onclick=()=>{const N=NOTIFY();if(N)N.openSettings({channel:CHAN.messaggi}).catch(()=>{})};
 $('notifExpOn').onchange=e=>{SET.notifyExp=e.target.checked;saveSet();if(SET.notifyExp)askNotif()};
 $('notifOn').onchange=e=>{SET.notify=e.target.checked;saveSet();if(SET.notify)askNotif();renderNotifState();applyKeepAlive()};
 $('keepOn').onchange=async e=>{
@@ -2137,7 +2154,7 @@ $('keepOn').onchange=async e=>{
 };
 $('keepBattery').onclick=()=>{const P=keepPlugin();if(P)P.openBatterySettings().catch(()=>{})};
 // al ritorno nell'app (per esempio dalla richiesta della batteria) aggiorna lo stato
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&keepPlugin()){keepInfo=null;renderKeepAlive()}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&keepPlugin()){keepInfo=null;renderKeepAlive()}if(document.visibilityState==='visible')renderNotifSnd()});
 applyKeepAlive();
 /* --- avviso di aggiornamento (app Android): confronta il proprio numero di versione (build.json, scritto da GitHub
    quando costruisce l'APK) con quello della Release «android-latest». Android non permette di aggiornare da soli
@@ -2257,7 +2274,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)persist()})
 /* ---------- suoni, vibrazione e accessibilità ---------- */
 const VISION=[['auto','vmAuto'],['standard','vmStandard'],['low','vmLow'],['contrast','vmContrast'],['protan','vmProtan'],['deutan','vmDeutan'],['tritan','vmTritan'],['mono','vmMono'],['blind','vmBlind'],['photo','vmPhoto']];
 function renderA11y(){
-  $('notifOn').checked=SET.notify!==false;$('notifExpOn').checked=SET.notifyExp!==false;$('rcptOn').checked=SET.receipts!==false;renderNotifState();renderKeepAlive();
+  $('notifOn').checked=SET.notify!==false;$('notifExpOn').checked=SET.notifyExp!==false;renderNotifSnd();$('rcptOn').checked=SET.receipts!==false;renderNotifState();renderKeepAlive();
   $('sndOn').checked=SET.sound!==false;$('vibOn').checked=SET.vib!==false;
   $('sndVol').value=SET.vol;$('vibInt').value=SET.vibInt;$('txtSize').value=SET.textSize;$('voiceRate').value=SET.voiceRate;
   $('sndVolOut').textContent=SET.vol+'%';$('vibIntOut').textContent=SET.vibInt+'%';$('txtSizeOut').textContent=SET.textSize+'%';$('voiceRateOut').textContent=SET.voiceRate+'%';
