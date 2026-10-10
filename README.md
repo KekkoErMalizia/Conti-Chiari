@@ -22,7 +22,7 @@
     <img src="docs/anteprima-tutorial.gif" width="300" alt="Anteprima del tutorial di Conti Chiari: creazione del gruppo, aggiunta delle persone, registrazione delle spese e calcolo di chi deve a chi">
   </a>
   <br>
-  <a href="https://kekkoermalizia.github.io/Conti-Chiari/video/ContiChiari-promo.mp4"><b>▶ Guarda il video di presentazione (54 secondi, con musica)</b></a><br>
+  <a href="https://kekkoermalizia.github.io/Conti-Chiari/video/ContiChiari-promo.mp4"><b>▶ Guarda il video di presentazione (56 secondi, con voce e musica)</b></a><br>
   <a href="https://kekkoermalizia.github.io/Conti-Chiari/video/ContiChiari-tutorial.mp4">Tutorial passo passo (72 secondi)</a>
 </p>
 
