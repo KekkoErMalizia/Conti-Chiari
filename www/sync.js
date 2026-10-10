@@ -104,6 +104,7 @@ class Hub{
     this.groups = {};                  // topic -> {id, key, since}
     this.seen = new Set();
     this.pending = {};                 // eventId -> event (in attesa di conferma)
+    this.once = {};                    // topic -> {done, eose} (letture singole dei link brevi)
   }
   connected(){return Object.values(this.socks).filter(s => s.open).length}
   start(){this.relays.forEach(u => this._connect(u))}
@@ -146,6 +147,12 @@ class Hub{
   async _msg(data){
     let m; try{ m = JSON.parse(data) }catch(e){ return }
     if(m[0] === 'OK' && m[2] === true && this.pending[m[1]]){ delete this.pending[m[1]]; this.onSent(m[1]); return }
+    if(m[0] === 'EOSE'){
+      // tutti i relay hanno risposto e nessuno ha l'invito: inutile aspettare oltre
+      const o = Object.entries(this.once).find(([t]) => m[1] === 'cc-' + t.slice(0, 12));
+      if(o && ++o[1].eose >= this.relays.length) setTimeout(() => o[1].done(null), 500);
+      return;
+    }
     if(m[0] !== 'EVENT' || !m[2]) return;
     const ev = m[2];
     if(this.seen.has(ev.id)) return;
@@ -159,8 +166,20 @@ class Hub{
     if(!key) return;
     let op; try{ op = await open(key, ev.content) }catch(e){ return }   // chiave sbagliata o dati manomessi
     if(!op || typeof op !== 'object' || typeof op.t !== 'string') return;
+    if(this.once[tag[1]]){ this.once[tag[1]].done(op); return }
     g.since = Math.max(g.since || 0, ev.created_at);
     this.onOp(g.id, op, ev.pubkey, ev.created_at);
+  }
+  // legge una sola volta un argomento: il primo contenuto valido, oppure null se non arriva entro ms
+  fetchOnce(key, topic, ms){
+    return new Promise(res => {
+      let tm;
+      const done = v => { if(!this.once[topic]) return; clearTimeout(tm); delete this.once[topic]; this.unwatch(topic); res(v) };
+      this.once[topic] = {done, eose: 0};
+      tm = setTimeout(() => done(null), ms || 15000);
+      this.watch('once:' + topic, key, topic, 0);
+      this.start();
+    });
   }
   async publish(key, topic, op){
     const ev = await makeEvent(this.keys, topic, await seal(key, op), op.ts || Date.now(), op.exp);
@@ -242,5 +261,41 @@ function parseInvite(text){
   return null;
 }
 
-window.CCSync = {Hub, deviceKeys, newGroupKey, topicOf, seal, open, makeEvent, checkEvent, inviteLink, parseInvite, dmChannel, inboxTopic, contactLink, parseContact, rid, KIND, DEFAULT_RELAYS};
+/* ---------- link brevi ---------- */
+// Il link condiviso contiene solo un codice di 8 caratteri (…/Conti-Chiari/#Ab3dEf7h). Il link completo (con la chiave
+// del gruppo) è salvato sui relay, cifrato con una chiave ricavata dal codice. La derivazione PBKDF2 è lenta di proposito:
+// chi copia tutti gli eventi da un relay non può provare a indovinare i codici.
+const SHORT_LEN = 8, SHORT_DAYS = 60;
+const SHORT_RE = /^[1-9A-HJ-NP-Za-km-z]{8}$/;
+function newShortCode(){
+  let s = '';
+  while(s.length < SHORT_LEN) for(const x of crypto.getRandomValues(new Uint8Array(16))) if(x < 232 && s.length < SHORT_LEN) s += B58[x % 58];
+  return s;
+}
+const shortCache = {};
+function shortKeys(code){
+  if(!shortCache[code]) shortCache[code] = (async () => {
+    const base = await subtle.importKey('raw', enc.encode(code), 'PBKDF2', false, ['deriveBits']);
+    const bits = new Uint8Array(await subtle.deriveBits({name: 'PBKDF2', hash: 'SHA-256', salt: enc.encode('conti-chiari/short-link'), iterations: 200000}, base, 384));
+    return {key: b64url(bits.subarray(0, 32)), topic: hex(bits.subarray(32, 48))};
+  })();
+  return shortCache[code];
+}
+function shortLink(code){return appBase() + '#' + code}
+function parseShort(text){
+  text = String(text || '').trim();
+  const m = text.match(/^#?([1-9A-HJ-NP-Za-km-z]{8})$/) || text.match(/#([1-9A-HJ-NP-Za-km-z]{8})(?![A-Za-z0-9_=-])/);
+  return m && SHORT_RE.test(m[1]) ? m[1] : '';
+}
+async function publishShort(hub, code, link){
+  const {key, topic} = await shortKeys(code), ts = Date.now();
+  return hub.publish(key, topic, {t: 'link', ts, exp: ts + SHORT_DAYS * 864e5, l: link});
+}
+async function resolveShort(hub, code){
+  const {key, topic} = await shortKeys(code);
+  const op = await hub.fetchOnce(key, topic, 15000);
+  return op && op.t === 'link' && typeof op.l === 'string' ? op.l : null;
+}
+
+window.CCSync = {newShortCode, shortLink, parseShort, publishShort, resolveShort, Hub, deviceKeys, newGroupKey, topicOf, seal, open, makeEvent, checkEvent, inviteLink, parseInvite, dmChannel, inboxTopic, contactLink, parseContact, rid, KIND, DEFAULT_RELAYS};
 })();
